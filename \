@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Новая вкладка</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: rgba(255, 255, 255, 0.03);
+            --bg-hover: rgba(255, 255, 255, 0.08);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-primary: #e0e0e0;
+            --text-secondary: #888;
+            --accent: #4285F4;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* Анимированный фон */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, #1a1a2e 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, #16213e 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, #0f3460 0%, transparent 50%);
+            z-index: -1;
+            animation: backgroundShift 20s ease-in-out infinite;
+        }
+
+        @keyframes backgroundShift {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(10deg); }
+        }
+
+        /* Время и дата */
+        .datetime-container {
+            margin-top: 40px;
+            text-align: center;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .time {
+            font-size: 5rem;
+            font-weight: 200;
+            color: #fff;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+            margin-bottom: 10px;
+            letter-spacing: -2px;
+        }
+
+        .date {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Приветствие */
+        .greeting {
+            font-size: 1.8rem;
+            margin: 20px 0;
+            opacity: 0;
+            animation: slideUp 0.8s ease-out 0.3s forwards;
+        }
+
+        /* Контейнер поиска */
+        .search-wrapper {
+            margin: 30px 0;
+            width: 100%;
+            max-width: 600px;
+            animation: slideUp 0.8s ease-out 0.2s both;
+        }
+
+        /* Выбор поисковика */
+        .search-engine-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            justify-content: center;
+        }
+
+        .engine-btn {
+            padding: 8px 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .engine-btn:hover {
+            background: var(--bg-hover);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        .engine-btn.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .engine-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Поисковая строка */
+        .search-container {
+            position: relative;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 15px 50px 15px 20px;
+            font-size: 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: #fff;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus {
+            outline: none;
+            background: var(--bg-hover);
+            border-color: rgba(100, 181, 246, 0.5);
+            box-shadow: 0 0 20px rgba(100, 181, 246, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 24px;
+            opacity: 0.5;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+
+        .search-icon:hover {
+            opacity: 0.8;
+        }
+
+        /* Контейнер для карточек */
+        .links-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1000px;
+            margin-top: 30px;
+        }
+
+        /* Карточки ссылок */
+        .link-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            animation: fadeInScale 0.6s ease-out forwards;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .link-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .link-card:hover::before {
+            opacity: 1;
+        }
+
+        .link-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            background: var(--bg-hover);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .link-card:nth-child(1) { animation-delay: 0.4s; }
+        .link-card:nth-child(2) { animation-delay: 0.5s; }
+        .link-card:nth-child(3) { animation-delay: 0.6s; }
+        .link-card:nth-child(4) { animation-delay: 0.7s; }
+        .link-card:nth-child(5) { animation-delay: 0.8s; }
+        .link-card:nth-child(6) { animation-delay: 0.9s; }
+        .link-card:nth-child(7) { animation-delay: 1.0s; }
+        .link-card:nth-child(8) { animation-delay: 1.1s; }
+        .link-card:nth-child(9) { animation-delay: 1.2s; }
+        .link-card:nth-child(10) { animation-delay: 1.3s; }
+
+        @keyframes fadeInScale {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .link-icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 10px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .link-name {
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Цвета для разных сервисов */
+        .youtube { background: linear-gradient(135deg, rgba(255, 0, 0, 0.1), rgba(255, 0, 0, 0.05)); }
+        .youtube:hover { background: linear-gradient(135deg, rgba(255, 0, 0, 0.2), rgba(255, 0, 0, 0.1)); }
+
+        .github { background: linear-gradient(135deg, rgba(88, 166, 255, 0.1), rgba(88, 166, 255, 0.05)); }
+        .github:hover { background: linear-gradient(135deg, rgba(88, 166, 255, 0.2), rgba(88, 166, 255, 0.1)); }
+
+        .gmail { background: linear-gradient(135deg, rgba(234, 67, 53, 0.1), rgba(234, 67, 53, 0.05)); }
+        .gmail:hover { background: linear-gradient(135deg, rgba(234, 67, 53, 0.2), rgba(234, 67, 53, 0.1)); }
+
+        .gemini { background: linear-gradient(135deg, rgba(138, 180, 248, 0.1), rgba(138, 180, 248, 0.05)); }
+        .gemini:hover { background: linear-gradient(135deg, rgba(138, 180, 248, 0.2), rgba(138, 180, 248, 0.1)); }
+
+        .chatgpt { background: linear-gradient(135deg, rgba(16, 163, 127, 0.1), rgba(16, 163, 127, 0.05)); }
+        .chatgpt:hover { background: linear-gradient(135deg, rgba(16, 163, 127, 0.2), rgba(16, 163, 127, 0.1)); }
+
+        .notebooklm { background: linear-gradient(135deg, rgba(251, 188, 4, 0.1), rgba(251, 188, 4, 0.05)); }
+        .notebooklm:hover { background: linear-gradient(135deg, rgba(251, 188, 4, 0.2), rgba(251, 188, 4, 0.1)); }
+
+        .reddit { background: linear-gradient(135deg, rgba(255, 69, 0, 0.1), rgba(255, 69, 0, 0.05)); }
+        .reddit:hover { background: linear-gradient(135deg, rgba(255, 69, 0, 0.2), rgba(255, 69, 0, 0.1)); }
+
+        .spotify { background: linear-gradient(135deg, rgba(30, 215, 96, 0.1), rgba(30, 215, 96, 0.05)); }
+        .spotify:hover { background: linear-gradient(135deg, rgba(30, 215, 96, 0.2), rgba(30, 215, 96, 0.1)); }
+
+        .discord { background: linear-gradient(135deg, rgba(88, 101, 242, 0.1), rgba(88, 101, 242, 0.05)); }
+        .discord:hover { background: linear-gradient(135deg, rgba(88, 101, 242, 0.2), rgba(88, 101, 242, 0.1)); }
+
+        .telegram { background: linear-gradient(135deg, rgba(0, 136, 204, 0.1), rgba(0, 136, 204, 0.05)); }
+        .telegram:hover { background: linear-gradient(135deg, rgba(0, 136, 204, 0.2), rgba(0, 136, 204, 0.1)); }
+
+        /* Анимации */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Быстрые ссылки внизу */
+        .quick-links {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            border-radius: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            animation: slideUp 0.8s ease-out 1s both;
+        }
+
+        .quick-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.3s ease;
+        }
+
+        .quick-link:hover {
+            color: #fff;
+        }
+
+        /* Виджет погоды */
+        .weather-widget {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px 20px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: fadeIn 0.8s ease-out 0.5s both;
+        }
+
+        .weather-widget:hover {
+            background: rgba(0, 0, 0, 0.7);
+            transform: translateY(-2px);
+        }
+
+        .weather-temp {
+            font-size: 1.5rem;
+            font-weight: 300;
+        }
+
+        .weather-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Счетчик закладок */
+        .bookmark-counter {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 15px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            font-size: 0.85rem;
+            animation: fadeIn 0.8s ease-out 0.5s both;
+        }
+
+        /* Кастомная полоса прокрутки */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Подсказки при наведении */
+        .tooltip {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .link-card:hover .tooltip {
+            opacity: 1;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .time {
+                font-size: 3rem;
+            }
+            
+            .greeting {
+                font-size: 1.4rem;
+            }
+            
+            .links-container {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+                gap: 15px;
+            }
+            
+            .link-card {
+                padding: 20px;
+            }
+            
+            .link-icon {
+                width: 36px;
+                height: 36px;
+            }
+            
+            .search-engine-selector {
+                flex-wrap: wrap;
+            }
+            
+            .weather-widget {
+                top: auto;
+                bottom: 70px;
+                right: 20px;
+            }
+            
+            .bookmark-counter {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Счетчик закладок -->
+    <div class="bookmark-counter">
+        <span id="bookmarkCount">0</span> закладок
+    </div>
+
+    <!-- Виджет погоды -->
+    <div class="weather-widget" id="weatherWidget">
+        <span class="weather-temp" id="weatherTemp">--°</span>
+        <span class="weather-desc" id="weatherDesc">Загрузка...</span>
+    </div>
+
+    <!-- Время и дата -->
+    <div class="datetime-container">
+        <div class="time" id="time"></div>
+        <div class="date" id="date"></div>
+        <div class="greeting" id="greeting"></div>
+    </div>
+
+    <!-- Поиск с выбором поисковика -->
+    <div class="search-wrapper">
+        <div class="search-engine-selector">
+            <button class="engine-btn active" data-engine="duckduckgo">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="12" r="10" fill="#DE5833"/>
+                    <path d="M12 3.5C7.3 3.5 3.5 7.3 3.5 12s3.8 8.5 8.5 8.5 8.5-3.8 8.5-8.5S16.7 3.5 12 3.5zm0 2c3.6 0 6.5 2.9 6.5 6.5s-2.9 6.5-6.5 6.5-6.5-2.9-6.5-6.5 2.9-6.5 6.5-6.5z" fill="white"/>
+                    <circle cx="9" cy="10" r="1.5" fill="white"/>
+                    <path d="M12 14c2 0 3.5 1 3.5 2.5S14 19 12 19s-3.5-1-3.5-2.5S10 14 12 14z" fill="#FFD43B"/>
+                </svg>
+                DuckDuckGo
+            </button>
+            <button class="engine-btn" data-engine="google">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+                Google
+            </button>
+            <button class="engine-btn" data-engine="yandex">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M2 12C2 6.48 6.48 2 12 2s10 4.48 10 10-4.48 10-10 10S2 17.52 2 12z" fill="#FC3F1D"/>
+                    <path d="M13.8 7.4h-1.9c-1.3 0-1.9.7-1.9 1.6 0 1.1.6 1.6 1.3 2.1l.9.6-2.7 4.9h-2l2.4-4.3c-.9-.6-2.1-1.5-2.1-3.4 0-2.2 1.5-3.6 4.1-3.6H16v11.3h-2.2V7.4z" fill="white"/>
+                </svg>
+                Яндекс
+            </button>
+        </div>
+        <div class="search-container">
+            <input type="text" class="search-box" id="searchBox" placeholder="Поиск в DuckDuckGo..." autofocus>
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" onclick="performSearch()">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Основные ссылки -->
+    <div class="links-container">
+        <a href="https://youtube.com" class="link-card youtube">
+            <img src="icons/youtube-color-svgrepo-com.svg" alt="YouTube" class="link-icon">
+            <span class="link-name">YouTube</span>
+            <span class="tooltip">Открыть YouTube</span>
+        </a>
+        
+        <a href="https://github.com" class="link-card github">
+            <img src="icons/github-142-svgrepo-com.svg" alt="GitHub" class="link-icon">
+            <span class="link-name">GitHub</span>
+            <span class="tooltip">Открыть GitHub</span>
+        </a>
+        
+        <a href="https://mail.google.com" class="link-card gmail">
+            <img src="icons/gmail-svgrepo-com.svg" alt="Gmail" class="link-icon">
+            <span class="link-name">Gmail</span>
+            <span class="tooltip">Открыть Gmail</span>
+        </a>
+        
+        <a href="https://gemini.google.com" class="link-card gemini">
+            <img src="icons/icons8-gemini-48.svg" alt="Gemini" class="link-icon">
+            <span class="link-name">Gemini</span>
+            <span class="tooltip">Открыть Gemini</span>
+        </a>
+        
+        <a href="https://chat.openai.com" class="link-card chatgpt">
+            <img src="icons/icons8-chatgpt-500.svg" alt="ChatGPT" class="link-icon">
+            <span class="link-name">ChatGPT</span>
+            <span class="tooltip">Открыть ChatGPT</span>
+        </a>
+        
+        <a href="https://notebooklm.google.com" class="link-card notebooklm">
+            <img src="icons/notebooklm.svg" alt="NotebookLM" class="link-icon">
+            <span class="link-name">NotebookLM</span>
+            <span class="tooltip">Открыть NotebookLM</span>
+        </a>
+        
+        <a href="https://reddit.com" class="link-card reddit">
+            <svg class="link-icon" viewBox="0 0 24 24" fill="#FF4500">
+                <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.249 0 .688.561 1.249 1.249 1.249.688 0 1.249-.561 1.249-1.249 0-.688-.561-1.249-1.249-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/>
+            </svg>
+            <span class="link-name">Reddit</span>
+            <span class="tooltip">Открыть Reddit</span>
+        </a>
+        
+        <a href="https://spotify.com" class="link-card spotify">
+            <svg class="link-icon" viewBox="0 0 24 24" fill="#1DB954">
+                <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+            </svg>
+            <span class="link-name">Spotify</span>
+            <span class="tooltip">Открыть Spotify</span>
+        </a>
+        
+        <a href="https://discord.com/app" class="link-card discord">
+            <svg class="link-icon" viewBox="0 0 24 24" fill="#5865F2">
+                <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0

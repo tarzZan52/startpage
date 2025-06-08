@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Домашняя страница</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-primary: #e0e0e0;
+            --text-secondary: #888;
+            --accent: #ffffff;
+            --accent-green: #2ecc71;
+            --accent-red: #e74c3c;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Фоновое изображение */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('src/wallpaper.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: -3;
+            filter: brightness(0.3) contrast(1.2);
+        }
+
+        /* Слой затемнения */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom,
+                rgba(0, 0, 0, 0.6) 0%,
+                rgba(0, 0, 0, 0.4) 50%,
+                rgba(0, 0, 0, 0.7) 100%);
+            z-index: -2;
+        }
+
+        /* Анимированный туман */
+        .fog-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .fog-layer {
+            position: absolute;
+            width: 120%;
+            height: 120%;
+            opacity: 0.2;
+            background: radial-gradient(ellipse at 20% 30%, rgba(255,255,255,0.1) 0%, transparent 40%);
+            animation: fogDrift1 45s infinite ease-in-out;
+        }
+
+        @keyframes fogDrift1 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(-40px, 30px) scale(1.05); }
+        }
+
+        /* Движущиеся частицы */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+            opacity: 0;
+        }
+
+        @keyframes float {
+            from { transform: translateY(100vh) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            to { transform: translateY(-10vh) translateX(100px); opacity: 0; }
+        }
+
+        /* Основной контент */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 1400px; /* Увеличено для виджетов */
+            position: relative;
+            z-index: 1;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .site-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffffff 0%, #808080 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+            margin-top: 30px;
+        }
+
+        .datetime-container {
+            margin-top: 20px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 20px 40px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .time {
+            font-size: 4rem;
+            font-weight: 300;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+            letter-spacing: -2px;
+        }
+
+        .date {
+            font-size: 1.1rem;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: 300;
+        }
+
+        .search-wrapper {
+            margin: 40px 0;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .search-engine-selector {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .engine-btn {
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+        }
+
+        .engine-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .engine-btn.active {
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+
+        .engine-btn img {
+            width: 24px;
+            height: 24px;
+            background-color: white;
+            border-radius: 50%;
+            padding: 3px;
+        }
+
+        .search-container {
+            position: relative;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 18px 55px 18px 25px;
+            font-size: 17px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 13px;
+            color: #fff;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .search-box:focus {
+            outline: none;
+            background: rgba(0, 0, 0, 0.8);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 26px;
+            height: 26px;
+            stroke: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-icon:hover {
+            stroke: rgba(255, 255, 255, 1);
+        }
+
+        /* --- Widgets --- */
+        .widgets-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            width: 100%;
+            margin-top: 10px;
+            animation: slideUp 0.8s ease-out 0.6s both;
+        }
+
+        .widget {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .widget h4 {
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .widget:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .calendar-widget { flex-basis: 450px; }
+        .crypto-widget { flex-basis: 300px; }
+        .pomodoro-widget { flex-basis: 250px; }
+        .scratchpad-widget { flex-basis: 250px; }
+
+
+        /* Calendar Widget */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        #month-year { text-transform: capitalize; }
+
+        .nav-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+        }
+        .nav-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            justify-items: center;
+        }
+
+        .calendar-cell {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 38px;
+            height: 38px;
+            text-align: center;
+            border-radius: 50%;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .calendar-cell.day-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            height: auto;
+        }
+
+        .calendar-cell.day-number:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .calendar-cell.current-day {
+            background-color: var(--accent);
+            color: var(--bg-primary);
+            font-weight: 700;
+        }
+
+        /* Scratchpad Widget */
+        #scratchpad {
+            flex-grow: 1;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid transparent;
+            border-radius: 8px;
+            padding: 15px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 1rem;
+            resize: none;
+            outline: none;
+            transition: border-color 0.3s, background-color 0.3s;
+        }
+
+        #scratchpad:focus {
+            border-color: rgba(255, 255, 255, 0.3);
+            background-color: rgba(255, 255, 255, 0.08);
+        }
+
+        /* Pomodoro Widget */
+        .pomodoro-widget {
+            align-items: center;
+            justify-content: center;
+        }
+        #pomodoro-timer {
+            font-size: 4.5rem;
+            font-weight: 300;
+            margin: 10px 0;
+        }
+        #pomodoro-status {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            min-height: 1.2em;
+        }
+        .pomodoro-controls {
+            display: flex;
+            gap: 15px;
+        }
+        .pomodoro-btn {
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 500;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        #pomodoro-start-pause {
+            background-color: var(--accent);
+            color: var(--bg-primary);
+        }
+        #pomodoro-start-pause:hover {
+            background-color: #dcdcdc;
+        }
+        #pomodoro-reset {
+            background-color: transparent;
+            border-color: var(--text-secondary);
+            color: var(--text-secondary);
+        }
+        #pomodoro-reset:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-color: #fff;
+        }
+        
+        /* Crypto Widget */
+        #crypto-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 5px;
+            width: 100%;
+        }
+        .crypto-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .crypto-item:last-child {
+            border-bottom: none;
+        }
+        .crypto-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .crypto-icon {
+            width: 32px;
+            height: 32px;
+        }
+        .crypto-name {
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+        .crypto-ticker {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        .crypto-prices {
+            text-align: right;
+        }
+        .crypto-price-usd {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        .crypto-price-rub {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+
+        /* Анимации */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Адаптивность */
+        @media (max-width: 1420px) {
+            .main-content { max-width: 95%; }
+        }
+         @media (max-width: 1220px) {
+            .widgets-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .widget {
+                width: 100%;
+                max-width: 600px; /* Ограничиваем макс. ширину на мобильных */
+                flex-basis: auto;
+            }
+             .scratchpad-widget, .pomodoro-widget {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="fog-container">
+        <div class="fog-layer"></div>
+    </div>
+
+    <div class="particles" id="particles"></div>
+
+    <div class="main-content">
+        <h1 class="site-title">tarZan's start page</h1>
+
+        <div class="datetime-container">
+            <div class="time" id="time"></div>
+            <div class="date" id="date"></div>
+        </div>
+
+        <div class="search-wrapper">
+            <div class="search-engine-selector">
+                <button class="engine-btn active" data-engine="duckduckgo">
+                    <img src="icons/icons8-duckduckgo.svg" alt="DuckDuckGo">
+                </button>
+                <button class="engine-btn" data-engine="google">
+                    <img src="icons/icons8-google.svg" alt="Google">
+                </button>
+                <button class="engine-btn" data-engine="yandex">
+                    <img src="icons/icons8-yandex.svg" alt="Yandex">
+                </button>
+            </div>
+            <form class="search-container" id="searchForm">
+                <input type="text" class="search-box" id="searchBox" placeholder="Поиск в DuckDuckGo..." autofocus>
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+            </form>
+        </div>
+
+        <div class="widgets-container">
+            <div class="widget calendar-widget">
+                <div class="calendar-header">
+                    <button id="prev-month" class="nav-btn">&lt;</button>
+                    <span id="month-year"></span>
+                    <button id="next-month" class="nav-btn">&gt;</button>
+                </div>
+                <div class="calendar-grid" id="calendar-grid"></div>
+            </div>
+            
+            <div class="widget crypto-widget">
+                <h4>Криптовалюты</h4>
+                <div id="crypto-list">
+                    </div>
+            </div>
+
+            <div class="widget pomodoro-widget">
+                <h4>Таймер Pomodoro</h4>
+                <div id="pomodoro-timer">25:00</div>
+                <div id="pomodoro-status">Время работать!</div>
+                <div class="pomodoro-controls">
+                    <button id="pomodoro-start-pause" class="pomodoro-btn">Старт</button>
+                    <button id="pomodoro-reset" class="pomodoro-btn">Сброс</button>
+                </div>
+            </div>
+
+            <div class="widget scratchpad-widget">
+                <h4>Быстрые заметки</h4>
+                <textarea id="scratchpad" placeholder="Напишите что-нибудь..."></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // --- Clock and Date ---
+        const timeElement = document.getElementById('time');
+        const dateElement = document.getElementById('date');
+        function updateTime() {
+            const now = new Date();
+            timeElement.textContent = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            dateElement.textContent = now.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        // --- Particle Animation ---
+        const particlesContainer = document.getElementById('particles');
+        const particleCount = 50;
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = `${Math.random() * 100}%`;
+            particle.style.animationDuration = `${Math.random() * 15 + 10}s`;
+            particle.style.animationDelay = `${Math.random() * 10}s`;
+            particlesContainer.appendChild(particle);
+        }
+
+        // --- Search Functionality ---
+        const searchBox = document.getElementById('searchBox');
+        const searchForm = document.getElementById('searchForm');
+        const engineButtons = document.querySelectorAll('.engine-btn');
+        const searchIcon = document.querySelector('.search-icon');
+        const searchEngines = {
+            duckduckgo: { url: 'https://duckduckgo.com/?q=', placeholder: 'Поиск в DuckDuckGo...' },
+            google: { url: 'https://www.google.com/search?q=', placeholder: 'Поиск в Google...' },
+            yandex: { url: 'https://yandex.ru/search/?text=', placeholder: 'Поиск в Яндексе...' }
+        };
+        let currentEngine = 'duckduckgo';
+
+        function setSearchEngine(engine) {
+            currentEngine = engine;
+            engineButtons.forEach(button => {
+                button.classList.toggle('active', button.dataset.engine === engine);
+            });
+            searchBox.placeholder = searchEngines[engine].placeholder;
+            searchBox.focus();
+        }
+
+        const performSearch = () => {
+            const query = searchBox.value.trim();
+            if (query) {
+                window.location.href = searchEngines[currentEngine].url + encodeURIComponent(query);
+            }
+        };
+
+        searchForm.addEventListener('submit', (e) => { e.preventDefault(); performSearch(); });
+        searchIcon.addEventListener('click', performSearch);
+        engineButtons.forEach(button => {
+            button.addEventListener('click', () => setSearchEngine(button.dataset.engine));
+        });
+
+        // --- Calendar Widget ---
+        let currentCalendarDate = new Date();
+        const monthYearEl = document.getElementById('month-year');
+        const gridEl = document.getElementById('calendar-grid');
+        const prevMonthBtn = document.getElementById('prev-month');
+        const nextMonthBtn = document.getElementById('next-month');
+
+        function renderCalendar(date) {
+            const today = new Date();
+            const month = date.getMonth();
+            const year = date.getFullYear();
+
+            monthYearEl.textContent = date.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
+
+            const firstDayOfMonth = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const dayOffset = (firstDayOfMonth === 0) ? 6 : firstDayOfMonth - 1;
+
+            gridEl.innerHTML = '';
+
+            ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].forEach(day => {
+                gridEl.innerHTML += `<div class="calendar-cell day-name">${day}</div>`;
+            });
+
+            for (let i = 0; i < dayOffset; i++) {
+                gridEl.innerHTML += `<div class="calendar-cell"></div>`;
+            }
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                let cellClass = "calendar-cell day-number";
+                if (i === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+                    cellClass += " current-day";
+                }
+                gridEl.innerHTML += `<div class="${cellClass}">${i}</div>`;
+            }
+        }
+
+        prevMonthBtn.addEventListener('click', () => {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+            renderCalendar(currentCalendarDate);
+        });
+
+        nextMonthBtn.addEventListener('click', () => {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+            renderCalendar(currentCalendarDate);
+        });
+
+        renderCalendar(currentCalendarDate);
+
+        // --- Crypto Widget ---
+        const cryptoListEl = document.getElementById('crypto-list');
+        const cryptoIds = ['bitcoin', 'ethereum', 'ripple', 'binancecoin', 'solana'];
+        const cryptoData = {
+            'bitcoin': { name: 'Bitcoin', ticker: 'BTC', icon: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png?1696501400' },
+            'ethereum': { name: 'Ethereum', ticker: 'ETH', icon: 'https://assets.coingecko.com/coins/images/279/large/ethereum.png?1696501638' },
+            'ripple': { name: 'XRP', ticker: 'XRP', icon: 'https://assets.coingecko.com/coins/images/44/large/xrp-symbol-black-100.png?1696501442' },
+            'binancecoin': { name: 'BNB', ticker: 'BNB', icon: 'https://assets.coingecko.com/coins/images/825/large/bnb-icon2_2x.png?1696501970' },
+            'solana': { name: 'Solana', ticker: 'SOL', icon: 'https://assets.coingecko.com/coins/images/4128/large/solana.png?1696504756' }
+        };
+
+        async function fetchCryptoPrices() {
+            try {
+                const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${cryptoIds.join(',')}&vs_currencies=usd,rub`);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const data = await response.json();
+
+                cryptoListEl.innerHTML = ''; // Clear previous data
+
+                for (const id of cryptoIds) {
+                    if (data[id]) {
+                        const info = cryptoData[id];
+                        const prices = data[id];
+                        const usdPrice = prices.usd.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+                        const rubPrice = prices.rub.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+                        const cryptoItemHTML = `
+                            <div class="crypto-item">
+                                <div class="crypto-info">
+                                    <img src="${info.icon}" alt="${info.name}" class="crypto-icon">
+                                    <div>
+                                        <div class="crypto-name">${info.name}</div>
+                                        <div class="crypto-ticker">${info.ticker}</div>
+                                    </div>
+                                </div>
+                                <div class="crypto-prices">
+                                    <div class="crypto-price-usd">${usdPrice}</div>
+                                    <div class="crypto-price-rub">${rubPrice}</div>
+                                </div>
+                            </div>
+                        `;
+                        cryptoListEl.innerHTML += cryptoItemHTML;
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to fetch crypto prices:", error);
+                cryptoListEl.innerHTML = '<p style="color: var(--text-secondary);">Не удалось загрузить курсы.</p>';
+            }
+        }
+        fetchCryptoPrices();
+        setInterval(fetchCryptoPrices, 300000); // Обновление каждые 5 минут
+
+        // --- Scratchpad Widget ---
+        const scratchpad = document.getElementById('scratchpad');
+        const savedText = localStorage.getItem('scratchpadContent');
+        if (savedText) {
+            scratchpad.value = savedText;
+        }
+        scratchpad.addEventListener('input', () => {
+            localStorage.setItem('scratchpadContent', scratchpad.value);
+        });
+
+        // --- Pomodoro Timer ---
+        const pomodoroTimerEl = document.getElementById('pomodoro-timer');
+        const pomodoroStatusEl = document.getElementById('pomodoro-status');
+        const startPauseBtn = document.getElementById('pomodoro-start-pause');
+        const resetBtn = document.getElementById('pomodoro-reset');
+
+        const workTime = 25 * 60; // 25 минут
+        const breakTime = 5 * 60; // 5 минут
+
+        let timerInterval = null;
+        let timeLeft = workTime;
+        let isPaused = true;
+        let isWorkSession = true;
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            pomodoroTimerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function switchSession() {
+            isWorkSession = !isWorkSession;
+            timeLeft = isWorkSession ? workTime : breakTime;
+            pomodoroStatusEl.textContent = isWorkSession ? "Время работать!" : "Время отдыхать!";
+            updateTimerDisplay();
+        }
+
+        function startTimer() {
+            isPaused = false;
+            startPauseBtn.textContent = 'Пауза';
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+
+                if (timeLeft < 0) {
+                    clearInterval(timerInterval);
+                    switchSession();
+                    startTimer(); // Автоматически начинаем следующий раунд
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            isPaused = true;
+            startPauseBtn.textContent = 'Старт';
+            clearInterval(timerInterval);
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            timeLeft = isWorkSession ? workTime : breakTime;
+            updateTimerDisplay();
+        }
+
+        startPauseBtn.addEventListener('click', () => {
+            if (isPaused) {
+                startTimer();
+            } else {
+                pauseTimer();
+            }
+        });
+
+        resetBtn.addEventListener('click', resetTimer);
+
+        updateTimerDisplay(); // Initial display
+    });
+    </script>
+</body>
+</html>
