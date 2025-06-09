@@ -126,7 +126,7 @@
             flex-direction: column;
             align-items: center;
             width: 100%;
-            max-width: 1400px; /* Увеличено для виджетов */
+            max-width: 1400px;
             position: relative;
             z-index: 1;
             animation: fadeIn 0.8s ease-out;
@@ -294,9 +294,8 @@
 
         .calendar-widget { flex-basis: 450px; }
         .crypto-widget { flex-basis: 300px; }
-        .pomodoro-widget { flex-basis: 250px; }
+        .pomodoro-widget { flex-basis: 350px; }
         .scratchpad-widget { flex-basis: 250px; }
-
 
         /* Calendar Widget */
         .calendar-header {
@@ -382,26 +381,61 @@
             background-color: rgba(255, 255, 255, 0.08);
         }
 
-        /* Pomodoro Widget */
+        /* Улучшенный Pomodoro Widget */
         .pomodoro-widget {
             align-items: center;
             justify-content: center;
+            position: relative;
         }
+
         #pomodoro-timer {
             font-size: 4.5rem;
             font-weight: 300;
             margin: 10px 0;
+            position: relative;
+            z-index: 2;
         }
+
         #pomodoro-status {
             font-size: 1rem;
             color: var(--text-secondary);
             margin-bottom: 20px;
             min-height: 1.2em;
         }
+
+        /* Круговой прогресс */
+        .progress-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            z-index: 1;
+        }
+
+        .progress-ring__circle {
+            fill: transparent;
+            stroke: rgba(255, 255, 255, 0.1);
+            stroke-width: 4;
+        }
+
+        .progress-ring__progress {
+            fill: transparent;
+            stroke: var(--accent);
+            stroke-width: 4;
+            stroke-linecap: round;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+            transition: stroke-dashoffset 0.3s;
+        }
+
         .pomodoro-controls {
             display: flex;
             gap: 15px;
+            margin-bottom: 15px;
         }
+
         .pomodoro-btn {
             font-family: inherit;
             font-size: 1rem;
@@ -412,24 +446,133 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
+
         #pomodoro-start-pause {
             background-color: var(--accent);
             color: var(--bg-primary);
         }
+
         #pomodoro-start-pause:hover {
             background-color: #dcdcdc;
         }
+
         #pomodoro-reset {
             background-color: transparent;
             border-color: var(--text-secondary);
             color: var(--text-secondary);
         }
+
         #pomodoro-reset:hover {
             background-color: rgba(255, 255, 255, 0.1);
             color: #fff;
             border-color: #fff;
         }
-        
+
+        /* Настройки Pomodoro */
+        .pomodoro-settings {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+            width: 100%;
+        }
+
+        .settings-toggle {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            cursor: pointer;
+            padding: 5px;
+            margin-bottom: 10px;
+            transition: color 0.3s;
+        }
+
+        .settings-toggle:hover {
+            color: var(--text-primary);
+        }
+
+        .settings-panel {
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .settings-panel.active {
+            display: flex;
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .setting-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .setting-input {
+            width: 60px;
+            padding: 5px 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .setting-input:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .sound-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sound-toggle input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        /* Статистика */
+        .stats-container {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+            width: 100%;
+            text-align: center;
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 500;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
         /* Crypto Widget */
         #crypto-list {
             display: flex;
@@ -438,6 +581,7 @@
             margin-top: 5px;
             width: 100%;
         }
+
         .crypto-item {
             display: flex;
             align-items: center;
@@ -445,38 +589,45 @@
             padding-bottom: 10px;
             border-bottom: 1px solid var(--border-color);
         }
+
         .crypto-item:last-child {
             border-bottom: none;
         }
+
         .crypto-info {
             display: flex;
             align-items: center;
             gap: 12px;
         }
+
         .crypto-icon {
             width: 32px;
             height: 32px;
         }
+
         .crypto-name {
             font-weight: 500;
             font-size: 1.1rem;
         }
+
         .crypto-ticker {
             font-size: 0.9rem;
             color: var(--text-secondary);
         }
+
         .crypto-prices {
             text-align: right;
         }
+
         .crypto-price-usd {
             font-size: 1.1rem;
             font-weight: 500;
         }
+
         .crypto-price-rub {
             font-size: 0.9rem;
             color: var(--text-secondary);
         }
-
 
         /* Анимации */
         @keyframes fadeIn {
@@ -493,18 +644,20 @@
         @media (max-width: 1420px) {
             .main-content { max-width: 95%; }
         }
-         @media (max-width: 1220px) {
+
+        @media (max-width: 1220px) {
             .widgets-container {
                 flex-direction: column;
                 align-items: center;
             }
             .widget {
                 width: 100%;
-                max-width: 600px; /* Ограничиваем макс. ширину на мобильных */
+                max-width: 600px;
                 flex-basis: auto;
             }
-             .scratchpad-widget, .pomodoro-widget {
-                height: 300px;
+            .scratchpad-widget, .pomodoro-widget {
+                height: auto;
+                min-height: 300px;
             }
         }
     </style>
@@ -557,17 +710,60 @@
             
             <div class="widget crypto-widget">
                 <h4>Криптовалюты</h4>
-                <div id="crypto-list">
-                    </div>
+                <div id="crypto-list"></div>
             </div>
 
             <div class="widget pomodoro-widget">
                 <h4>Таймер Pomodoro</h4>
-                <div id="pomodoro-timer">25:00</div>
+                <div style="position: relative; height: 200px; display: flex; align-items: center; justify-content: center;">
+                    <svg class="progress-ring" viewBox="0 0 200 200">
+                        <circle class="progress-ring__circle" cx="100" cy="100" r="90"/>
+                        <circle class="progress-ring__progress" cx="100" cy="100" r="90" 
+                                stroke-dasharray="565.48" 
+                                stroke-dashoffset="565.48"/>
+                    </svg>
+                    <div id="pomodoro-timer">25:00</div>
+                </div>
                 <div id="pomodoro-status">Время работать!</div>
                 <div class="pomodoro-controls">
                     <button id="pomodoro-start-pause" class="pomodoro-btn">Старт</button>
                     <button id="pomodoro-reset" class="pomodoro-btn">Сброс</button>
+                </div>
+                
+                <div class="pomodoro-settings">
+                    <button class="settings-toggle" id="settings-toggle">⚙️ Настройки</button>
+                    <div class="settings-panel" id="settings-panel">
+                        <div class="setting-row">
+                            <label class="setting-label">Работа (мин):</label>
+                            <input type="number" class="setting-input" id="work-time-input" value="25" min="1" max="60">
+                        </div>
+                        <div class="setting-row">
+                            <label class="setting-label">Отдых (мин):</label>
+                            <input type="number" class="setting-input" id="break-time-input" value="5" min="1" max="30">
+                        </div>
+                        <div class="setting-row">
+                            <label class="setting-label">Долгий отдых (мин):</label>
+                            <input type="number" class="setting-input" id="long-break-input" value="15" min="1" max="45">
+                        </div>
+                        <div class="sound-toggle">
+                            <input type="checkbox" id="sound-enabled" checked>
+                            <label for="sound-enabled" class="setting-label">Звуковые уведомления</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-container">
+                    <h5 style="margin-bottom: 10px; color: var(--text-secondary); font-weight: 400;">Статистика</h5>
+                    <div class="stats-row">
+                        <div class="stat-item">
+                            <div class="stat-value" id="today-sessions">0</div>
+                            <div class="stat-label">Сегодня</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="week-sessions">0</div>
+                            <div class="stat-label">За неделю</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -704,7 +900,7 @@
                 if (!response.ok) throw new Error('Network response was not ok');
                 const data = await response.json();
 
-                cryptoListEl.innerHTML = ''; // Clear previous data
+                cryptoListEl.innerHTML = '';
 
                 for (const id of cryptoIds) {
                     if (data[id]) {
@@ -737,7 +933,7 @@
             }
         }
         fetchCryptoPrices();
-        setInterval(fetchCryptoPrices, 300000); // Обновление каждые 5 минут
+        setInterval(fetchCryptoPrices, 300000);
 
         // --- Scratchpad Widget ---
         const scratchpad = document.getElementById('scratchpad');
@@ -749,31 +945,135 @@
             localStorage.setItem('scratchpadContent', scratchpad.value);
         });
 
-        // --- Pomodoro Timer ---
+        // --- Улучшенный Pomodoro Timer ---
         const pomodoroTimerEl = document.getElementById('pomodoro-timer');
         const pomodoroStatusEl = document.getElementById('pomodoro-status');
         const startPauseBtn = document.getElementById('pomodoro-start-pause');
         const resetBtn = document.getElementById('pomodoro-reset');
+        const progressCircle = document.querySelector('.progress-ring__progress');
+        const settingsToggle = document.getElementById('settings-toggle');
+        const settingsPanel = document.getElementById('settings-panel');
+        const workTimeInput = document.getElementById('work-time-input');
+        const breakTimeInput = document.getElementById('break-time-input');
+        const longBreakInput = document.getElementById('long-break-input');
+        const soundEnabledCheckbox = document.getElementById('sound-enabled');
+        const todaySessionsEl = document.getElementById('today-sessions');
+        const weekSessionsEl = document.getElementById('week-sessions');
 
-        const workTime = 25 * 60; // 25 минут
-        const breakTime = 5 * 60; // 5 минут
+        // Загрузка настроек
+        const savedSettings = JSON.parse(localStorage.getItem('pomodoroSettings')) || {
+            workTime: 25,
+            breakTime: 5,
+            longBreakTime: 15,
+            soundEnabled: true
+        };
+
+        workTimeInput.value = savedSettings.workTime;
+        breakTimeInput.value = savedSettings.breakTime;
+        longBreakInput.value = savedSettings.longBreakTime;
+        soundEnabledCheckbox.checked = savedSettings.soundEnabled;
+
+        let workTime = savedSettings.workTime * 60;
+        let breakTime = savedSettings.breakTime * 60;
+        let longBreakTime = savedSettings.longBreakTime * 60;
 
         let timerInterval = null;
         let timeLeft = workTime;
+        let totalTime = workTime;
         let isPaused = true;
         let isWorkSession = true;
+        let sessionsCompleted = 0;
+
+        // Звуковые уведомления
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playNotificationSound() {
+            if (!soundEnabledCheckbox.checked) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.3);
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.3);
+        }
+
+        // Обновление прогресс-бара
+        function updateProgressBar() {
+            const circumference = 2 * Math.PI * 90;
+            const progress = (totalTime - timeLeft) / totalTime;
+            const offset = circumference - (progress * circumference);
+            progressCircle.style.strokeDashoffset = offset;
+        }
 
         function updateTimerDisplay() {
             const minutes = Math.floor(timeLeft / 60);
             const seconds = timeLeft % 60;
             pomodoroTimerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            updateProgressBar();
+        }
+
+        // Статистика
+        function loadStats() {
+            const stats = JSON.parse(localStorage.getItem('pomodoroStats')) || {};
+            const today = new Date().toDateString();
+            const weekAgo = new Date();
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            
+            let todayCount = stats[today] || 0;
+            let weekCount = 0;
+            
+            for (const date in stats) {
+                const dateObj = new Date(date);
+                if (dateObj >= weekAgo) {
+                    weekCount += stats[date];
+                }
+            }
+            
+            todaySessionsEl.textContent = todayCount;
+            weekSessionsEl.textContent = weekCount;
+        }
+
+        function saveStat() {
+            const stats = JSON.parse(localStorage.getItem('pomodoroStats')) || {};
+            const today = new Date().toDateString();
+            stats[today] = (stats[today] || 0) + 1;
+            localStorage.setItem('pomodoroStats', JSON.stringify(stats));
+            loadStats();
         }
 
         function switchSession() {
+            if (isWorkSession) {
+                saveStat();
+                sessionsCompleted++;
+            }
+            
             isWorkSession = !isWorkSession;
-            timeLeft = isWorkSession ? workTime : breakTime;
-            pomodoroStatusEl.textContent = isWorkSession ? "Время работать!" : "Время отдыхать!";
+            
+            if (!isWorkSession && sessionsCompleted % 4 === 0) {
+                timeLeft = longBreakTime;
+                totalTime = longBreakTime;
+                pomodoroStatusEl.textContent = "Время для долгого отдыха!";
+            } else if (!isWorkSession) {
+                timeLeft = breakTime;
+                totalTime = breakTime;
+                pomodoroStatusEl.textContent = "Время отдыхать!";
+            } else {
+                timeLeft = workTime;
+                totalTime = workTime;
+                pomodoroStatusEl.textContent = "Время работать!";
+            }
+            
             updateTimerDisplay();
+            playNotificationSound();
         }
 
         function startTimer() {
@@ -787,7 +1087,7 @@
                 if (timeLeft < 0) {
                     clearInterval(timerInterval);
                     switchSession();
-                    startTimer(); // Автоматически начинаем следующий раунд
+                    startTimer();
                 }
             }, 1000);
         }
@@ -800,10 +1100,14 @@
 
         function resetTimer() {
             pauseTimer();
-            timeLeft = isWorkSession ? workTime : breakTime;
+            isWorkSession = true;
+            timeLeft = workTime;
+            totalTime = workTime;
+            pomodoroStatusEl.textContent = "Время работать!";
             updateTimerDisplay();
         }
 
+        // Обработчики событий
         startPauseBtn.addEventListener('click', () => {
             if (isPaused) {
                 startTimer();
@@ -814,7 +1118,38 @@
 
         resetBtn.addEventListener('click', resetTimer);
 
-        updateTimerDisplay(); // Initial display
+        settingsToggle.addEventListener('click', () => {
+            settingsPanel.classList.toggle('active');
+        });
+
+        // Сохранение настроек
+        function saveSettings() {
+            const settings = {
+                workTime: parseInt(workTimeInput.value),
+                breakTime: parseInt(breakTimeInput.value),
+                longBreakTime: parseInt(longBreakInput.value),
+                soundEnabled: soundEnabledCheckbox.checked
+            };
+            
+            localStorage.setItem('pomodoroSettings', JSON.stringify(settings));
+            
+            workTime = settings.workTime * 60;
+            breakTime = settings.breakTime * 60;
+            longBreakTime = settings.longBreakTime * 60;
+            
+            if (isPaused) {
+                resetTimer();
+            }
+        }
+
+        workTimeInput.addEventListener('change', saveSettings);
+        breakTimeInput.addEventListener('change', saveSettings);
+        longBreakInput.addEventListener('change', saveSettings);
+        soundEnabledCheckbox.addEventListener('change', saveSettings);
+
+        // Инициализация
+        updateTimerDisplay();
+        loadStats();
     });
     </script>
 </body>
