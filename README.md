@@ -16,7 +16,7 @@
 </p>
 
 <div align="center">
-  <h3>Минималистичная стартовая страница с полезными виджетами</h3>
+  <h3>Минималистичная стартовая страница</h3>
 </div>
 
 <br>
@@ -32,24 +32,3 @@ git clone https://github.com/TarzZan52/startpage.git
 open index.html
 ```
 
-## ⚙️ Настройка
-
-<details>
-<summary><b>Изменить фон</b></summary>
-
-Замените `src/wallpaper.jpg` на свое изображение
-</details>
-
-<details>
-<summary><b>Добавить поисковик</b></summary>
-
-```javascript
-const searchEngines = {
-    // ...существующие
-    bing: { 
-        url: 'https://www.bing.com/search?q=', 
-        placeholder: 'Поиск в Bing...' 
-    }
-};
-```
-</details>
