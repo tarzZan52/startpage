@@ -21,47 +21,7 @@
 
 <br>
 
-![screenshot](src/screenshot.png)
-
-## ✨ Функции
-
-<table>
-  <tr>
-    <td align="center" width="33%">
-      <img width="60" height="60" src="https://img.icons8.com/fluency/96/search.png" alt="search"/>
-      <br><strong>Поиск</strong><br>
-      <sub>DuckDuckGo, Google, Яндекс</sub>
-    </td>
-    <td align="center" width="33%">
-      <img width="60" height="60" src="https://img.icons8.com/fluency/96/calendar.png" alt="calendar"/>
-      <br><strong>Календарь</strong><br>
-      <sub>Текущий месяц с подсветкой</sub>
-    </td>
-    <td align="center" width="33%">
-      <img width="60" height="60" src="https://img.icons8.com/fluency/96/bitcoin.png" alt="bitcoin"/>
-      <br><strong>Криптовалюты</strong><br>
-      <sub>BTC, ETH, XRP, BNB, SOL</sub>
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="33%">
-      <img width="60" height="60" src="https://img.icons8.com/fluency/96/tomato.png" alt="pomodoro"/>
-      <br><strong>Pomodoro</strong><br>
-      <sub>Таймер со статистикой</sub>
-    </td>
-    <td align="center" width="33%">
-      <img width="60" height="60" src="https://img.icons8.com/fluency/96/note.png" alt="notes"/>
-      <br><strong>Заметки</strong><br>
-      <sub>С автосохранением</sub>
-    </td>
-    <td align="center" width="33%">
-      <img width="60" height="60" src="https://img.icons8.com/fluency/96/clock.png" alt="clock"/>
-      <br><strong>Часы</strong><br>
-      <sub>Время и дата</sub>
-    </td>
-  </tr>
-</table>
-
+![screenshot](src/image.png)
 ## 🚀 Установка
 
 ```bash
@@ -93,15 +53,3 @@ const searchEngines = {
 };
 ```
 </details>
-
-<details>
-<summary><b>Изменить криптовалюты</b></summary>
-
-```javascript
-const cryptoIds = ['bitcoin', 'ethereum', 'cardano']; // ваш список
-```
-</details>
-
-## 📄 Лицензия
-
-MIT © [TarzZan52](https://github.com/TarzZan52)
