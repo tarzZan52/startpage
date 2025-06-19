@@ -1,0 +1,110 @@
+/* Плитки приложений */
+.apps-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 20px;
+    width: 100%;
+    max-width: 800px;
+    margin-top: 20px;
+    animation: slideUp 1s ease-out 0.5s both;
+}
+
+.app-tile {
+    aspect-ratio: 1;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    color: var(--text-primary);
+    backdrop-filter: blur(20px);
+    position: relative;
+    overflow: hidden;
+}
+
+.app-tile::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    transform: rotate(45deg);
+}
+
+.app-tile:hover::before {
+    opacity: 1;
+}
+
+.app-tile:hover {
+    transform: translateY(-5px) scale(1.02);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.app-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    position: relative;
+    z-index: 1;
+}
+
+.app-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: brightness(0.9);
+    transition: filter 0.3s ease;
+}
+
+.app-tile:hover .app-icon img {
+    filter: brightness(1.1);
+}
+
+.app-name {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: color 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.app-tile:hover .app-name {
+    color: var(--text-primary);
+}
+
+/* Специальные градиенты для разных приложений */
+.app-tile.chatgpt:hover {
+    background: linear-gradient(135deg, rgba(116, 188, 164, 0.2), rgba(0, 0, 0, 0.4));
+}
+
+.app-tile.claude:hover {
+    background: linear-gradient(135deg, rgba(220, 176, 124, 0.2), rgba(0, 0, 0, 0.4));
+}
+
+.app-tile.gemini:hover {
+    background: linear-gradient(135deg, rgba(66, 133, 244, 0.2), rgba(0, 0, 0, 0.4));
+}
+
+.app-tile.github:hover {
+    background: linear-gradient(135deg, rgba(36, 41, 46, 0.5), rgba(0, 0, 0, 0.4));
+}
+
+.app-tile.gmail:hover {
+    background: linear-gradient(135deg, rgba(234, 67, 53, 0.2), rgba(0, 0, 0, 0.4));
+}

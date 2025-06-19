@@ -1,0 +1,79 @@
+/* Анимация свечения заголовка */
+@keyframes titleGlow {
+    0% { filter: brightness(1); }
+    100% { filter: brightness(1.2); }
+}
+
+/* Анимация тумана */
+@keyframes fogDrift {
+    0%, 100% { transform: translate(-10%, -10%) scale(1); }
+    33% { transform: translate(5%, -5%) scale(1.1); }
+    66% { transform: translate(-5%, 5%) scale(0.9); }
+}
+
+@keyframes fogDrift2 {
+    0%, 100% { transform: translate(10%, 10%) scale(1.2); }
+    50% { transform: translate(-10%, -10%) scale(0.8); }
+}
+
+@keyframes fogDrift3 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    25% { transform: translate(-20%, 10%) scale(1.2); }
+    50% { transform: translate(20%, -10%) scale(0.9); }
+    75% { transform: translate(-10%, -20%) scale(1.1); }
+}
+
+/* Анимация частиц */
+@keyframes float {
+    0% { 
+        transform: translateY(100vh) translateX(0) scale(0);
+        opacity: 0;
+    }
+    10% { 
+        opacity: 1;
+        transform: translateY(90vh) translateX(10px) scale(1);
+    }
+    90% { 
+        opacity: 1;
+        transform: translateY(10vh) translateX(-10px) scale(1);
+    }
+    100% { 
+        transform: translateY(-10vh) translateX(0) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Анимация градиентных линий */
+@keyframes lineMove {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+}
+
+/* Анимация свечения даты/времени */
+@keyframes dateTimeGlow {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Анимации появления */
+@keyframes fadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(-20px);
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from { 
+        opacity: 0; 
+        transform: translateY(40px);
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0);
+    }
+}

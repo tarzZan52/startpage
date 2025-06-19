@@ -1,0 +1,43 @@
+.datetime-container {
+    margin-top: 20px;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 25px 50px;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+.datetime-container::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+    animation: dateTimeGlow 10s linear infinite;
+}
+
+.time {
+    font-size: 4.5rem;
+    font-weight: 200;
+    text-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+    letter-spacing: -3px;
+    position: relative;
+    z-index: 1;
+}
+
+.date {
+    font-size: 1.2rem;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    font-weight: 300;
+    margin-top: 10px;
+    position: relative;
+    z-index: 1;
+}
