@@ -17,6 +17,11 @@ body {
     position: relative;
 }
 
+/* Скрываем индикатор загрузки браузера после полной загрузки */
+body.loaded {
+    cursor: default;
+}
+
 /* Фоновое изображение */
 body::before {
     content: '';
@@ -71,4 +76,31 @@ body::after {
     margin-top: 40px;
     letter-spacing: -1px;
     animation: titleGlow 3s ease-in-out infinite alternate;
+}
+
+/* Убираем выделение текста для интерактивных элементов */
+button, .app-tile, .engine-btn {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Улучшенный скроллбар для модального окна */
+.modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
 }

@@ -4,25 +4,6 @@
     100% { filter: brightness(1.2); }
 }
 
-/* Анимация тумана */
-@keyframes fogDrift {
-    0%, 100% { transform: translate(-10%, -10%) scale(1); }
-    33% { transform: translate(5%, -5%) scale(1.1); }
-    66% { transform: translate(-5%, 5%) scale(0.9); }
-}
-
-@keyframes fogDrift2 {
-    0%, 100% { transform: translate(10%, 10%) scale(1.2); }
-    50% { transform: translate(-10%, -10%) scale(0.8); }
-}
-
-@keyframes fogDrift3 {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    25% { transform: translate(-20%, 10%) scale(1.2); }
-    50% { transform: translate(20%, -10%) scale(0.9); }
-    75% { transform: translate(-10%, -20%) scale(1.1); }
-}
-
 /* Анимация частиц */
 @keyframes float {
     0% { 
@@ -75,5 +56,19 @@
     to { 
         opacity: 1; 
         transform: translateY(0);
+    }
+}
+
+/* Оптимизация производительности */
+.particle, .gradient-line {
+    will-change: transform;
+}
+
+/* Отключаем анимации при сниженной производительности */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
     }
 }

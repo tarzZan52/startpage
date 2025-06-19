@@ -9,12 +9,179 @@
     }
     
     .apps-container {
-        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        grid-template-columns: repeat(4, 100px) !important;
         gap: 15px;
+    }
+    
+    .apps-container:has(.app-tile:nth-child(1):last-child) {
+        grid-template-columns: repeat(1, 100px) !important;
+    }
+    
+    .apps-container:has(.app-tile:nth-child(2):last-child) {
+        grid-template-columns: repeat(2, 100px) !important;
+    }
+    
+    .apps-container:has(.app-tile:nth-child(3):last-child) {
+        grid-template-columns: repeat(3, 100px) !important;
+    }
+    
+    .app-tile,
+    .add-app-btn {
+        width: 100px;
+        height: 100px;
     }
     
     .app-icon {
         width: 40px;
         height: 40px;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 20px;
+    }
+    
+    .icon-upload-container {
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .form-actions {
+        flex-direction: column-reverse;
+        gap: 8px;
+    }
+    
+    .form-actions button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .site-title {
+        font-size: 2rem;
+    }
+    
+    .time {
+        font-size: 3rem;
+    }
+    
+    .datetime-container {
+        padding: 20px 30px;
+    }
+    
+    .date {
+        font-size: 1rem;
+        letter-spacing: 2px;
+    }
+    
+    .apps-container {
+        grid-template-columns: repeat(3, 90px) !important;
+        gap: 12px;
+    }
+    
+    .apps-container:has(.app-tile:nth-child(1):last-child) {
+        grid-template-columns: repeat(1, 90px) !important;
+    }
+    
+    .apps-container:has(.app-tile:nth-child(2):last-child) {
+        grid-template-columns: repeat(2, 90px) !important;
+    }
+    
+    .app-tile,
+    .add-app-btn {
+        width: 90px;
+        height: 90px;
+    }
+    
+    .app-icon {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .app-name {
+        font-size: 0.8rem;
+    }
+    
+    .search-wrapper {
+        margin: 30px 0 40px;
+    }
+    
+    .search-engine-selector {
+        gap: 10px;
+    }
+    
+    .engine-btn {
+        padding: 10px;
+    }
+    
+    .engine-btn img {
+        width: 20px;
+        height: 20px;
+    }
+}
+
+@media (max-width: 380px) {
+    .apps-container {
+        grid-template-columns: repeat(3, 80px) !important;
+        gap: 10px;
+    }
+    
+    .apps-container:has(.app-tile:nth-child(1):last-child) {
+        grid-template-columns: repeat(1, 80px) !important;
+    }
+    
+    .apps-container:has(.app-tile:nth-child(2):last-child) {
+        grid-template-columns: repeat(2, 80px) !important;
+    }
+    
+    .app-tile,
+    .add-app-btn {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .app-icon {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .app-name {
+        font-size: 0.75rem;
+    }
+}
+
+/* Поддержка ландшафтной ориентации на мобильных */
+@media (max-height: 600px) and (orientation: landscape) {
+    .main-content {
+        padding-top: 10px;
+    }
+    
+    .site-title {
+        font-size: 2rem;
+        margin-top: 20px;
+        margin-bottom: 10px;
+    }
+    
+    .datetime-container {
+        margin-top: 10px;
+        padding: 15px 40px;
+    }
+    
+    .time {
+        font-size: 3rem;
+    }
+    
+    .search-wrapper {
+        margin: 20px 0 30px;
+    }
+    
+    .apps-container {
+        gap: 10px;
+    }
+    
+    .app-tile,
+    .add-app-btn {
+        width: 90px;
+        height: 90px;
     }
 }
