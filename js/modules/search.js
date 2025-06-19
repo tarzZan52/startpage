@@ -41,6 +41,11 @@ const Search = {
     },
     
     setSearchEngine(engine) {
+        if (!CONFIG.searchEngines[engine]) {
+            console.error('Unknown search engine:', engine);
+            return;
+        }
+        
         this.currentEngine = engine;
         
         // Обновляем активную кнопку

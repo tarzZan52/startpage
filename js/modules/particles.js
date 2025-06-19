@@ -9,6 +9,11 @@ const Particles = {
             return;
         }
         
+        // Проверяем, не созданы ли уже частицы
+        if (this.container.children.length > 0) {
+            return;
+        }
+        
         this.createParticles();
     },
     

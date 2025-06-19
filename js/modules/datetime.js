@@ -2,6 +2,7 @@
 const DateTime = {
     timeElement: null,
     dateElement: null,
+    intervalId: null,
     
     init() {
         this.timeElement = document.getElementById('time');
@@ -13,7 +14,9 @@ const DateTime = {
         }
         
         this.updateTime();
-        setInterval(() => this.updateTime(), 1000);
+        
+        // Сохраняем ID интервала для возможности очистки
+        this.intervalId = setInterval(() => this.updateTime(), 1000);
     },
     
     updateTime() {
@@ -30,5 +33,11 @@ const DateTime = {
             day: 'numeric', 
             month: 'long' 
         });
+    },
+    
+    destroy() {
+        if (this.intervalId) {
+            clearInterval(this.intervalId);
+        }
     }
 };
