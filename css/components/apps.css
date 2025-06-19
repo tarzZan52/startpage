@@ -1,16 +1,50 @@
-/* Плитки приложений */
-.apps-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 20px;
+/* Секция приложений */
+.apps-section {
     width: 100%;
     max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     margin-top: 20px;
+}
+
+/* Контейнер для плиток */
+.apps-container {
+    display: grid;
+    grid-template-columns: repeat(6, 120px);
+    gap: 20px;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 20px;
     animation: slideUp 1s ease-out 0.5s both;
 }
 
+/* Адаптация сетки для меньшего количества плиток */
+.apps-container:has(.app-tile:nth-child(1):last-child) {
+    grid-template-columns: repeat(1, 120px);
+}
+
+.apps-container:has(.app-tile:nth-child(2):last-child) {
+    grid-template-columns: repeat(2, 120px);
+}
+
+.apps-container:has(.app-tile:nth-child(3):last-child) {
+    grid-template-columns: repeat(3, 120px);
+}
+
+.apps-container:has(.app-tile:nth-child(4):last-child) {
+    grid-template-columns: repeat(4, 120px);
+}
+
+.apps-container:has(.app-tile:nth-child(5):last-child) {
+    grid-template-columns: repeat(5, 120px);
+}
+
+/* Плитка приложения */
 .app-tile {
-    aspect-ratio: 1;
+    width: 120px;
+    height: 120px;
     background: rgba(0, 0, 0, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
@@ -52,6 +86,44 @@
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
+/* Скрываем плитки после 12-й */
+.app-tile:nth-child(n+13) {
+    display: none;
+}
+
+/* Кнопка добавления - показываем только если меньше 12 плиток */
+.add-app-btn {
+    display: none;
+}
+
+.apps-container:not(:has(.app-tile:nth-child(12))) ~ .add-app-btn {
+    display: flex;
+    width: 120px;
+    height: 120px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(20px);
+}
+
+.add-app-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.7);
+    transform: scale(1.02);
+}
+
+.add-app-btn svg {
+    width: 32px;
+    height: 32px;
+}
+
+/* Иконка приложения */
 .app-icon {
     width: 48px;
     height: 48px;
@@ -75,6 +147,7 @@
     filter: brightness(1.1);
 }
 
+/* Название приложения */
 .app-name {
     font-size: 0.9rem;
     font-weight: 500;
@@ -82,29 +155,13 @@
     transition: color 0.3s ease;
     position: relative;
     z-index: 1;
+    text-align: center;
+    width: 90%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .app-tile:hover .app-name {
     color: var(--text-primary);
-}
-
-/* Специальные градиенты для разных приложений */
-.app-tile.chatgpt:hover {
-    background: linear-gradient(135deg, rgba(116, 188, 164, 0.2), rgba(0, 0, 0, 0.4));
-}
-
-.app-tile.claude:hover {
-    background: linear-gradient(135deg, rgba(220, 176, 124, 0.2), rgba(0, 0, 0, 0.4));
-}
-
-.app-tile.gemini:hover {
-    background: linear-gradient(135deg, rgba(66, 133, 244, 0.2), rgba(0, 0, 0, 0.4));
-}
-
-.app-tile.github:hover {
-    background: linear-gradient(135deg, rgba(36, 41, 46, 0.5), rgba(0, 0, 0, 0.4));
-}
-
-.app-tile.gmail:hover {
-    background: linear-gradient(135deg, rgba(234, 67, 53, 0.2), rgba(0, 0, 0, 0.4));
 }

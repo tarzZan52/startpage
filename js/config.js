@@ -16,37 +16,42 @@ const CONFIG = {
         }
     },
     
-    // Приложения
+    // Приложения по умолчанию
     apps: [
         {
+            id: 'default_chatgpt',
             name: 'ChatGPT',
             url: 'https://chat.openai.com',
             icon: 'icons/icons8-chatgpt.svg',
-            class: 'chatgpt'
+            isCustom: false
         },
         {
+            id: 'default_claude',
             name: 'Claude',
             url: 'https://claude.ai',
             icon: 'icons/icons8-claude.svg',
-            class: 'claude'
+            isCustom: false
         },
         {
+            id: 'default_gemini',
             name: 'Gemini',
             url: 'https://gemini.google.com',
             icon: 'icons/icons8-gemini.svg',
-            class: 'gemini'
+            isCustom: false
         },
         {
+            id: 'default_github',
             name: 'GitHub',
             url: 'https://github.com',
             icon: 'icons/icons8-github.svg',
-            class: 'github'
+            isCustom: false
         },
         {
+            id: 'default_gmail',
             name: 'Gmail',
             url: 'https://mail.google.com',
             icon: 'icons/icons8-gmail.svg',
-            class: 'gmail'
+            isCustom: false
         }
     ],
     
