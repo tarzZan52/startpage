@@ -50,16 +50,59 @@ Write-Host ""
 Write-Host "Для остановки нажмите Ctrl+C" -ForegroundColor Yellow
 Write-Host ""
 
-# Бесконечный цикл для автоматического перезапуска
-while ($true) {
+# Устанавливаем обработчик Ctrl+C
+[Console]::TreatControlCAsInput = $false
+$Global:StopRequested = $false
+
+# Обработчик прерывания
+$Handler = {
+    $Global:StopRequested = $true
+    Write-Host ""
+    Write-Host "🛑 Получен сигнал остановки..." -ForegroundColor Yellow
+}
+
+# Регистрируем обработчик
+$null = Register-EngineEvent -SourceIdentifier PowerShell.Exiting -Action $Handler
+
+# Основной цикл с корректной обработкой исключений
+while (-not $Global:StopRequested) {
     try {
+        Write-Host "🌐 Запуск HTTP сервера на порту 8000..." -ForegroundColor Green
+        
         # Запускаем Python сервер
-        & $pythonCmd -m http.server 8000 --bind 0.0.0.0
-    }
-    catch {
+        $process = Start-Process -FilePath $pythonCmd -ArgumentList "-m", "http.server", "8000", "--bind", "0.0.0.0" -NoNewWindow -PassThru
+        
+        # Ожидаем завершения процесса или сигнала остановки
+        while (-not $process.HasExited -and -not $Global:StopRequested) {
+            Start-Sleep -Milliseconds 500
+        }
+        
+        # Если процесс еще запущен, завершаем его
+        if (-not $process.HasExited) {
+            $process.Kill()
+            $process.WaitForExit(5000)
+        }
+        
+        if ($Global:StopRequested) {
+            Write-Host "✅ Сервер остановлен по запросу пользователя" -ForegroundColor Green
+            break
+        }
+        
+    } catch {
         Write-Host ""
-        Write-Host "⚠️  Сервер остановлен. Перезапуск через 5 секунд..." -ForegroundColor Yellow
-        Write-Host "   (Нажмите Ctrl+C дважды для полной остановки)" -ForegroundColor Gray
-        Start-Sleep -Seconds 5
+        Write-Host "❌ Ошибка: $($_.Exception.Message)" -ForegroundColor Red
+        
+        if (-not $Global:StopRequested) {
+            Write-Host "⚠️  Перезапуск через 5 секунд..." -ForegroundColor Yellow
+            Write-Host "   (Нажмите Ctrl+C для остановки)" -ForegroundColor Gray
+            
+            # Ожидание с возможностью прерывания
+            for ($i = 5; $i -gt 0 -and -not $Global:StopRequested; $i--) {
+                Start-Sleep -Seconds 1
+            }
+        }
     }
 }
+
+Write-Host ""
+Write-Host "🏁 Сервер завершен" -ForegroundColor Cyan
