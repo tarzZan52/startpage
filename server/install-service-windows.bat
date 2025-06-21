@@ -62,6 +62,19 @@ for %%i in ("%SCRIPT_PATH%") do set "PROJECT_PATH=%%~dpi"
 set "PROJECT_PATH=%PROJECT_PATH:~0,-1%"
 
 echo 📁 Путь к проекту: "%PROJECT_PATH%"
+
+:: Проверяем существование index.html
+if not exist "%PROJECT_PATH%\index.html" (
+    color 0C
+    echo.
+    echo ❌ ОШИБКА: Файл index.html не найден!
+    echo Убедитесь, что вы запускаете скрипт из правильной папки проекта.
+    echo Ожидаемый путь: "%PROJECT_PATH%\index.html"
+    echo.
+    pause
+    exit /b 1
+)
+
 echo.
 
 :: Создаем PowerShell скрипт для сервера
@@ -119,6 +132,7 @@ echo     $Global:StopRequested = $true
 echo     Write-Host ""
 echo     Write-Host "🛑 Получен сигнал остановки..." -ForegroundColor Yellow
 echo }
+echo Register-EngineEvent -SourceIdentifier PowerShell.Exiting -Action $Handler
 echo.
 echo # Основной цикл с корректной обработкой исключений
 echo while ^(-not $Global:StopRequested^) {
@@ -168,7 +182,7 @@ echo Write-Host "🏁 Сервер завершен" -ForegroundColor Cyan
 echo 📝 Создание автозапуска...
 (
 echo Set objShell = CreateObject^("WScript.Shell"^)
-echo objShell.Run "powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File """%SCRIPT_PATH%\start-dashboard.ps1"""", 0, False
+echo objShell.Run "powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File """ ^& Chr^(34^) ^& "%SCRIPT_PATH%\start-dashboard.ps1" ^& Chr^(34^) ^& """", 0, False
 ) > "%PROJECT_PATH%\dashboard-hidden.vbs"
 
 :: Удаляем старую задачу если есть

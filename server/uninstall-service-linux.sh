@@ -45,10 +45,14 @@ fi
 
 # Удаляем файл сервиса
 echo -e "${BLUE}🗑️  Удаление файла сервиса...${NC}"
-if sudo rm -f /etc/systemd/system/dashboard.service; then
-    echo -e "${GREEN}✅ Файл сервиса удален${NC}"
+if [[ -f /etc/systemd/system/dashboard.service ]]; then
+    if sudo rm -f /etc/systemd/system/dashboard.service; then
+        echo -e "${GREEN}✅ Файл сервиса удален${NC}"
+    else
+        echo -e "${RED}❌ Ошибка удаления файла сервиса${NC}"
+    fi
 else
-    echo -e "${RED}❌ Ошибка удаления файла сервиса${NC}"
+    echo -e "${YELLOW}⚠️  Файл сервиса не найден${NC}"
 fi
 
 # Перезагружаем systemd
