@@ -93,8 +93,10 @@ const Apps = {
     animateTiles() {
         const tiles = this.container.querySelectorAll('.app-tile');
         tiles.forEach((tile, index) => {
-            tile.style.animationDelay = `${0.05 * index}s`;
-            tile.style.animation = 'slideUp 0.6s ease-out forwards';
+            // Устанавливаем начальное состояние для анимации
+            tile.style.opacity = '1';
+            tile.style.animationDelay = `${0.1 * index}s`;
+            tile.style.animation = 'tileSlideUp 0.8s cubic-bezier(0.25, 0.8, 0.25, 1) forwards';
         });
     },
     

@@ -59,8 +59,25 @@
     }
 }
 
+/* Плавная анимация появления плиток без изменения прозрачности */
+@keyframes tileSlideUp {
+    0% {
+        transform: translateY(30px) scale(0.8);
+    }
+    60% {
+        transform: translateY(-5px) scale(1.02);
+    }
+    100% {
+        transform: translateY(0) scale(1);
+    }
+}
+
 /* Оптимизация производительности */
 .particle, .gradient-line {
+    will-change: transform;
+}
+
+.app-tile {
     will-change: transform;
 }
 

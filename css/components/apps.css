@@ -54,12 +54,15 @@
     justify-content: center;
     gap: 12px;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     text-decoration: none;
     color: var(--text-primary);
     backdrop-filter: blur(20px);
     position: relative;
     overflow: hidden;
+    /* Устанавливаем начальную прозрачность для анимации */
+    opacity: 1;
+    transform: translateY(0) scale(1);
 }
 
 .app-tile::before {
@@ -69,9 +72,9 @@
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 60%);
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 60%);
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     transform: rotate(45deg);
 }
 
@@ -80,10 +83,12 @@
 }
 
 .app-tile:hover {
-    transform: translateY(-5px) scale(1.02);
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.3);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    transform: translateY(-8px) scale(1.05);
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.3),
+        0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 /* Скрываем плитки после 12-й */
@@ -106,21 +111,26 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     color: rgba(255, 255, 255, 0.4);
     backdrop-filter: blur(20px);
 }
 
 .add-app-btn:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.3);
-    color: rgba(255, 255, 255, 0.7);
-    transform: scale(1.02);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.4);
+    color: rgba(255, 255, 255, 0.8);
+    transform: scale(1.05);
 }
 
 .add-app-btn svg {
     width: 32px;
     height: 32px;
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.add-app-btn:hover svg {
+    transform: scale(1.1);
 }
 
 /* Иконка приложения */
@@ -140,11 +150,12 @@
     height: 100%;
     object-fit: contain;
     filter: brightness(0.9);
-    transition: filter 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .app-tile:hover .app-icon img {
     filter: brightness(1.1);
+    transform: scale(1.05);
 }
 
 /* Название приложения */
@@ -152,7 +163,7 @@
     font-size: 0.9rem;
     font-weight: 500;
     color: var(--text-secondary);
-    transition: color 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     position: relative;
     z-index: 1;
     text-align: center;
@@ -164,4 +175,5 @@
 
 .app-tile:hover .app-name {
     color: var(--text-primary);
+    transform: translateY(-2px);
 }

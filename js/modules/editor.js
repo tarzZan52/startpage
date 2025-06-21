@@ -81,6 +81,14 @@ const Editor = {
         }
         
         this.modal.classList.add('active');
+        
+        // Устанавливаем фокус на поле названия после открытия модального окна
+        setTimeout(() => {
+            const nameField = document.getElementById('appName');
+            if (nameField) {
+                nameField.focus();
+            }
+        }, 100);
     },
     
     closeEditor() {
