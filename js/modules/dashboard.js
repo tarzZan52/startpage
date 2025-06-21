@@ -48,8 +48,6 @@ const Dashboard = {
         } else {
             this.showMain();
         }
-        
-        this.saveState();
     },
     
     showDashboard() {
@@ -141,18 +139,11 @@ const Dashboard = {
         }
     },
     
-    saveState() {
-        localStorage.setItem('dashboard_active', this.isActive.toString());
-    },
+
     
     loadState() {
-        const savedState = localStorage.getItem('dashboard_active');
-        if (savedState === 'true') {
-            this.showDashboard();
-        } else {
-            // Убеждаемся что мы в правильном состоянии
-            this.ensureMainState();
-        }
+        // Всегда начинаем с главной страницы при открытии новой вкладки
+        this.ensureMainState();
     },
     
     ensureMainState() {
