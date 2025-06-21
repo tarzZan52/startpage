@@ -119,9 +119,7 @@ const Dashboard = {
             CryptoModule.init();
         }
         
-        if (typeof CalendarModule !== 'undefined') {
-            CalendarModule.init();
-        }
+
         
         if (typeof TodoModule !== 'undefined') {
             TodoModule.init();
@@ -134,9 +132,7 @@ const Dashboard = {
             CryptoModule.refresh();
         }
         
-        if (typeof CalendarModule !== 'undefined' && this.isActive) {
-            CalendarModule.refresh();
-        }
+
     },
     
 
