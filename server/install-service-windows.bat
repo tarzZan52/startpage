@@ -79,111 +79,112 @@ echo.
 
 :: Создаем PowerShell скрипт для сервера
 echo 📝 Создание сервера...
-(
-echo # Dashboard Web Server
-echo $host.UI.RawUI.WindowTitle = "Dashboard Server"
-echo.
-echo # Получаем путь к корневой папке проекта
-echo $scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Path
-echo $projectPath = Split-Path -Parent $scriptPath
-echo Set-Location $projectPath
-echo.
-echo Write-Host "====================================" -ForegroundColor Cyan
-echo Write-Host "   DASHBOARD WEB SERVER" -ForegroundColor White
-echo Write-Host "====================================" -ForegroundColor Cyan
-echo Write-Host ""
-echo Write-Host "📁 Папка проекта: $projectPath" -ForegroundColor Yellow
-echo Write-Host "🚀 Запуск сервера..." -ForegroundColor Green
-echo Write-Host ""
-echo.
-echo # Проверяем наличие Python
-echo $pythonCmd = $null
-echo if ^(Get-Command python -ErrorAction SilentlyContinue^) {
-echo     $pythonCmd = "python"
-echo } elseif ^(Get-Command python3 -ErrorAction SilentlyContinue^) {
-echo     $pythonCmd = "python3"
-echo } elseif ^(Get-Command py -ErrorAction SilentlyContinue^) {
-echo     $pythonCmd = "py"
-echo }
-echo.
-echo if ^(-not $pythonCmd^) {
-echo     Write-Host "❌ Python не найден!" -ForegroundColor Red
-echo     Write-Host "Установите Python с https://www.python.org/downloads/" -ForegroundColor Yellow
-echo     exit
-echo }
-echo.
-echo Write-Host "✅ Python найден: $pythonCmd" -ForegroundColor Green
-echo Write-Host ""
-echo Write-Host "====================================" -ForegroundColor Cyan
-echo Write-Host "📍 Ваш Dashboard доступен по адресу:" -ForegroundColor White
-echo Write-Host "   http://localhost:8000/" -ForegroundColor Green
-echo Write-Host "====================================" -ForegroundColor Cyan
-echo Write-Host ""
-echo Write-Host "Для остановки нажмите Ctrl+C" -ForegroundColor Yellow
-echo Write-Host ""
-echo.
-echo # Устанавливаем обработчик Ctrl+C
-echo [Console]::TreatControlCAsInput = $false
-echo $Global:StopRequested = $false
-echo.
-echo # Обработчик прерывания
-echo $Handler = {
-echo     $Global:StopRequested = $true
-echo     Write-Host ""
-echo     Write-Host "🛑 Получен сигнал остановки..." -ForegroundColor Yellow
-echo }
-echo Register-EngineEvent -SourceIdentifier PowerShell.Exiting -Action $Handler
-echo.
-echo # Основной цикл с корректной обработкой исключений
-echo while ^(-not $Global:StopRequested^) {
-echo     try {
-echo         Write-Host "🌐 Запуск HTTP сервера на порту 8000..." -ForegroundColor Green
-echo         
-echo         # Запускаем Python сервер
-echo         $process = Start-Process -FilePath $pythonCmd -ArgumentList "-m", "http.server", "8000", "--bind", "0.0.0.0" -NoNewWindow -PassThru
-echo         
-echo         # Ожидаем завершения процесса или сигнала остановки
-echo         while ^(-not $process.HasExited -and -not $Global:StopRequested^) {
-echo             Start-Sleep -Milliseconds 500
-echo         }
-echo         
-echo         # Если процесс еще запущен, завершаем его
-echo         if ^(-not $process.HasExited^) {
-echo             $process.Kill^(^)
-echo             $process.WaitForExit^(5000^)
-echo         }
-echo         
-echo         if ^($Global:StopRequested^) {
-echo             Write-Host "✅ Сервер остановлен по запросу пользователя" -ForegroundColor Green
-echo             break
-echo         }
-echo         
-echo     } catch {
-echo         Write-Host ""
-echo         Write-Host "❌ Ошибка: $^($_.Exception.Message^)" -ForegroundColor Red
-echo         
-echo         if ^(-not $Global:StopRequested^) {
-echo             Write-Host "⚠️  Перезапуск через 5 секунд..." -ForegroundColor Yellow
-echo             Write-Host "   ^(Нажмите Ctrl+C для остановки^)" -ForegroundColor Gray
-echo             
-echo             # Ожидание с возможностью прерывания
-echo             for ^($i = 5; $i -gt 0 -and -not $Global:StopRequested; $i--^) {
-echo                 Start-Sleep -Seconds 1
-echo             }
-echo         }
-echo     }
-echo }
-echo.
-echo Write-Host ""
-echo Write-Host "🏁 Сервер завершен" -ForegroundColor Cyan
-) > "%SCRIPT_PATH%\start-dashboard.ps1"
+set "PS_SCRIPT=%SCRIPT_PATH%\start-dashboard.ps1"
+
+:: Создаем файл построчно, чтобы избежать проблем с экранированием
+echo # Dashboard Web Server > "%PS_SCRIPT%"
+echo $host.UI.RawUI.WindowTitle = "Dashboard Server" >> "%PS_SCRIPT%"
+echo. >> "%PS_SCRIPT%"
+echo # Получаем путь к корневой папке проекта >> "%PS_SCRIPT%"
+echo $scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Path >> "%PS_SCRIPT%"
+echo $projectPath = Split-Path -Parent $scriptPath >> "%PS_SCRIPT%"
+echo Set-Location $projectPath >> "%PS_SCRIPT%"
+echo. >> "%PS_SCRIPT%"
+echo Write-Host "====================================" -ForegroundColor Cyan >> "%PS_SCRIPT%"
+echo Write-Host "   DASHBOARD WEB SERVER" -ForegroundColor White >> "%PS_SCRIPT%"
+echo Write-Host "====================================" -ForegroundColor Cyan >> "%PS_SCRIPT%"
+echo Write-Host "" >> "%PS_SCRIPT%"
+echo Write-Host "📁 Папка проекта: $projectPath" -ForegroundColor Yellow >> "%PS_SCRIPT%"
+echo Write-Host "🚀 Запуск сервера..." -ForegroundColor Green >> "%PS_SCRIPT%"
+echo Write-Host "" >> "%PS_SCRIPT%"
+echo. >> "%PS_SCRIPT%"
+echo # Проверяем наличие Python >> "%PS_SCRIPT%"
+echo $pythonCmd = $null >> "%PS_SCRIPT%"
+echo if (Get-Command python -ErrorAction SilentlyContinue) { >> "%PS_SCRIPT%"
+echo     $pythonCmd = "python" >> "%PS_SCRIPT%"
+echo } elseif (Get-Command python3 -ErrorAction SilentlyContinue) { >> "%PS_SCRIPT%"
+echo     $pythonCmd = "python3" >> "%PS_SCRIPT%"
+echo } elseif (Get-Command py -ErrorAction SilentlyContinue) { >> "%PS_SCRIPT%"
+echo     $pythonCmd = "py" >> "%PS_SCRIPT%"
+echo } >> "%PS_SCRIPT%"
+echo. >> "%PS_SCRIPT%"
+echo if (-not $pythonCmd) { >> "%PS_SCRIPT%"
+echo     Write-Host "❌ Python не найден!" -ForegroundColor Red >> "%PS_SCRIPT%"
+echo     Write-Host "Установите Python с https://www.python.org/downloads/" -ForegroundColor Yellow >> "%PS_SCRIPT%"
+echo     exit >> "%PS_SCRIPT%"
+echo } >> "%PS_SCRIPT%"
+echo. >> "%PS_SCRIPT%"
+echo Write-Host "✅ Python найден: $pythonCmd" -ForegroundColor Green >> "%PS_SCRIPT%"
+echo Write-Host "" >> "%PS_SCRIPT%"
+echo Write-Host "====================================" -ForegroundColor Cyan >> "%PS_SCRIPT%"
+echo Write-Host "📍 Ваш Dashboard доступен по адресу:" -ForegroundColor White >> "%PS_SCRIPT%"
+echo Write-Host "   http://localhost:8000/" -ForegroundColor Green >> "%PS_SCRIPT%"
+echo Write-Host "====================================" -ForegroundColor Cyan >> "%PS_SCRIPT%"
+echo Write-Host "" >> "%PS_SCRIPT%"
+echo Write-Host "Для остановки нажмите Ctrl+C" -ForegroundColor Yellow >> "%PS_SCRIPT%"
+echo Write-Host "" >> "%PS_SCRIPT%"
+echo. >> "%PS_SCRIPT%"
+echo # Устанавливаем обработчик Ctrl+C >> "%PS_SCRIPT%"
+echo [Console]::TreatControlCAsInput = $false >> "%PS_SCRIPT%"
+echo $Global:StopRequested = $false >> "%PS_SCRIPT%"
+echo. >> "%PS_SCRIPT%"
+echo # Обработчик прерывания >> "%PS_SCRIPT%"
+echo $Handler = { >> "%PS_SCRIPT%"
+echo     $Global:StopRequested = $true >> "%PS_SCRIPT%"
+echo     Write-Host "" >> "%PS_SCRIPT%"
+echo     Write-Host "🛑 Получен сигнал остановки..." -ForegroundColor Yellow >> "%PS_SCRIPT%"
+echo } >> "%PS_SCRIPT%"
+echo Register-EngineEvent -SourceIdentifier PowerShell.Exiting -Action $Handler >> "%PS_SCRIPT%"
+echo. >> "%PS_SCRIPT%"
+echo # Основной цикл с корректной обработкой исключений >> "%PS_SCRIPT%"
+echo while (-not $Global:StopRequested) { >> "%PS_SCRIPT%"
+echo     try { >> "%PS_SCRIPT%"
+echo         Write-Host "🌐 Запуск HTTP сервера на порту 8000..." -ForegroundColor Green >> "%PS_SCRIPT%"
+echo. >> "%PS_SCRIPT%"        
+echo         # Запускаем Python сервер >> "%PS_SCRIPT%"
+echo         $process = Start-Process -FilePath $pythonCmd -ArgumentList "-m", "http.server", "8000", "--bind", "0.0.0.0" -NoNewWindow -PassThru >> "%PS_SCRIPT%"
+echo. >> "%PS_SCRIPT%"        
+echo         # Ожидаем завершения процесса или сигнала остановки >> "%PS_SCRIPT%"
+echo         while (-not $process.HasExited -and -not $Global:StopRequested) { >> "%PS_SCRIPT%"
+echo             Start-Sleep -Milliseconds 500 >> "%PS_SCRIPT%"
+echo         } >> "%PS_SCRIPT%"
+echo. >> "%PS_SCRIPT%"        
+echo         # Если процесс еще запущен, завершаем его >> "%PS_SCRIPT%"
+echo         if (-not $process.HasExited) { >> "%PS_SCRIPT%"
+echo             $process.Kill() >> "%PS_SCRIPT%"
+echo             $process.WaitForExit(5000) >> "%PS_SCRIPT%"
+echo         } >> "%PS_SCRIPT%"
+echo. >> "%PS_SCRIPT%"        
+echo         if ($Global:StopRequested) { >> "%PS_SCRIPT%"
+echo             Write-Host "✅ Сервер остановлен по запросу пользователя" -ForegroundColor Green >> "%PS_SCRIPT%"
+echo             break >> "%PS_SCRIPT%"
+echo         } >> "%PS_SCRIPT%"
+echo. >> "%PS_SCRIPT%"        
+echo     } catch { >> "%PS_SCRIPT%"
+echo         Write-Host "" >> "%PS_SCRIPT%"
+echo         Write-Host "❌ Ошибка: $($_.Exception.Message)" -ForegroundColor Red >> "%PS_SCRIPT%"
+echo. >> "%PS_SCRIPT%"        
+echo         if (-not $Global:StopRequested) { >> "%PS_SCRIPT%"
+echo             Write-Host "⚠️  Перезапуск через 5 секунд..." -ForegroundColor Yellow >> "%PS_SCRIPT%"
+echo             Write-Host "   (Нажмите Ctrl+C для остановки)" -ForegroundColor Gray >> "%PS_SCRIPT%"
+echo. >> "%PS_SCRIPT%"            
+echo             # Ожидание с возможностью прерывания >> "%PS_SCRIPT%"
+echo             for ($i = 5; $i -gt 0 -and -not $Global:StopRequested; $i--) { >> "%PS_SCRIPT%"
+echo                 Start-Sleep -Seconds 1 >> "%PS_SCRIPT%"
+echo             } >> "%PS_SCRIPT%"
+echo         } >> "%PS_SCRIPT%"
+echo     } >> "%PS_SCRIPT%"
+echo } >> "%PS_SCRIPT%"
+echo. >> "%PS_SCRIPT%"
+echo Write-Host "" >> "%PS_SCRIPT%"
+echo Write-Host "🏁 Сервер завершен" -ForegroundColor Cyan >> "%PS_SCRIPT%"
 
 :: Создаем VBS скрипт для скрытого запуска
 echo 📝 Создание автозапуска...
-(
-echo Set objShell = CreateObject^("WScript.Shell"^)
-echo objShell.Run "powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File """ ^& Chr^(34^) ^& "%SCRIPT_PATH%\start-dashboard.ps1" ^& Chr^(34^) ^& """", 0, False
-) > "%PROJECT_PATH%\dashboard-hidden.vbs"
+set "VBS_SCRIPT=%PROJECT_PATH%\dashboard-hidden.vbs"
+
+echo Set objShell = CreateObject("WScript.Shell") > "%VBS_SCRIPT%"
+echo objShell.Run "powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File ""%SCRIPT_PATH%\start-dashboard.ps1""", 0, False >> "%VBS_SCRIPT%"
 
 :: Удаляем старую задачу если есть
 schtasks /delete /tn "DashboardWebServer" /f >nul 2>&1
