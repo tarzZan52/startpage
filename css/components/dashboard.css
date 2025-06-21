@@ -1,0 +1,872 @@
+/* Тумблер переключения режимов */
+.mode-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.mode-toggle-btn {
+    width: 56px;
+    height: 56px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+}
+
+.mode-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.mode-toggle-btn svg {
+    width: 24px;
+    height: 24px;
+    color: var(--text-primary);
+    position: absolute;
+    transition: all 0.3s ease;
+}
+
+.mode-icon-dashboard {
+    opacity: 0;
+    transform: rotate(180deg);
+}
+
+.dashboard-mode .mode-icon-home {
+    opacity: 0;
+    transform: rotate(-180deg);
+}
+
+.dashboard-mode .mode-icon-dashboard {
+    opacity: 1;
+    transform: rotate(0deg);
+}
+
+/* Основной контент */
+.main-content {
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Предотвращаем конфликты стилей в режиме дашборда */
+.dashboard-mode .main-content {
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
+    transform: none !important;
+}
+
+/* Убираем все переходы в режиме дашборда для главного контента */
+.dashboard-mode .main-content * {
+    transition: none !important;
+}
+
+/* Дашборд контент */
+.dashboard-content {
+    padding: 60px 20px 20px;
+    min-height: 100vh;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    z-index: 10;
+}
+
+.dashboard-content.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.dashboard-content .site-title {
+    text-align: center;
+    margin-bottom: 40px;
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--text-primary), rgba(116, 188, 164, 0.8));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Сетка дашборда */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(3, 300px);
+    gap: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Размещение виджетов */
+.pomodoro-widget {
+    grid-column: 1 / 3;
+    grid-row: 1 / 3;
+}
+
+.crypto-widget {
+    grid-column: 3 / 5;
+    grid-row: 1 / 2;
+}
+
+.calendar-widget {
+    grid-column: 3 / 4;
+    grid-row: 2 / 4;
+}
+
+.todo-widget {
+    grid-column: 4 / 5;
+    grid-row: 2 / 4;
+}
+
+/* Базовые стили виджетов */
+.widget {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.widget:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.widget::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(116, 188, 164, 0.1) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.widget:hover::before {
+    opacity: 1;
+}
+
+/* Заголовки виджетов */
+.widget-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.widget-icon {
+    width: 24px;
+    height: 24px;
+    color: var(--dashboard-accent);
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.widget-header h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    flex: 1;
+}
+
+.widget-settings-btn,
+.crypto-refresh {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    margin-left: auto;
+}
+
+.widget-settings-btn:hover,
+.crypto-refresh:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.widget-settings-btn svg,
+.crypto-refresh svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Статистика помодоро */
+.pomodoro-stats {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-left: auto;
+}
+
+/* Инлайн настройки помодоро */
+.pomodoro-settings-inline {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 20px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.settings-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+}
+
+.settings-row label {
+    color: var(--text-secondary);
+    min-width: 45px;
+    font-size: 0.75rem;
+}
+
+.settings-row input[type="number"] {
+    width: 40px;
+    padding: 2px 4px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-size: 0.75rem;
+    text-align: center;
+}
+
+.settings-row input[type="number"]:focus {
+    outline: none;
+    border-color: var(--dashboard-accent);
+}
+
+.settings-row input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    accent-color: var(--dashboard-accent);
+}
+
+.settings-row span {
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+}
+
+/* Таймер Помодоро */
+.pomodoro-timer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    position: relative;
+    z-index: 1;
+}
+
+.timer-circle {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin-bottom: 30px;
+}
+
+.timer-progress {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.timer-display {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.timer-time {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    font-feature-settings: 'tnum';
+}
+
+.timer-label {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.timer-controls {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.timer-btn {
+    width: 48px;
+    height: 48px;
+    background: rgba(107, 114, 128, 0.2);
+    border: 1px solid rgba(107, 114, 128, 0.3);
+    border-radius: 50%;
+    color: var(--dashboard-accent);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.timer-btn:hover {
+    background: rgba(156, 163, 175, 0.3);
+    border-color: rgba(156, 163, 175, 0.5);
+    transform: scale(1.05);
+    color: var(--dashboard-accent-hover);
+}
+
+.timer-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Криптовалюты */
+.crypto-list {
+    flex: 1;
+    position: relative;
+    z-index: 1;
+}
+
+.crypto-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.crypto-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.2s ease;
+}
+
+.crypto-item:hover {
+    background: rgba(255, 255, 255, 0.02);
+    padding-left: 8px;
+    padding-right: 8px;
+    border-radius: 8px;
+}
+
+.crypto-item:last-child {
+    border-bottom: none;
+}
+
+.crypto-info {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.crypto-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.crypto-symbol {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    margin-left: 8px;
+}
+
+.crypto-price-section {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.crypto-price {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-feature-settings: 'tnum';
+}
+
+.crypto-change {
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    justify-content: flex-end;
+}
+
+.crypto-change.positive {
+    color: var(--dashboard-success);
+}
+
+.crypto-change.negative {
+    color: var(--dashboard-danger);
+}
+
+/* Календарь */
+.calendar-nav {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.calendar-prev,
+.calendar-next {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.calendar-prev:hover,
+.calendar-next:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.calendar-prev svg,
+.calendar-next svg {
+    width: 16px;
+    height: 16px;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    flex: 1;
+    position: relative;
+    z-index: 1;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.calendar-day.header {
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: default;
+    font-size: 0.7rem;
+}
+
+.calendar-day.other-month {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.calendar-day.today {
+    background: var(--dashboard-info);
+    color: white;
+    font-weight: 600;
+}
+
+.calendar-day:hover:not(.header):not(.today):not(.selected) {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.calendar-day.selected {
+    background: var(--dashboard-accent);
+    color: white;
+    font-weight: 600;
+}
+
+/* ToDo список */
+.todo-stats {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-left: auto;
+}
+
+.todo-input {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 1;
+}
+
+.todo-input-row {
+    flex: 1;
+    display: flex;
+    gap: 6px;
+}
+
+.todo-input input {
+    flex: 1;
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.todo-input input:focus {
+    outline: none;
+    border-color: var(--dashboard-accent);
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.todo-add-btn {
+    width: 44px;
+    height: 44px;
+    background: rgba(107, 114, 128, 0.2);
+    border: 1px solid rgba(107, 114, 128, 0.3);
+    border-radius: 12px;
+    color: var(--dashboard-accent);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.todo-add-btn:hover {
+    background: rgba(156, 163, 175, 0.3);
+    border-color: rgba(156, 163, 175, 0.5);
+    color: var(--dashboard-accent-hover);
+}
+
+.todo-add-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.todo-priority-select {
+    width: 50px;
+    padding: 8px 4px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 0.8rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.todo-priority-select:focus {
+    outline: none;
+    border-color: var(--dashboard-accent);
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.todo-priority-select option {
+    background: rgba(0, 0, 0, 0.9);
+    color: var(--text-primary);
+}
+
+.todo-filters {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 1;
+}
+
+.todo-filter {
+    flex: 1;
+    padding: 6px 8px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.todo-filter:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+.todo-filter.active {
+    background: var(--dashboard-accent);
+    border-color: var(--dashboard-accent);
+    color: white;
+}
+
+.todo-clear-completed {
+    padding: 6px 12px;
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 6px;
+    color: var(--dashboard-danger);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.todo-clear-completed:hover {
+    background: rgba(239, 68, 68, 0.3);
+    border-color: var(--dashboard-danger);
+}
+
+.todo-list {
+    flex: 1;
+    overflow-y: auto;
+    position: relative;
+    z-index: 1;
+}
+
+.todo-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.todo-item.priority-high {
+    border-left: 3px solid var(--dashboard-danger);
+    padding-left: 8px;
+}
+
+.todo-item.priority-medium {
+    border-left: 3px solid var(--dashboard-warning);
+    padding-left: 8px;
+}
+
+.todo-item.priority-low {
+    border-left: 3px solid var(--dashboard-info);
+    padding-left: 8px;
+}
+
+.todo-item:last-child {
+    border-bottom: none;
+}
+
+.todo-item.completed {
+    opacity: 0.6;
+}
+
+.todo-checkbox {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    margin-right: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.todo-checkbox.checked {
+    background: var(--dashboard-success);
+    border-color: var(--dashboard-success);
+}
+
+.todo-checkbox svg {
+    width: 12px;
+    height: 12px;
+    color: white;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.todo-checkbox.checked svg {
+    opacity: 1;
+}
+
+.todo-text {
+    flex: 1;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.todo-item.completed .todo-text {
+    text-decoration: line-through;
+    color: var(--text-secondary);
+}
+
+.todo-delete {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    opacity: 0;
+    transition: all 0.2s ease;
+    margin-left: 8px;
+}
+
+.todo-item:hover .todo-delete {
+    opacity: 1;
+}
+
+.todo-delete:hover {
+    background: rgba(248, 113, 113, 0.2);
+    color: #f87171;
+}
+
+.todo-delete svg {
+    width: 16px;
+    height: 16px;
+}
+
+.todo-edit-input {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid var(--dashboard-accent);
+    border-radius: 6px;
+    color: var(--text-primary);
+    padding: 4px 8px;
+    font-size: 0.9rem;
+    font-family: inherit;
+}
+
+.todo-edit-input:focus {
+    outline: none;
+    border-color: var(--dashboard-accent);
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.todo-priority {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    margin-left: 8px;
+    margin-right: 8px;
+    opacity: 0.6;
+}
+
+.todo-item.priority-high .todo-priority {
+    color: var(--dashboard-danger);
+    opacity: 0.8;
+}
+
+.todo-item.priority-medium .todo-priority {
+    color: var(--dashboard-warning);
+    opacity: 0.8;
+}
+
+.todo-item.priority-low .todo-priority {
+    color: var(--dashboard-info);
+    opacity: 0.8;
+}
+
+.todo-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-secondary);
+}
+
+.todo-empty-icon {
+    font-size: 2rem;
+    margin-bottom: 12px;
+    opacity: 0.6;
+}
+
+.todo-empty-text {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+
+
+/* Адаптивность */
+@media (max-width: 1200px) {
+    .dashboard-grid {
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(4, 280px);
+    }
+    
+    .pomodoro-widget {
+        grid-column: 1 / 4;
+        grid-row: 1 / 2;
+    }
+    
+    .crypto-widget {
+        grid-column: 1 / 2;
+        grid-row: 2 / 4;
+    }
+    
+    .calendar-widget {
+        grid-column: 2 / 3;
+        grid-row: 2 / 4;
+    }
+    
+    .todo-widget {
+        grid-column: 3 / 4;
+        grid-row: 2 / 4;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        gap: 16px;
+    }
+    
+    .widget {
+        grid-column: 1 / 2 !important;
+        grid-row: auto !important;
+        min-height: 300px;
+    }
+    
+    .mode-toggle {
+        top: 16px;
+        right: 16px;
+    }
+    
+    .mode-toggle-btn {
+        width: 48px;
+        height: 48px;
+    }
+    
+    .dashboard-content {
+        padding: 80px 16px 16px;
+    }
+} 

@@ -4,4 +4,17 @@
     --text-primary: #e0e0e0;
     --text-secondary: #888;
     --accent: #ffffff;
+    
+    /* Dashboard neutral colors */
+    --dashboard-accent: #6b7280;
+    --dashboard-accent-hover: #9ca3af;
+    --dashboard-success: #22c55e;
+    --dashboard-warning: #f59e0b;
+    --dashboard-danger: #ef4444;
+    --dashboard-info: #3b82f6;
+    
+    /* Transition timings */
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
 }

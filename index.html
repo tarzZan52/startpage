@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="css/components/search.css?v=3.0">
     <link rel="stylesheet" href="css/components/apps.css?v=3.0">
     <link rel="stylesheet" href="css/components/editor.css?v=3.0">
+    <link rel="stylesheet" href="css/components/dashboard.css?v=3.0">
     <link rel="stylesheet" href="css/responsive.css?v=3.0">
 </head>
 <body>
@@ -29,8 +30,24 @@
 
     <div class="particles" id="particles"></div>
 
-    <!-- Основной контент -->
-    <div class="main-content">
+    <!-- Тумблер переключения режимов -->
+    <div class="mode-toggle">
+        <button class="mode-toggle-btn" id="modeToggleBtn" title="Переключить режим">
+            <svg class="mode-icon-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9,22 9,12 15,12 15,22"></polyline>
+            </svg>
+            <svg class="mode-icon-dashboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Основной контент (стартовая страница) -->
+    <div class="main-content" id="mainContent">
         <h1 class="site-title">tarZan's start page</h1>
 
         <div class="datetime-container">
@@ -73,6 +90,178 @@
             </button>
         </div>
     </div>
+
+    <!-- Дашборд -->
+    <div class="dashboard-content" id="dashboardContent" style="display: none;">
+        <h1 class="site-title">Dashboard</h1>
+        
+        <div class="dashboard-grid">
+            <!-- Таймер Помодоро -->
+            <div class="widget pomodoro-widget">
+                <div class="widget-header">
+                    <svg class="widget-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12,6 12,12 16,14"></polyline>
+                    </svg>
+                    <h3>Помодоро</h3>
+                    <div class="pomodoro-stats">
+                        <span id="pomodoroSessions">0</span> сессий
+                    </div>
+                </div>
+                
+                <div class="pomodoro-settings-inline" id="pomodoroSettingsInline">
+                    <div class="settings-row">
+                        <label>Работа:</label>
+                        <input type="number" id="workTimeInline" min="1" max="60" value="25">
+                        <span>мин</span>
+                    </div>
+                    <div class="settings-row">
+                        <label>Перерыв:</label>
+                        <input type="number" id="shortBreakInline" min="1" max="30" value="5">
+                        <span>мин</span>
+                    </div>
+                    <div class="settings-row">
+                        <label>Длинный:</label>
+                        <input type="number" id="longBreakInline" min="1" max="60" value="15">
+                        <span>мин</span>
+                    </div>
+                    <div class="settings-row">
+                        <label>Звук:</label>
+                        <input type="checkbox" id="soundEnabledInline" checked>
+                    </div>
+                </div>
+                
+                <div class="pomodoro-timer">
+                    <div class="timer-circle">
+                        <svg class="timer-progress" viewBox="0 0 100 100">
+                            <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+                            <circle cx="50" cy="50" r="45" fill="none" stroke="var(--dashboard-accent)" stroke-width="2" 
+                                    stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="283" id="timerProgress"/>
+                        </svg>
+                        <div class="timer-display">
+                            <div class="timer-time" id="timerTime">25:00</div>
+                            <div class="timer-label" id="timerLabel">Фокус</div>
+                        </div>
+                    </div>
+                    <div class="timer-controls">
+                        <button class="timer-btn timer-start" id="timerStart" title="Пробел - старт/пауза">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="5,3 19,12 5,21"></polygon>
+                            </svg>
+                        </button>
+                        <button class="timer-btn timer-pause" id="timerPause" style="display: none;" title="Пробел - старт/пауза">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="6" y="4" width="4" height="16"></rect>
+                                <rect x="14" y="4" width="4" height="16"></rect>
+                            </svg>
+                        </button>
+                        <button class="timer-btn timer-reset" id="timerReset" title="R - сброс">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="23,4 23,10 17,10"></polyline>
+                                <path d="M20.49 15A9 9 0 1 1 5.64 5.64L23 10"></path>
+                            </svg>
+                        </button>
+                        <button class="timer-btn timer-skip" id="timerSkip" title="S - пропустить">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="5,4 15,12 5,20"></polygon>
+                                <line x1="19" y1="5" x2="19" y2="19"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Криптовалюты -->
+            <div class="widget crypto-widget">
+                <div class="widget-header">
+                    <svg class="widget-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                    <h3>Криптовалюты</h3>
+                    <div class="crypto-refresh" id="cryptoRefresh">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23,4 23,10 17,10"></polyline>
+                            <path d="M20.49 15A9 9 0 1 1 5.64 5.64L23 10"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="crypto-list" id="cryptoList">
+                    <div class="crypto-loading">Загрузка...</div>
+                </div>
+            </div>
+
+            <!-- Календарь -->
+            <div class="widget calendar-widget">
+                <div class="widget-header">
+                    <svg class="widget-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    <h3 id="calendarMonth">Декабрь 2024</h3>
+                    <div class="calendar-nav">
+                        <button class="calendar-prev" id="calendarPrev">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="15,18 9,12 15,6"></polyline>
+                            </svg>
+                        </button>
+                        <button class="calendar-next" id="calendarNext">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="9,18 15,12 9,6"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="calendar-grid" id="calendarGrid">
+                    <!-- Календарь будет сгенерирован JS -->
+                </div>
+            </div>
+
+            <!-- ToDo список -->
+            <div class="widget todo-widget">
+                <div class="widget-header">
+                    <svg class="widget-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 11l3 3L22 4"></path>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    </svg>
+                    <h3>Задачи</h3>
+                    <div class="todo-stats" id="todoStats">0/0</div>
+                </div>
+                
+                <div class="todo-input">
+                    <div class="todo-input-row">
+                        <input type="text" id="todoInput" placeholder="Добавить задачу..." maxlength="100">
+                        <select id="todoPriority" class="todo-priority-select" title="Приоритет">
+                            <option value="low">●</option>
+                            <option value="medium" selected>●●</option>
+                            <option value="high">●●●</option>
+                        </select>
+                    </div>
+                    <button class="todo-add-btn" id="todoAddBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="todo-filters">
+                    <button class="todo-filter active" data-filter="all">Все</button>
+                    <button class="todo-filter" data-filter="active">Активные</button>
+                    <button class="todo-filter" data-filter="completed">Готовые</button>
+                    <button class="todo-clear-completed" id="todoClearCompleted">Очистить</button>
+                </div>
+                
+                <div class="todo-list" id="todoList">
+                    <!-- Задачи будут сгенерированы JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 
     <!-- Модальное окно редактора -->
     <div class="modal-overlay" id="editorModal">
@@ -142,6 +331,11 @@
     <script src="js/modules/search.js?v=3.0"></script>
     <script src="js/modules/apps.js?v=3.0"></script>
     <script src="js/modules/editor.js?v=3.0"></script>
+    <script src="js/modules/dashboard.js?v=3.0"></script>
+    <script src="js/modules/pomodoro.js?v=3.0"></script>
+    <script src="js/modules/crypto.js?v=3.0"></script>
+    <script src="js/modules/calendar.js?v=3.0"></script>
+    <script src="js/modules/todo.js?v=3.0"></script>
     <script src="js/main.js?v=3.0"></script>
 </body>
 </html>

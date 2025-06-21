@@ -24,7 +24,6 @@
     gap: 10px;
     font-size: 0.95rem;
     font-weight: 500;
-    backdrop-filter: blur(20px);
     position: relative;
     overflow: hidden;
 }
@@ -84,7 +83,6 @@
     border-radius: 16px;
     color: #fff;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    backdrop-filter: blur(20px);
     /* Принудительный автофокус */
     caret-color: #fff;
     user-select: text;

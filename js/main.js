@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
         Search.init();
         Apps.init();
         Editor.init();
+        Dashboard.init();
         
         console.log('Dashboard initialized successfully');
         
