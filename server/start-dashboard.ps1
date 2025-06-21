@@ -99,8 +99,8 @@ while (-not $Global:StopRequested) {
             # Ожидание с возможностью прерывания
             for ($i = 5; $i -gt 0 -and -not $Global:StopRequested; $i--) {
                 Start-Sleep -Seconds 1
-    }
-}
+            }
+        }
     }
 }
 

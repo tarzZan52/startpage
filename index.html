@@ -3,7 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="format-detection" content="telephone=no">
     <title>Домашняя страница</title>
+    
+    <!-- Inline script for immediate focus -->
+    <script>
+        // Агрессивная стратегия для новых вкладок
+        let focusAttempts = 0;
+        const maxFocusAttempts = 50;
+        
+        const focusSearchBox = () => {
+            const searchBox = document.getElementById('searchBox');
+            if (searchBox && focusAttempts < maxFocusAttempts) {
+                focusAttempts++;
+                try {
+                    // Принудительно убираем фокус с адресной строки
+                    if (document.activeElement && document.activeElement.tagName === 'BODY') {
+                        document.activeElement.blur();
+                    }
+                    
+                    searchBox.focus();
+                    searchBox.select();
+                    searchBox.click();
+                    
+                    // Проверяем, установился ли фокус
+                    if (document.activeElement === searchBox) {
+                        console.log('Focus successfully set to search box on attempt:', focusAttempts);
+                        return true;
+                    }
+                } catch (e) {
+                    console.log('Focus failed on attempt', focusAttempts, ':', e);
+                }
+            }
+            return false;
+        };
+        
+        // Немедленная попытка как можно раньше
+        const immediatelyTryFocus = () => {
+            if (focusSearchBox()) return;
+            
+            // Если не получилось, продолжаем попытки
+            const tryAgain = () => {
+                if (!focusSearchBox() && focusAttempts < maxFocusAttempts) {
+                    requestAnimationFrame(tryAgain);
+                }
+            };
+            requestAnimationFrame(tryAgain);
+        };
+        
+        // Запускаем сразу
+        immediatelyTryFocus();
+        
+        // При загрузке DOM
+        document.addEventListener('DOMContentLoaded', function() {
+            immediatelyTryFocus();
+            
+            // Дополнительные попытки через интервалы
+            const intervals = [0, 1, 5, 10, 25, 50, 100, 200, 500, 1000];
+            intervals.forEach(delay => {
+                setTimeout(immediatelyTryFocus, delay);
+            });
+            
+            // Постоянный мониторинг для новых вкладок
+            const monitorFocus = () => {
+                const searchBox = document.getElementById('searchBox');
+                if (searchBox && document.activeElement !== searchBox && 
+                    !document.querySelector('.modal-overlay[style*="flex"]')) {
+                    focusSearchBox();
+                }
+            };
+            
+            setInterval(monitorFocus, 100); // Более частая проверка
+        });
+        
+        // При полной загрузке страницы
+        window.addEventListener('load', function() {
+            immediatelyTryFocus();
+            
+            // Дополнительные попытки после загрузки
+            setTimeout(immediatelyTryFocus, 100);
+            setTimeout(immediatelyTryFocus, 300);
+            setTimeout(immediatelyTryFocus, 500);
+        });
+        
+        // При получении фокуса окном (важно для новых вкладок)
+        window.addEventListener('focus', immediatelyTryFocus);
+        
+        // При показе страницы (включая новые вкладки)
+        window.addEventListener('pageshow', immediatelyTryFocus);
+        
+        // Перехватываем события клавиатуры для немедленного фокуса
+        document.addEventListener('keydown', function(e) {
+            if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+                const searchBox = document.getElementById('searchBox');
+                if (searchBox && document.activeElement !== searchBox) {
+                    searchBox.focus();
+                    // Не блокируем событие, чтобы символ был введен
+                }
+            }
+        });
+    </script>
     
     <!-- CSS -->
     <link rel="stylesheet" href="css/variables.css?v=3.0">
@@ -50,7 +149,7 @@
                 </button>
             </div>
             <form class="search-container" id="searchForm">
-                <input type="text" class="search-box" id="searchBox" placeholder="Поиск в DuckDuckGo..." autofocus>
+                <input type="text" class="search-box" id="searchBox" placeholder="Поиск в DuckDuckGo..." autofocus tabindex="1" autocomplete="off" spellcheck="false">
                 <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="11" cy="11" r="8"></circle>
                     <path d="m21 21-4.35-4.35"></path>

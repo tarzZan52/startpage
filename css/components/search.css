@@ -85,6 +85,16 @@
     color: #fff;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     backdrop-filter: blur(20px);
+    /* Принудительный автофокус */
+    caret-color: #fff;
+    user-select: text;
+    /* Принудительная активация */
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    outline: none !important;
+    -webkit-appearance: none;
+    -moz-appearance: textfield;
 }
 
 .search-box:focus {
