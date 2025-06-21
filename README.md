@@ -23,7 +23,7 @@
 <br>
 
 <p align="center">
-  <img src="src/image-v2.png" alt="Основной вид страницы" width="90%">
+  <img src="src/image-v3.png" alt="Основной вид страницы" width="90%">
 </p>
 
 ---
