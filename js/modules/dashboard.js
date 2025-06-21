@@ -82,6 +82,11 @@ const Dashboard = {
     showMain() {
         this.isActive = false;
         
+        // Автосохранение заметок при выходе из дашборда
+        if (typeof NotesModule !== 'undefined' && NotesModule.cleanup) {
+            NotesModule.cleanup();
+        }
+        
         // Сначала скрываем дашборд с анимацией
         this.dashboardContent.classList.remove('active');
         
@@ -115,8 +120,8 @@ const Dashboard = {
             PomodoroModule.init();
         }
         
-        if (typeof CryptoModule !== 'undefined') {
-            CryptoModule.init();
+        if (typeof NotesModule !== 'undefined') {
+            NotesModule.init();
         }
         
 
@@ -128,8 +133,8 @@ const Dashboard = {
     
     refreshWidgets() {
         // Обновляем данные виджетов
-        if (typeof CryptoModule !== 'undefined' && this.isActive) {
-            CryptoModule.refresh();
+        if (typeof NotesModule !== 'undefined' && this.isActive) {
+            // Заметки не нуждаются в refresh'е, они обновляются автоматически
         }
         
 

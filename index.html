@@ -171,23 +171,39 @@
                 </div>
             </div>
 
-            <!-- Криптовалюты -->
-            <div class="widget crypto-widget">
+            <!-- Заметки -->
+            <div class="widget notes-widget">
                 <div class="widget-header">
                     <svg class="widget-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="12" y1="1" x2="12" y2="23"></line>
-                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14,2 14,8 20,8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10,9 9,9 8,9"></polyline>
                     </svg>
-                    <h3>Криптовалюты</h3>
-                    <div class="crypto-refresh" id="cryptoRefresh">
+                    <h3>Заметки</h3>
+                    <button class="notes-add-btn" id="addNoteBtn" title="Ctrl+N - новая заметка">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="23,4 23,10 17,10"></polyline>
-                            <path d="M20.49 15A9 9 0 1 1 5.64 5.64L23 10"></path>
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
                         </svg>
-                    </div>
+                    </button>
                 </div>
-                <div class="crypto-list" id="cryptoList">
-                    <div class="crypto-loading">Загрузка...</div>
+                
+                <div class="notes-content">
+                    <div class="notes-sidebar">
+                        <div class="notes-list" id="notesList">
+                            <!-- Список заметок будет сгенерирован JS -->
+                        </div>
+                    </div>
+                    
+                    <div class="notes-editor">
+                        <textarea id="noteTextarea" placeholder="Начните писать заметку..."></textarea>
+                        <div class="notes-actions">
+                            <button class="notes-btn" id="saveNoteBtn" title="Ctrl+S - сохранить">Сохранить</button>
+                            <button class="notes-btn notes-btn-danger" id="deleteNoteBtn" title="Удалить заметку">Удалить</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -307,7 +323,7 @@
     <script src="js/modules/editor.js?v=3.0"></script>
     <script src="js/modules/dashboard.js?v=3.0"></script>
     <script src="js/modules/pomodoro.js?v=3.0"></script>
-        <script src="js/modules/crypto.js?v=3.0"></script>
+        <script src="js/modules/notes.js?v=3.0"></script>
     <script src="js/modules/todo.js?v=3.0"></script>
     <script src="js/main.js?v=3.0"></script>
 </body>
