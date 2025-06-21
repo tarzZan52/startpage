@@ -169,17 +169,17 @@ echo -e "${CYAN}🌐 Откройте браузер и перейдите на:
 echo -e "   ${YELLOW}http://localhost:8000/${NC}"
 echo ""
 echo -e "${GREEN}════════════════════════════════════════════${NC}"
-echo ""
+    echo ""
 
 # Предлагаем открыть в браузере
 read -p "Открыть Dashboard в браузере сейчас? (y/n): " -n 1 -r
-echo ""
+    echo ""
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     if command -v xdg-open &> /dev/null; then
         xdg-open http://localhost:8000/
     elif command -v open &> /dev/null; then
         open http://localhost:8000/
-    else
+else
         echo -e "${YELLOW}Автоматическое открытие браузера недоступно.${NC}"
         echo -e "Откройте вручную: ${YELLOW}http://localhost:8000/${NC}"
     fi
