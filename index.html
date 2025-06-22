@@ -93,8 +93,6 @@
 
     <!-- Дашборд -->
     <div class="dashboard-content" id="dashboardContent" style="display: none;">
-        <h1 class="site-title">Dashboard</h1>
-        
         <div class="dashboard-grid">
             <!-- Таймер Помодоро -->
             <div class="widget pomodoro-widget">
@@ -169,6 +167,18 @@
                         </button>
                     </div>
                 </div>
+                
+                <!-- Статистика продуктивности -->
+                <div class="pomodoro-productivity">
+                    <div class="productivity-item">
+                        <span class="productivity-label">Сегодня:</span>
+                        <span class="productivity-value" id="todayMinutes">0 мин</span>
+                    </div>
+                    <div class="productivity-item">
+                        <span class="productivity-label">Эта неделя:</span>
+                        <span class="productivity-value" id="weekMinutes">0 мин</span>
+                    </div>
+                </div>
             </div>
 
             <!-- Заметки -->
@@ -192,12 +202,18 @@
                 
                 <div class="notes-content">
                     <div class="notes-sidebar">
+                        <div class="notes-search">
+                            <input type="text" id="notesSearchInput" placeholder="Поиск заметок...">
+                        </div>
                         <div class="notes-list" id="notesList">
                             <!-- Список заметок будет сгенерирован JS -->
                         </div>
                     </div>
                     
                     <div class="notes-editor">
+                        <div class="notes-tags" id="notesTags">
+                            <!-- Теги будут добавлены через JS -->
+                        </div>
                         <textarea id="noteTextarea" placeholder="Начните писать заметку..."></textarea>
                         <div class="notes-actions">
                             <button class="notes-btn" id="saveNoteBtn" title="Ctrl+S - сохранить">Сохранить</button>
@@ -206,8 +222,6 @@
                     </div>
                 </div>
             </div>
-
-
 
             <!-- ToDo список -->
             <div class="widget todo-widget">
@@ -223,6 +237,7 @@
                 <div class="todo-input">
                     <div class="todo-input-row">
                         <input type="text" id="todoInput" placeholder="Добавить задачу..." maxlength="100">
+                        <input type="date" id="todoDeadline" class="todo-deadline-input" title="Дедлайн">
                         <select id="todoPriority" class="todo-priority-select" title="Приоритет">
                             <option value="low">●</option>
                             <option value="medium" selected>●●</option>
@@ -248,10 +263,122 @@
                     <!-- Задачи будут сгенерированы JS -->
                 </div>
             </div>
+
+            <!-- Трекер привычек -->
+            <div class="widget habits-widget">
+                <div class="widget-header">
+                    <svg class="widget-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9,11 12,14 22,4"></polyline>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    </svg>
+                    <h3>Привычки</h3>
+                    <button class="habits-add-btn" id="addHabitBtn" title="Добавить привычку">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="habits-content">
+                    <div class="habits-list" id="habitsList">
+                        <!-- Привычки будут сгенерированы JS -->
+                    </div>
+                    <div class="habits-streak">
+                        <div class="streak-item">
+                            <span class="streak-number" id="currentStreak">0</span>
+                            <span class="streak-label">Текущая серия</span>
+                        </div>
+                        <div class="streak-item">
+                            <span class="streak-number" id="bestStreak">0</span>
+                            <span class="streak-label">Лучшая серия</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Календарь -->
+            <div class="widget calendar-widget">
+                <div class="widget-header">
+                    <svg class="widget-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    <h3>Календарь</h3>
+                    <div class="calendar-nav">
+                        <button class="calendar-nav-btn" id="calPrevMonth">‹</button>
+                        <span class="calendar-month" id="calCurrentMonth">Январь 2024</span>
+                        <button class="calendar-nav-btn" id="calNextMonth">›</button>
+                    </div>
+                </div>
+                
+                <div class="calendar-content">
+                    <div class="calendar-weekdays">
+                        <span>Пн</span>
+                        <span>Вт</span>
+                        <span>Ср</span>
+                        <span>Чт</span>
+                        <span>Пт</span>
+                        <span>Сб</span>
+                        <span>Вс</span>
+                    </div>
+                    <div class="calendar-days" id="calendarDays">
+                        <!-- Дни будут сгенерированы JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Быстрые ссылки -->
+            <div class="widget quicklinks-widget">
+                <div class="widget-header">
+                    <svg class="widget-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                    </svg>
+                    <h3>Быстрые ссылки</h3>
+                    <button class="quicklinks-add-btn" id="addQuickLinkBtn" title="Добавить ссылку">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="quicklinks-content">
+                    <div class="quicklinks-grid" id="quickLinksGrid">
+                        <!-- Ссылки будут сгенерированы JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Цитата дня -->
+            <div class="widget quote-widget">
+                <div class="widget-header">
+                    <svg class="widget-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"></path>
+                        <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"></path>
+                    </svg>
+                    <h3>Цитата дня</h3>
+                    <button class="quote-refresh-btn" id="refreshQuoteBtn" title="Обновить цитату">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23,4 23,10 17,10"></polyline>
+                            <polyline points="1,20 1,14 7,14"></polyline>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="quote-content">
+                    <blockquote class="quote-text" id="quoteText">
+                        Загружаем вдохновляющую цитату...
+                    </blockquote>
+                    <cite class="quote-author" id="quoteAuthor"></cite>
+                </div>
+            </div>
         </div>
     </div>
-
-
 
     <!-- Модальное окно редактора -->
     <div class="modal-overlay" id="editorModal">
@@ -289,6 +416,9 @@
                         </div>
                         <div class="icon-upload-controls">
                             <input type="file" id="iconFile" accept="image/*" hidden>
+                            <button type="button" class="btn-secondary" id="autoFaviconBtn">
+                                Получить автоматически
+                            </button>
                             <button type="button" class="btn-secondary" id="uploadIconBtn">
                                 Выбрать файл
                             </button>
@@ -323,8 +453,12 @@
     <script src="js/modules/editor.js?v=3.0"></script>
     <script src="js/modules/dashboard.js?v=3.0"></script>
     <script src="js/modules/pomodoro.js?v=3.0"></script>
-        <script src="js/modules/notes.js?v=3.0"></script>
+    <script src="js/modules/notes.js?v=3.0"></script>
     <script src="js/modules/todo.js?v=3.0"></script>
+    <script src="js/modules/habits.js?v=3.0"></script>
+    <script src="js/modules/calendar.js?v=3.0"></script>
+    <script src="js/modules/quicklinks.js?v=3.0"></script>
+    <script src="js/modules/quote.js?v=3.0"></script>
     <script src="js/main.js?v=3.0"></script>
 </body>
 </html>

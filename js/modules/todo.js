@@ -11,7 +11,8 @@ const TodoModule = {
         stats: null,
         prioritySelect: null,
         filters: null,
-        clearCompleted: null
+        clearCompleted: null,
+        deadlineInput: null
     },
     
     // Инициализация модуля
@@ -31,6 +32,7 @@ const TodoModule = {
         this.elements.prioritySelect = document.getElementById('todoPriority');
         this.elements.filters = document.querySelectorAll('.todo-filter');
         this.elements.clearCompleted = document.getElementById('todoClearCompleted');
+        this.elements.deadlineInput = document.getElementById('todoDeadline');
     },
     
     // Настройка обработчиков событий
@@ -80,6 +82,7 @@ const TodoModule = {
             text: text,
             completed: false,
             priority: this.elements.prioritySelect.value,
+            deadline: this.elements.deadlineInput.value || null,
             createdAt: new Date().toISOString(),
             completedAt: null
         };
@@ -91,6 +94,7 @@ const TodoModule = {
         // Очистка формы
         this.elements.input.value = '';
         this.elements.prioritySelect.value = 'medium';
+        this.elements.deadlineInput.value = '';
         
         // Анимация добавления
         this.animateTaskAdd();
@@ -171,10 +175,19 @@ const TodoModule = {
                 break;
         }
         
-        // Сортировка: сначала по выполнению, потом по приоритету, потом по дате
+        // Сортировка: сначала по выполнению, потом по дедлайну, потом по приоритету, потом по дате
         return filtered.sort((a, b) => {
             if (a.completed !== b.completed) {
                 return a.completed ? 1 : -1;
+            }
+            
+            // Сортировка по дедлайну (ближайшие первые)
+            if (!a.completed && a.deadline && b.deadline) {
+                return new Date(a.deadline) - new Date(b.deadline);
+            } else if (!a.completed && a.deadline && !b.deadline) {
+                return -1;
+            } else if (!a.completed && !a.deadline && b.deadline) {
+                return 1;
             }
             
             const priorityOrder = { high: 0, medium: 1, low: 2 };
@@ -200,6 +213,37 @@ const TodoModule = {
             high: '●●●'
         };
         
+        // Определяем статус дедлайна
+        let deadlineHtml = '';
+        if (task.deadline && !task.completed) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const deadline = new Date(task.deadline);
+            deadline.setHours(0, 0, 0, 0);
+            const daysLeft = Math.ceil((deadline - today) / (1000 * 60 * 60 * 24));
+            
+            let deadlineClass = 'todo-deadline';
+            let deadlineText = '';
+            
+            if (daysLeft < 0) {
+                deadlineClass += ' overdue';
+                deadlineText = `Просрочено на ${Math.abs(daysLeft)} дн.`;
+            } else if (daysLeft === 0) {
+                deadlineClass += ' soon';
+                deadlineText = 'Сегодня';
+            } else if (daysLeft === 1) {
+                deadlineClass += ' soon';
+                deadlineText = 'Завтра';
+            } else if (daysLeft <= 3) {
+                deadlineClass += ' soon';
+                deadlineText = `Через ${daysLeft} дн.`;
+            } else {
+                deadlineText = deadline.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+            }
+            
+            deadlineHtml = `<span class="${deadlineClass}">📅 ${deadlineText}</span>`;
+        }
+        
         item.innerHTML = `
             <div class="todo-checkbox ${task.completed ? 'checked' : ''}" data-id="${task.id}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -207,6 +251,7 @@ const TodoModule = {
                 </svg>
             </div>
             <div class="todo-text" data-id="${task.id}">${this.escapeHtml(task.text)}</div>
+            ${deadlineHtml}
             <div class="todo-priority" title="Приоритет: ${task.priority}">${priorityDots[task.priority]}</div>
             <button class="todo-delete" data-id="${task.id}" title="Удалить задачу">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

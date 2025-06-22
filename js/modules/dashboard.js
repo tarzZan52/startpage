@@ -124,10 +124,24 @@ const Dashboard = {
             NotesModule.init();
         }
         
-
-        
         if (typeof TodoModule !== 'undefined') {
             TodoModule.init();
+        }
+        
+        if (typeof HabitsModule !== 'undefined') {
+            HabitsModule.init();
+        }
+        
+        if (typeof CalendarModule !== 'undefined') {
+            CalendarModule.init();
+        }
+        
+        if (typeof QuickLinksModule !== 'undefined') {
+            QuickLinksModule.init();
+        }
+        
+        if (typeof QuoteModule !== 'undefined') {
+            QuoteModule.init();
         }
     },
     

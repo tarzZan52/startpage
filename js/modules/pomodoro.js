@@ -1,5 +1,5 @@
 // Модуль таймера Помодоро
-const Pomodoro = {
+const PomodoroModule = {
     // Настройки по умолчанию
     settings: {
         workTime: 25,
@@ -18,6 +18,13 @@ const Pomodoro = {
         totalTime: 0
     },
     
+    // Статистика продуктивности
+    stats: {
+        today: 0,
+        week: 0,
+        history: {}
+    },
+    
     // DOM элементы
     elements: {
         timerTime: null,
@@ -31,7 +38,9 @@ const Pomodoro = {
         workTimeInline: null,
         shortBreakInline: null,
         longBreakInline: null,
-        soundEnabledInline: null
+        soundEnabledInline: null,
+        todayMinutes: null,
+        weekMinutes: null
     },
     
     timer: null,
@@ -39,8 +48,10 @@ const Pomodoro = {
     init() {
         this.loadElements();
         this.loadSettings();
+        this.loadStats();
         this.setupEventListeners();
         this.updateDisplay();
+        this.updateProductivityStats();
         this.createNotificationSound();
     },
     
@@ -57,6 +68,8 @@ const Pomodoro = {
         this.elements.shortBreakInline = document.getElementById('shortBreakInline');
         this.elements.longBreakInline = document.getElementById('longBreakInline');
         this.elements.soundEnabledInline = document.getElementById('soundEnabledInline');
+        this.elements.todayMinutes = document.getElementById('todayMinutes');
+        this.elements.weekMinutes = document.getElementById('weekMinutes');
     },
     
     setupEventListeners() {
@@ -153,6 +166,11 @@ const Pomodoro = {
     
     completeSession() {
         this.pause();
+        
+        // Обновляем статистику если завершена рабочая сессия
+        if (this.state.currentSession === 'work') {
+            this.updateStats(this.settings.workTime);
+        }
         
         if (this.settings.soundEnabled) {
             this.playNotificationSound();
@@ -310,5 +328,87 @@ const Pomodoro = {
         if (savedSettings) {
             this.settings = { ...this.settings, ...JSON.parse(savedSettings) };
         }
+    },
+    
+    loadStats() {
+        const savedStats = localStorage.getItem('pomodoro_stats');
+        if (savedStats) {
+            this.stats = { ...this.stats, ...JSON.parse(savedStats) };
+        }
+        this.cleanOldStats();
+        this.calculateWeekStats();
+    },
+    
+    saveStats() {
+        localStorage.setItem('pomodoro_stats', JSON.stringify(this.stats));
+    },
+    
+    updateStats(minutes) {
+        const today = new Date().toISOString().split('T')[0];
+        
+        if (!this.stats.history[today]) {
+            this.stats.history[today] = 0;
+        }
+        
+        this.stats.history[today] += minutes;
+        this.stats.today = this.stats.history[today];
+        
+        this.calculateWeekStats();
+        this.saveStats();
+        this.updateProductivityStats();
+    },
+    
+    calculateWeekStats() {
+        const today = new Date();
+        const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+        
+        this.stats.week = 0;
+        
+        Object.entries(this.stats.history).forEach(([date, minutes]) => {
+            const dateObj = new Date(date);
+            if (dateObj >= weekAgo && dateObj <= today) {
+                this.stats.week += minutes;
+            }
+        });
+        
+        // Обновляем сегодняшнюю статистику
+        const todayKey = today.toISOString().split('T')[0];
+        this.stats.today = this.stats.history[todayKey] || 0;
+    },
+    
+    cleanOldStats() {
+        const monthAgo = new Date();
+        monthAgo.setMonth(monthAgo.getMonth() - 1);
+        
+        Object.keys(this.stats.history).forEach(date => {
+            if (new Date(date) < monthAgo) {
+                delete this.stats.history[date];
+            }
+        });
+    },
+    
+    updateProductivityStats() {
+        if (this.elements.todayMinutes) {
+            const hours = Math.floor(this.stats.today / 60);
+            const minutes = this.stats.today % 60;
+            if (hours > 0) {
+                this.elements.todayMinutes.textContent = `${hours}ч ${minutes}м`;
+            } else {
+                this.elements.todayMinutes.textContent = `${minutes} мин`;
+            }
+        }
+        
+        if (this.elements.weekMinutes) {
+            const hours = Math.floor(this.stats.week / 60);
+            const minutes = this.stats.week % 60;
+            if (hours > 0) {
+                this.elements.weekMinutes.textContent = `${hours}ч ${minutes}м`;
+            } else {
+                this.elements.weekMinutes.textContent = `${minutes} мин`;
+            }
+        }
     }
 }; 
+
+// Экспорт модуля
+window.PomodoroModule = PomodoroModule; 

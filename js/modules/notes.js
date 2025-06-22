@@ -2,13 +2,18 @@
 const NotesModule = {
     notes: [],
     currentNoteId: null,
+    searchQuery: '',
+    activeTags: new Set(),
+    allTags: new Set(),
     
     elements: {
         notesList: null,
         textarea: null,
         saveBtn: null,
         deleteBtn: null,
-        addBtn: null
+        addBtn: null,
+        searchInput: null,
+        tagsContainer: null
     },
     
     init() {
@@ -24,6 +29,8 @@ const NotesModule = {
         this.elements.saveBtn = document.getElementById('saveNoteBtn');
         this.elements.deleteBtn = document.getElementById('deleteNoteBtn');
         this.elements.addBtn = document.getElementById('addNoteBtn');
+        this.elements.searchInput = document.getElementById('notesSearchInput');
+        this.elements.tagsContainer = document.getElementById('notesTags');
     },
     
     setupEventListeners() {
@@ -45,6 +52,14 @@ const NotesModule = {
         if (this.elements.addBtn) {
             this.elements.addBtn.addEventListener('click', () => {
                 this.createNewNote();
+            });
+        }
+        
+        // Поиск заметок
+        if (this.elements.searchInput) {
+            this.elements.searchInput.addEventListener('input', (e) => {
+                this.searchQuery = e.target.value.toLowerCase();
+                this.render();
             });
         }
         
@@ -84,18 +99,21 @@ const NotesModule = {
             const saved = localStorage.getItem('notes_data');
             if (saved) {
                 this.notes = JSON.parse(saved);
+                this.extractAllTags();
             } else {
                 // Создаем дефолтные заметки
                 this.notes = [
                     {
                         id: Date.now(),
                         title: 'Добро пожаловать!',
-                        content: 'Это ваш личный блокнот.\n\nВы можете:\n• Создавать новые заметки\n• Редактировать существующие\n• Удалять ненужные\n\nВсе заметки автоматически сохраняются.',
+                        content: 'Это ваш личный блокнот.\n\nВы можете:\n• Создавать новые заметки\n• Редактировать существующие\n• Удалять ненужные\n• Использовать #теги для организации\n• Искать заметки по содержимому\n\nВсе заметки автоматически сохраняются.',
                         createdAt: new Date().toISOString(),
-                        updatedAt: new Date().toISOString()
+                        updatedAt: new Date().toISOString(),
+                        tags: ['помощь']
                     }
                 ];
                 this.saveNotes();
+                this.extractAllTags();
             }
         } catch (error) {
             console.error('Error loading notes:', error);
@@ -114,10 +132,11 @@ const NotesModule = {
     
     render() {
         this.renderNotesList();
+        this.renderTags();
         
         // Если нет выбранной заметки, выбираем первую
-        if (!this.currentNoteId && this.notes.length > 0) {
-            this.selectNote(this.notes[0].id);
+        if (!this.currentNoteId && this.getFilteredNotes().length > 0) {
+            this.selectNote(this.getFilteredNotes()[0].id);
         } else if (this.currentNoteId) {
             // Обновляем отображение текущей заметки
             const currentNote = this.notes.find(n => n.id === this.currentNoteId);
@@ -127,17 +146,48 @@ const NotesModule = {
         }
     },
     
+    getFilteredNotes() {
+        let filtered = [...this.notes];
+        
+        // Фильтр по поиску
+        if (this.searchQuery) {
+            filtered = filtered.filter(note => 
+                note.title.toLowerCase().includes(this.searchQuery) ||
+                note.content.toLowerCase().includes(this.searchQuery) ||
+                (note.tags && note.tags.some(tag => tag.toLowerCase().includes(this.searchQuery)))
+            );
+        }
+        
+        // Фильтр по тегам
+        if (this.activeTags.size > 0) {
+            filtered = filtered.filter(note =>
+                note.tags && note.tags.some(tag => this.activeTags.has(tag))
+            );
+        }
+        
+        // Сортируем по дате обновления
+        return filtered.sort((a, b) => 
+            new Date(b.updatedAt) - new Date(a.updatedAt)
+        );
+    },
+    
     renderNotesList() {
         if (!this.elements.notesList) return;
         
         this.elements.notesList.innerHTML = '';
         
-        // Сортируем заметки по дате обновления (новые первые)
-        const sortedNotes = [...this.notes].sort((a, b) => 
-            new Date(b.updatedAt) - new Date(a.updatedAt)
-        );
+        const filteredNotes = this.getFilteredNotes();
         
-        sortedNotes.forEach(note => {
+        if (filteredNotes.length === 0) {
+            this.elements.notesList.innerHTML = `
+                <div class="notes-empty">
+                    <p>${this.searchQuery || this.activeTags.size > 0 ? 'Ничего не найдено' : 'Нет заметок. Добавьте первую!'}</p>
+                </div>
+            `;
+            return;
+        }
+        
+        filteredNotes.forEach(note => {
             const noteItem = document.createElement('div');
             noteItem.className = 'note-item';
             if (note.id === this.currentNoteId) {
@@ -150,12 +200,17 @@ const NotesModule = {
                 month: 'short'
             });
             
+            const tagsHtml = note.tags && note.tags.length > 0 
+                ? `<div class="note-tags-preview">${note.tags.map(tag => `<span class="note-tag-preview">#${tag}</span>`).join(' ')}</div>` 
+                : '';
+            
             noteItem.innerHTML = `
                 <div class="note-header">
                     <div class="note-title">${this.escapeHtml(note.title)}</div>
                     <div class="note-date">${date}</div>
                 </div>
                 <div class="note-preview">${this.escapeHtml(preview)}</div>
+                ${tagsHtml}
             `;
             
             noteItem.addEventListener('click', () => {
@@ -206,7 +261,8 @@ const NotesModule = {
             title: 'Новая заметка',
             content: '',
             createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+            updatedAt: new Date().toISOString(),
+            tags: []
         };
         
         this.notes.unshift(newNote);
@@ -228,13 +284,18 @@ const NotesModule = {
         
         const content = this.elements.textarea.value.trim();
         
+        // Извлекаем теги из контента
+        const tags = this.extractTags(content);
+        
         // Обновляем заметку
         note.content = content;
         note.title = this.generateTitle(content);
+        note.tags = tags;
         note.updatedAt = new Date().toISOString();
         
         this.saveNotes();
-        this.renderNotesList();
+        this.extractAllTags();
+        this.render();
         
         // Визуальная обратная связь
         this.showSaveIndicator();
@@ -250,12 +311,16 @@ const NotesModule = {
         
         // Проверяем, изменилось ли содержимое
         if (note.content !== content) {
+            const tags = this.extractTags(content);
+            
             note.content = content;
             note.title = this.generateTitle(content);
+            note.tags = tags;
             note.updatedAt = new Date().toISOString();
             
             this.saveNotes();
-            this.renderNotesList();
+            this.extractAllTags();
+            this.render();
         }
     },
     
@@ -351,7 +416,68 @@ const NotesModule = {
         if (this.currentNoteId) {
             this.autoSave();
         }
-    }
+    },
+    
+    extractTags(content) {
+        const tagRegex = /#[а-яА-Яa-zA-Z0-9_]+/g;
+        const matches = content.match(tagRegex);
+        if (!matches) return [];
+        
+        return [...new Set(matches.map(tag => tag.substring(1).toLowerCase()))];
+    },
+    
+    extractAllTags() {
+        this.allTags.clear();
+        this.notes.forEach(note => {
+            if (note.tags) {
+                note.tags.forEach(tag => this.allTags.add(tag));
+            }
+        });
+    },
+    
+    renderTags() {
+        if (!this.elements.tagsContainer) return;
+        
+        this.elements.tagsContainer.innerHTML = '';
+        
+        // Добавляем кнопку "Все"
+        if (this.allTags.size > 0) {
+            const allTag = document.createElement('span');
+            allTag.className = 'note-tag';
+            allTag.textContent = 'Все';
+            if (this.activeTags.size === 0) {
+                allTag.classList.add('active');
+            }
+            allTag.addEventListener('click', () => {
+                this.activeTags.clear();
+                this.render();
+            });
+            this.elements.tagsContainer.appendChild(allTag);
+        }
+        
+        // Добавляем остальные теги
+        Array.from(this.allTags).sort().forEach(tag => {
+            const tagEl = document.createElement('span');
+            tagEl.className = 'note-tag';
+            tagEl.textContent = `#${tag}`;
+            
+            if (this.activeTags.has(tag)) {
+                tagEl.classList.add('active');
+            }
+            
+            tagEl.addEventListener('click', () => {
+                if (this.activeTags.has(tag)) {
+                    this.activeTags.delete(tag);
+                } else {
+                    this.activeTags.clear();
+                    this.activeTags.add(tag);
+                }
+                this.render();
+            });
+            
+            this.elements.tagsContainer.appendChild(tagEl);
+        });
+    },
 };
 
 // Экспорт модуля
