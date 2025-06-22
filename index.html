@@ -318,128 +318,76 @@
         </div>
     </div>
 
-    <!-- Модальное окно для привычек -->
-    <div class="habit-modal" id="habitModal">
-        <div class="habit-modal-content">
-            <div class="habit-modal-header">
-                <h2 class="habit-modal-title">Add Habit</h2>
-                <button class="habit-modal-close" id="habitModalClose">✕</button>
-            </div>
-            
-            <form class="habit-form" id="habitForm">
-                <div class="habit-form-group">
-                    <label for="habitName">Habit name</label>
-                    <input type="text" id="habitName" required placeholder="E.g.: Morning exercise" maxlength="50">
-                </div>
-                
-                <div class="habit-form-group">
-                    <label>Details</label>
-                    <div class="habit-icon-grid">
-                        <div class="habit-icon-input">
-                            <input type="text" id="habitIcon" placeholder="Emoji" value="🎯" maxlength="2">
-                        </div>
-                        <div class="habit-target-input">
-                            <label for="habitTarget">Weekly goal</label>
-                            <div class="habit-target-controls">
-                                <button type="button" class="habit-target-btn" id="habitTargetMinus">−</button>
-                                <input type="number" id="habitTarget" min="1" max="7" value="7" readonly>
-                                <button type="button" class="habit-target-btn" id="habitTargetPlus">+</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="habit-form-group">
-                    <label>Habit color</label>
-                    <div class="habit-color-picker">
-                        <button type="button" class="habit-color-option selected" data-color="#22c55e" style="background: #22c55e"></button>
-                        <button type="button" class="habit-color-option" data-color="#3b82f6" style="background: #3b82f6"></button>
-                        <button type="button" class="habit-color-option" data-color="#f59e0b" style="background: #f59e0b"></button>
-                        <button type="button" class="habit-color-option" data-color="#ef4444" style="background: #ef4444"></button>
-                        <button type="button" class="habit-color-option" data-color="#a855f7" style="background: #a855f7"></button>
-                        <button type="button" class="habit-color-option" data-color="#ec4899" style="background: #ec4899"></button>
-                        <button type="button" class="habit-color-option" data-color="#14b8a6" style="background: #14b8a6"></button>
-                        <button type="button" class="habit-color-option" data-color="#6366f1" style="background: #6366f1"></button>
-                    </div>
-                </div>
-                
-                <div class="habit-form-actions">
-                    <button type="button" class="habit-btn habit-btn-secondary" onclick="HabitsModule.closeModal()">
-                        Cancel
-                    </button>
-                    <button type="submit" class="habit-btn habit-btn-primary">
-                        Save
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
 
-    <!-- Модальное окно редактора приложений -->
-    <div class="modal-overlay" id="editorModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Edit Application</h2>
-                <button class="modal-close" id="modalClose">
+
+    <!-- HTML Templates -->
+    <template id="analytics-widget-template">
+        <div class="widget analytics-widget">
+            <div class="widget-header">
+                <svg class="widget-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 3v18h18"></path>
+                    <path d="m19 9-5 5-4-4-3 3"></path>
+                </svg>
+                <h3>Analytics & Progress</h3>
+                <button class="widget-settings-btn analytics-refresh-btn" title="Refresh data">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                        <polyline points="1 4 1 10 7 10"></polyline>
+                        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
                     </svg>
                 </button>
             </div>
             
-            <form class="editor-form" id="editorForm">
-                <div class="form-group">
-                    <label for="appName">Application name</label>
-                    <input type="text" id="appName" required placeholder="E.g.: YouTube">
-                </div>
-                
-                <div class="form-group">
-                    <label for="appUrl">Application URL</label>
-                    <input type="url" id="appUrl" required placeholder="https://example.com">
-                </div>
-                
-                <div class="form-group">
-                    <label for="appIcon">Application icon</label>
-                    <div class="icon-upload-container">
-                        <div class="icon-preview" id="iconPreview">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                <polyline points="21 15 16 10 5 21"></polyline>
-                            </svg>
-                        </div>
-                        <div class="icon-upload-controls">
-                            <input type="file" id="iconFile" accept="image/*" hidden>
-                            <button type="button" class="btn-secondary" id="autoFaviconBtn">
-                                Get automatically
-                            </button>
-                            <button type="button" class="btn-secondary" id="uploadIconBtn">
-                                Choose file
-                            </button>
-                            <small class="help-text">
-                                SVG format recommended.<br>
-                                Maximum size: 500KB<br>
-                                Find icons: <a href="https://icons8.com" target="_blank">icons8.com</a>
-                            </small>
-                        </div>
+            <div class="analytics-content">
+                <div class="analytics-section">
+                    <h4 class="analytics-subtitle">🍅 Pomodoro Productivity</h4>
+                    <div class="analytics-description">Focus time over the last 7 days</div>
+                    <div class="chart-container">
+                        <canvas class="pomodoro-chart"></canvas>
                     </div>
                 </div>
                 
-                <div class="form-actions">
-                    <button type="button" class="btn-danger" id="deleteAppBtn" style="display: none;">
-                        Delete
-                    </button>
-                    <button type="submit" class="btn-primary">
-                        Save
-                    </button>
+                <div class="analytics-section">
+                    <h4 class="analytics-subtitle">📊 Task Completion History</h4>
+                    <div class="analytics-description">Tasks completed over time</div>
+                    <div class="chart-container">
+                        <canvas class="tasks-chart"></canvas>
+                    </div>
                 </div>
-            </form>
+                
+                <div class="analytics-summary">
+                    <div class="summary-item">
+                        <span class="summary-label">Total Focus Time</span>
+                        <span class="summary-value total-focus-time">0h</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Tasks Completed</span>
+                        <span class="summary-value total-tasks-completed">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Habits Streak</span>
+                        <span class="summary-value best-habit-streak">0d</span>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
+    </template>
+
+    <template id="universal-modal-template">
+        <div class="universal-modal">
+            <div class="universal-modal-content">
+                <div class="universal-modal-header">
+                    <h2 class="universal-modal-title"></h2>
+                    <button class="universal-modal-close" type="button">✕</button>
+                </div>
+                <div class="universal-modal-body"></div>
+            </div>
+        </div>
+    </template>
 
     <!-- JavaScript -->
     <script src="js/config.js"></script>
+    <script src="js/modules/eventbus.js"></script>
+    <script src="js/modules/modal.js"></script>
     <script src="js/modules/storage.js"></script>
     <script src="js/modules/datetime.js"></script>
     <script src="js/modules/particles.js"></script>

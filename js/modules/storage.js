@@ -76,7 +76,7 @@ const Storage = {
             return customApps[customIndex];
         }
         
-        // Если это стандартное приложение, сохраняем изменения отдельно
+        // If this is a standard application, save changes separately
         const modifiedApps = this.getModifiedApps();
         modifiedApps[appId] = updates;
         this.saveModifiedApps(modifiedApps);

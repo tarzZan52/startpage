@@ -1,4 +1,4 @@
-// Модуль трекера привычек
+// Habits tracker module
 const HabitsModule = {
     habits: [],
     habitLogs: {},
@@ -14,6 +14,7 @@ const HabitsModule = {
         this.loadElements();
         this.loadData();
         this.setupEventListeners();
+        this.setupEventBusListeners();
         this.render();
         this.updateStats();
     },
@@ -22,7 +23,6 @@ const HabitsModule = {
         this.elements.habitsList = document.getElementById('habitsList');
         this.elements.addBtn = document.getElementById('addHabitBtn');
         this.elements.statsContainer = document.getElementById('habitsStats');
-        this.elements.modalOverlay = document.getElementById('habitModal');
     },
     
     setupEventListeners() {
@@ -31,63 +31,11 @@ const HabitsModule = {
             this.elements.addBtn.addEventListener('click', () => this.openModal());
         }
         
-        // Закрытие модального окна
-        const modalClose = document.getElementById('habitModalClose');
-        if (modalClose) {
-            modalClose.addEventListener('click', () => this.closeModal());
-        }
-        
-        // Клик по оверлею
-        if (this.elements.modalOverlay) {
-            this.elements.modalOverlay.addEventListener('click', (e) => {
-                if (e.target === this.elements.modalOverlay) {
-                    this.closeModal();
-                }
-            });
-        }
-        
-        // Форма добавления привычки
-        const habitForm = document.getElementById('habitForm');
-        if (habitForm) {
-            habitForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.saveHabit();
-            });
-        }
-        
-        // Цветовые кнопки
-        const colorButtons = document.querySelectorAll('.habit-color-option');
-        colorButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                colorButtons.forEach(b => b.classList.remove('selected'));
-                btn.classList.add('selected');
-            });
-        });
-        
-        // Кнопки изменения цели в модальном окне
-        const targetMinusBtn = document.getElementById('habitTargetMinus');
-        const targetPlusBtn = document.getElementById('habitTargetPlus');
-        const targetInput = document.getElementById('habitTarget');
-        
-        if (targetMinusBtn && targetPlusBtn && targetInput) {
-            targetMinusBtn.addEventListener('click', () => {
-                const currentValue = parseInt(targetInput.value);
-                if (currentValue > 1) {
-                    targetInput.value = currentValue - 1;
-                }
-            });
-            
-            targetPlusBtn.addEventListener('click', () => {
-                const currentValue = parseInt(targetInput.value);
-                if (currentValue < 7) {
-                    targetInput.value = currentValue + 1;
-                }
-            });
-        }
+
         
         // Горячие клавиши
         document.addEventListener('keydown', (e) => {
-            if (!Dashboard.isActive || this.elements.modalOverlay?.classList.contains('active')) {
+            if (!Dashboard.isActive || document.querySelector('.modal-overlay.active')) {
                 return;
             }
             
@@ -99,6 +47,10 @@ const HabitsModule = {
         });
     },
     
+    setupEventBusListeners() {
+        // В будущем здесь можно добавить подписки на события от других модулей
+    },
+    
     loadData() {
         try {
             const savedHabits = localStorage.getItem('habits_data');
@@ -107,12 +59,12 @@ const HabitsModule = {
             if (savedHabits) {
                 this.habits = JSON.parse(savedHabits);
             } else {
-                // Дефолтные привычки для новых пользователей
+                // Default habits for new users
                 const now = Date.now();
                 this.habits = [
                     {
                         id: now,
-                        name: 'Утренняя зарядка',
+                        name: 'Morning Exercise',
                         icon: '🏃',
                         color: '#22c55e',
                         frequency: 'daily',
@@ -121,7 +73,7 @@ const HabitsModule = {
                     },
                     {
                         id: now + 1,
-                        name: 'Медитация',
+                        name: 'Meditation',
                         icon: '🧘',
                         color: '#3b82f6',
                         frequency: 'daily',
@@ -136,7 +88,7 @@ const HabitsModule = {
                 this.habitLogs = JSON.parse(savedLogs);
             }
             
-            // Очистка старых логов (старше 90 дней)
+            // Clean old logs (older than 90 days)
             this.cleanOldLogs();
             
         } catch (error) {
@@ -164,7 +116,7 @@ const HabitsModule = {
             this.elements.habitsList.innerHTML = `
                 <div class="habits-empty">
                     <div class="habits-empty-icon">🎯</div>
-                    <div class="habits-empty-text">Нет привычек. Добавьте первую!</div>
+                    <div class="habits-empty-text">No habits. Add your first one!</div>
                 </div>
             `;
             return;
@@ -193,14 +145,14 @@ const HabitsModule = {
                 </div>
                 <div class="habit-info">
                     <div class="habit-name">${this.escapeHtml(habit.name)}</div>
-                    <div class="habit-stats">
-                        <span class="habit-streak" title="Текущая серия">
-                            🔥 ${streak} ${this.getDayWord(streak)}
-                        </span>
-                        <span class="habit-rate" title="Процент выполнения за последние 30 дней">
-                            ${completionRate}%
-                        </span>
-                    </div>
+                                    <div class="habit-stats">
+                    <span class="habit-streak" title="Current streak">
+                        🔥 ${streak} ${this.getDayWord(streak)}
+                    </span>
+                    <span class="habit-rate" title="Completion rate for last 30 days">
+                        ${completionRate}%
+                    </span>
+                </div>
                 </div>
                 <button class="habit-check ${isCompleted ? 'checked' : ''}" 
                         data-id="${habit.id}" 
@@ -226,19 +178,19 @@ const HabitsModule = {
             </div>
             
             <div class="habit-actions">
-                <button class="habit-action-btn" data-action="details" data-habit-id="${habit.id}" title="Подробности">
+                <button class="habit-action-btn" data-action="details" data-habit-id="${habit.id}" title="Details">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                         <circle cx="12" cy="12" r="3"></circle>
                     </svg>
                 </button>
-                <button class="habit-action-btn" data-action="edit" data-habit-id="${habit.id}" title="Редактировать">
+                <button class="habit-action-btn" data-action="edit" data-habit-id="${habit.id}" title="Edit">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                     </svg>
                 </button>
-                <button class="habit-action-btn habit-delete" data-action="delete" data-habit-id="${habit.id}" title="Удалить">
+                <button class="habit-action-btn habit-delete" data-action="delete" data-habit-id="${habit.id}" title="Delete">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="3,6 5,6 21,6"></polyline>
                         <path d="M19 6l-2 14H7L5 6"></path>
@@ -322,7 +274,10 @@ const HabitsModule = {
         this.render();
         this.updateStats();
         
-        // Анимация при отметке
+        // Send habits update event
+        EventBus.emit('habits:updated');
+        
+        // Animation on check
         const checkBtn = document.querySelector(`.habit-check[data-id="${habitId}"]`);
         if (checkBtn) {
             checkBtn.style.transform = 'scale(1.2)';
@@ -344,7 +299,7 @@ const HabitsModule = {
             if (this.isHabitCompleted(habitId, dateKey)) {
                 streak++;
             } else if (i > 0) {
-                // Прерываем только если это не сегодня
+                // Break only if it's not today
                 break;
             }
         }
@@ -392,7 +347,7 @@ const HabitsModule = {
     },
     
     getDateKey(date) {
-        // Используем локальную дату вместо UTC чтобы избежать смещения дня
+        // Use local date instead of UTC to avoid day offset
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
@@ -410,47 +365,52 @@ const HabitsModule = {
     openModal(habitId = null) {
         this.currentEditId = habitId;
         
-        if (habitId) {
-            const habit = this.habits.find(h => h.id === habitId);
-            if (habit) {
-                document.getElementById('habitName').value = habit.name;
-                document.getElementById('habitIcon').value = habit.icon;
-                document.getElementById('habitTarget').value = habit.target;
-                
-                // Устанавливаем выбранный цвет
-                document.querySelectorAll('.habit-color-option').forEach(btn => {
-                    btn.classList.toggle('selected', btn.dataset.color === habit.color);
-                });
-            }
-        } else {
-            document.getElementById('habitForm').reset();
-            document.querySelector('.habit-color-option').classList.add('selected');
-        }
+        const formContent = this.createHabitFormContent();
+        const title = habitId ? 'Edit Habit' : 'Add Habit';
         
-        this.elements.modalOverlay.classList.add('active');
-        setTimeout(() => {
-            document.getElementById('habitName').focus();
-        }, 100);
+        this.currentModal = Modal.open(title, formContent, {
+            className: 'habit-modal',
+            onOpen: (modal) => {
+                this.setupHabitFormEventListeners(modal);
+                
+                if (habitId) {
+                    const habit = this.habits.find(h => h.id === habitId);
+                    if (habit) {
+                        this.populateHabitForm(habit, modal);
+                    }
+                }
+                
+                setTimeout(() => {
+                    const nameField = modal.querySelector('#habitName');
+                    if (nameField) {
+                        nameField.focus();
+                    }
+                }, 100);
+            }
+        });
     },
     
     closeModal() {
-        this.elements.modalOverlay.classList.remove('active');
+        if (this.currentModal) {
+            Modal.close();
+            this.currentModal = null;
+        }
         this.currentEditId = null;
     },
     
-    saveHabit() {
-        const name = document.getElementById('habitName').value.trim();
-        const icon = document.getElementById('habitIcon').value.trim() || '🎯';
-        const target = parseInt(document.getElementById('habitTarget').value) || 7;
-        const color = document.querySelector('.habit-color-option.selected').dataset.color;
+    saveHabit(modal) {
+        const name = modal.querySelector('#habitName').value.trim();
+        const icon = modal.querySelector('#habitIcon').value.trim() || '🎯';
+        const target = parseInt(modal.querySelector('#habitTarget').value) || 7;
+        const color = modal.querySelector('.habit-color-option.selected').dataset.color;
         
         if (!name) {
-            alert('Enter habit name');
+            Modal.confirm('Enter habit name');
             return;
         }
         
         if (this.currentEditId) {
-            // Редактирование
+            // Editing
             const habit = this.habits.find(h => h.id === this.currentEditId);
             if (habit) {
                 habit.name = name;
@@ -459,7 +419,7 @@ const HabitsModule = {
                 habit.color = color;
             }
         } else {
-            // Новая привычка
+            // New habit
             const newHabit = {
                 id: Date.now(),
                 name,
@@ -477,16 +437,19 @@ const HabitsModule = {
         this.render();
         this.updateStats();
         this.closeModal();
+        
+        // Send habits update event
+        EventBus.emit('habits:updated');
     },
     
     editHabit(habitId) {
-        // Преобразуем habitId в число если это строка
+        // Convert habitId to number if it's a string
         const id = typeof habitId === 'string' ? parseInt(habitId) : habitId;
         this.openModal(id);
     },
     
     deleteHabit(habitId) {
-        // Преобразуем habitId в число если это строка
+        // Convert habitId to number if it's a string
         const id = typeof habitId === 'string' ? parseInt(habitId) : habitId;
         const habit = this.habits.find(h => h.id === id);
         
@@ -495,18 +458,21 @@ const HabitsModule = {
             return;
         }
         
-        if (confirm(`Delete habit "${habit.name}"? Completion history will also be deleted.`)) {
+        Modal.confirm(`Delete habit "${habit.name}"? Completion history will also be deleted.`, () => {
             this.habits = this.habits.filter(h => h.id !== id);
             delete this.habitLogs[id];
             
             this.saveData();
             this.render();
             this.updateStats();
-        }
+            
+            // Send habits update event
+            EventBus.emit('habits:updated');
+        });
     },
     
     showDetails(habitId) {
-        // Преобразуем habitId в число если это строка
+        // Convert habitId to number if it's a string
         const id = typeof habitId === 'string' ? parseInt(habitId) : habitId;
         const habit = this.habits.find(h => h.id === id);
         
@@ -515,14 +481,14 @@ const HabitsModule = {
             return;
         }
         
-        // Состояние календаря
+        // Calendar state
         this.calendarState = {
             habitId: id,
             currentMonth: new Date().getMonth(),
             currentYear: new Date().getFullYear()
         };
         
-        // Создаем модальное окно с календарем
+        // Create modal window with calendar
         const modal = document.createElement('div');
         modal.className = 'habit-details-modal';
         modal.innerHTML = `
@@ -558,10 +524,10 @@ const HabitsModule = {
         
         document.body.appendChild(modal);
         
-        // Инициализируем календарь
+        // Initialize calendar
         this.updateCalendar();
         
-        // Обработчики навигации календаря
+        // Calendar navigation handlers
         const prevBtn = modal.querySelector('#prevMonth');
         const nextBtn = modal.querySelector('#nextMonth');
         
@@ -583,12 +549,12 @@ const HabitsModule = {
             this.updateCalendar();
         });
         
-        // Анимация появления
+        // Appearance animation
         setTimeout(() => {
             modal.style.opacity = '1';
         }, 10);
         
-        // Закрытие модального окна
+        // Close modal window
         const closeBtn = modal.querySelector('.habit-details-close');
         closeBtn.addEventListener('click', () => {
             modal.style.opacity = '0';
@@ -602,7 +568,7 @@ const HabitsModule = {
             }
         });
         
-        // Закрытие по ESC
+        // Close on ESC
         const escHandler = (e) => {
             if (e.key === 'Escape') {
                 modal.style.opacity = '0';
@@ -639,16 +605,16 @@ const HabitsModule = {
             html += `<div class="calendar-header">${day}</div>`;
         });
         
-        // Первый день месяца
+        // First day of month
         const firstDay = new Date(year, month, 1);
-        const firstDayOfWeek = (firstDay.getDay() + 6) % 7; // Преобразуем воскресенье (0) в 6
+        const firstDayOfWeek = (firstDay.getDay() + 6) % 7; // Convert Sunday (0) to 6
         
-        // Пустые ячейки до первого дня
+        // Empty cells before first day
         for (let i = 0; i < firstDayOfWeek; i++) {
             html += '<div class="calendar-day empty"></div>';
         }
         
-        // Дни месяца
+        // Days of month
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         for (let day = 1; day <= daysInMonth; day++) {
             const date = new Date(year, month, day);
@@ -737,8 +703,130 @@ const HabitsModule = {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    },
+    
+    // Public methods for getting data (for analytics.js)
+    getHabits() {
+        return this.habits;
+    },
+    
+    getHabitCompletionRate(habitId) {
+        return this.getCompletionRate(habitId);
+    },
+    
+    getHabitStreak(habitId) {
+        return this.getStreak(habitId);
+    },
+    
+    createHabitFormContent() {
+        const content = document.createElement('div');
+        content.innerHTML = `
+            <form class="habit-form" id="habitForm">
+                <div class="habit-form-group">
+                    <label for="habitName">Habit name</label>
+                    <input type="text" id="habitName" required placeholder="E.g.: Morning exercise" maxlength="50">
+                </div>
+                
+                <div class="habit-form-group">
+                    <label>Details</label>
+                    <div class="habit-icon-grid">
+                        <div class="habit-icon-input">
+                            <input type="text" id="habitIcon" placeholder="Emoji" value="🎯" maxlength="2">
+                        </div>
+                        <div class="habit-target-input">
+                            <label for="habitTarget">Weekly goal</label>
+                            <div class="habit-target-controls">
+                                <button type="button" class="habit-target-btn" id="habitTargetMinus">−</button>
+                                <input type="number" id="habitTarget" min="1" max="7" value="7" readonly>
+                                <button type="button" class="habit-target-btn" id="habitTargetPlus">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="habit-form-group">
+                    <label>Habit color</label>
+                    <div class="habit-color-picker">
+                        <button type="button" class="habit-color-option selected" data-color="#22c55e" style="background: #22c55e"></button>
+                        <button type="button" class="habit-color-option" data-color="#3b82f6" style="background: #3b82f6"></button>
+                        <button type="button" class="habit-color-option" data-color="#f59e0b" style="background: #f59e0b"></button>
+                        <button type="button" class="habit-color-option" data-color="#ef4444" style="background: #ef4444"></button>
+                        <button type="button" class="habit-color-option" data-color="#a855f7" style="background: #a855f7"></button>
+                        <button type="button" class="habit-color-option" data-color="#ec4899" style="background: #ec4899"></button>
+                        <button type="button" class="habit-color-option" data-color="#14b8a6" style="background: #14b8a6"></button>
+                        <button type="button" class="habit-color-option" data-color="#6366f1" style="background: #6366f1"></button>
+                    </div>
+                </div>
+                
+                <div class="habit-form-actions">
+                    <button type="button" class="habit-btn habit-btn-secondary" id="habitCancel">
+                        Cancel
+                    </button>
+                    <button type="submit" class="habit-btn habit-btn-primary">
+                        Save
+                    </button>
+                </div>
+            </form>
+        `;
+        return content;
+    },
+    
+    setupHabitFormEventListeners(modal) {
+        const form = modal.querySelector('#habitForm');
+        const targetMinusBtn = modal.querySelector('#habitTargetMinus');
+        const targetPlusBtn = modal.querySelector('#habitTargetPlus');
+        const targetInput = modal.querySelector('#habitTarget');
+        const colorButtons = modal.querySelectorAll('.habit-color-option');
+        const cancelBtn = modal.querySelector('#habitCancel');
+        
+        // Отправка формы
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.saveHabit(modal);
+        });
+        
+        // Кнопка отмены
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', () => this.closeModal());
+        }
+        
+        // Цветовые кнопки
+        colorButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                colorButtons.forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+            });
+        });
+        
+        // Кнопки изменения цели
+        if (targetMinusBtn && targetPlusBtn && targetInput) {
+            targetMinusBtn.addEventListener('click', () => {
+                const currentValue = parseInt(targetInput.value);
+                if (currentValue > 1) {
+                    targetInput.value = currentValue - 1;
+                }
+            });
+            
+            targetPlusBtn.addEventListener('click', () => {
+                const currentValue = parseInt(targetInput.value);
+                if (currentValue < 7) {
+                    targetInput.value = currentValue + 1;
+                }
+            });
+        }
+    },
+    
+    populateHabitForm(habit, modal) {
+        modal.querySelector('#habitName').value = habit.name;
+        modal.querySelector('#habitIcon').value = habit.icon;
+        modal.querySelector('#habitTarget').value = habit.target;
+        
+        // Устанавливаем выбранный цвет
+        modal.querySelectorAll('.habit-color-option').forEach(btn => {
+            btn.classList.toggle('selected', btn.dataset.color === habit.color);
+        });
     }
 };
 
-// Экспорт модуля
+// Export module
 window.HabitsModule = HabitsModule;

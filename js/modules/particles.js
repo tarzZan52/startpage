@@ -9,7 +9,7 @@ const Particles = {
             return;
         }
         
-        // Проверяем, не созданы ли уже частицы
+        // Check if particles are not already created
         if (this.container.children.length > 0) {
             return;
         }

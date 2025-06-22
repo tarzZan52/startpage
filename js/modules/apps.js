@@ -1,4 +1,4 @@
-// Модуль для управления приложениями
+// Application management module
 const Apps = {
     container: null,
     
@@ -13,27 +13,24 @@ const Apps = {
     },
     
     loadApps() {
-        // Очищаем контейнер
+        // Clear container
         this.container.innerHTML = '';
         
-        // Загружаем приложения из Storage
+        // Load applications from Storage
         const apps = Storage.getApps();
-        console.log('Loading apps:', apps);
+        // Apps loaded from storage
         
-        // Ограничиваем количество до 12
-        const appsToShow = apps.slice(0, 12);
+        // Limit quantity to maximum
+        const appsToShow = apps.slice(0, CONFIG.maxApps);
         
-        // Рендерим приложения
+        // Render applications
         appsToShow.forEach(app => {
             const tile = this.createAppTile(app);
             this.container.appendChild(tile);
         });
         
-        // Анимируем плитки
+        // Animate tiles
         this.animateTiles();
-        
-        // Обновляем видимость кнопки добавления
-        this.updateAddButton(apps.length);
     },
     
     createAppTile(app) {
@@ -43,14 +40,14 @@ const Apps = {
         tile.target = '_blank';
         tile.dataset.appId = app.id;
         
-        // Предотвращаем переход по ссылке при клике на кнопку редактирования
+        // Prevent link navigation when clicking edit button
         tile.addEventListener('click', (e) => {
             if (e.target.closest('.app-edit-btn')) {
                 e.preventDefault();
             }
         });
         
-        // Иконка
+        // Icon
         const icon = document.createElement('div');
         icon.className = 'app-icon';
         
@@ -58,17 +55,17 @@ const Apps = {
         img.src = app.icon;
         img.alt = app.name;
         img.onerror = () => {
-            // Если изображение не загрузилось, показываем дефолтную иконку
+            // If image failed to load, show default icon
             img.src = 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2Utd2lkdGg9IjIiPjxyZWN0IHg9IjMiIHk9IjMiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjIiIHJ5PSIyIj48L3JlY3Q+PC9zdmc+';
         };
         
-        // Название
+        // Name
         const name = document.createElement('span');
         name.className = 'app-name';
         name.textContent = app.name;
-        name.title = app.name; // Тултип для длинных названий
+        name.title = app.name; // Tooltip for long names
         
-        // Кнопка редактирования для всех приложений
+        // Edit button for all applications
         const editBtn = document.createElement('button');
         editBtn.className = 'app-edit-btn';
         editBtn.innerHTML = `
@@ -94,18 +91,10 @@ const Apps = {
     animateTiles() {
         const tiles = this.container.querySelectorAll('.app-tile');
         tiles.forEach((tile, index) => {
-            // Устанавливаем начальное состояние для анимации
+            // Set initial state for animation
             tile.style.opacity = '1';
             tile.style.animationDelay = `${0.1 * index}s`;
             tile.style.animation = 'tileSlideUp 0.8s cubic-bezier(0.25, 0.8, 0.25, 1) forwards';
         });
-    },
-    
-    updateAddButton(appsCount) {
-        const addBtn = document.getElementById('addAppBtn');
-        if (addBtn) {
-            // Показываем кнопку только если меньше 12 приложений
-            addBtn.style.display = appsCount < 12 ? 'flex' : 'none';
-        }
     }
 };

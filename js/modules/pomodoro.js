@@ -1,6 +1,6 @@
-// Модуль таймера Помодоро
+// Pomodoro timer module
 const PomodoroModule = {
-    // Настройки по умолчанию
+    // Default settings
     settings: {
         workTime: 25,
         shortBreak: 5,
@@ -8,7 +8,7 @@ const PomodoroModule = {
         soundEnabled: true
     },
     
-    // Состояние таймера
+    // Timer state
     state: {
         isRunning: false,
         isPaused: false,
@@ -16,10 +16,10 @@ const PomodoroModule = {
         currentSession: 'work', // work, shortBreak, longBreak
         sessionsCompleted: 0,
         totalTime: 0,
-        currentTaskId: null // ID текущей задачи
+        currentTaskId: null // Current task ID
     },
     
-    // DOM элементы
+    // DOM elements
     elements: {
         timerTime: null,
         timerLabel: null,
@@ -42,7 +42,6 @@ const PomodoroModule = {
     timer: null,
     
     init() {
-        console.log('Initializing Pomodoro module...');
         this.loadElements();
         this.loadSettings();
         this.loadStats();
@@ -50,11 +49,8 @@ const PomodoroModule = {
         this.updateStatsDisplay();
         this.createNotificationSound();
         this.createTaskSelector();
-        
-        // Setup event listeners with delay to ensure DOM is ready
-        setTimeout(() => {
-            this.setupEventListeners();
-        }, 100);
+        this.setupEventListeners();
+        this.setupEventBusListeners();
     },
     
     loadElements() {
@@ -74,17 +70,17 @@ const PomodoroModule = {
         this.elements.todayMinutes = document.getElementById('todayMinutes');
         this.elements.weekMinutes = document.getElementById('weekMinutes');
         
-        // Проверяем, что основные элементы найдены
+        // Check that main elements are found
         const requiredElements = ['timerTime', 'timerLabel', 'startBtn', 'pauseBtn'];
         const missingElements = requiredElements.filter(key => !this.elements[key]);
         
         if (missingElements.length > 0) {
-            console.warn('Missing Pomodoro elements:', missingElements);
+            console.error('Missing Pomodoro elements:', missingElements);
         }
     },
     
     createTaskSelector() {
-        // Создаем селектор задач после таймера
+        // Create task selector after timer
         const timerContainer = document.querySelector('.pomodoro-timer');
         if (!timerContainer) return;
         
@@ -97,7 +93,7 @@ const PomodoroModule = {
             </select>
         `;
         
-        // Вставляем после кругового таймера
+        // Insert after circular timer
         const timerCircle = timerContainer.querySelector('.timer-circle');
         if (timerCircle && timerCircle.nextSibling) {
             timerContainer.insertBefore(selectorContainer, timerCircle.nextSibling);
@@ -115,27 +111,27 @@ const PomodoroModule = {
         const activeTasks = window.TodoModule.getActiveTasks();
         const currentValue = this.elements.taskSelector.value;
         
-        // Очищаем и заполняем селектор
+        // Clear and fill selector
         this.elements.taskSelector.innerHTML = '<option value="">No task selected</option>';
         
         activeTasks.forEach(task => {
             const option = document.createElement('option');
             option.value = task.id;
             
-            // Обрезаем длинный текст
+            // Trim long text
             let taskText = task.text;
             if (taskText.length > 40) {
                 taskText = taskText.substring(0, 40) + '...';
             }
             
-            // Добавляем информацию о времени если есть
+            // Add time information if present
             if (task.timeSpent > 0) {
                 taskText += ` (${window.TodoModule.formatTime(task.timeSpent)})`;
             }
             
             option.textContent = taskText;
             
-            // Выделяем задачи с высоким приоритетом
+            // Highlight high priority tasks
             if (task.priority === 'high') {
                 option.style.fontWeight = 'bold';
             }
@@ -143,7 +139,7 @@ const PomodoroModule = {
             this.elements.taskSelector.appendChild(option);
         });
         
-        // Восстанавливаем выбранное значение если оно все еще актуально
+        // Restore selected value if it's still relevant
         if (currentValue && activeTasks.find(t => t.id == currentValue)) {
             this.elements.taskSelector.value = currentValue;
             this.state.currentTaskId = parseInt(currentValue);
@@ -153,9 +149,7 @@ const PomodoroModule = {
     },
     
     setupEventListeners() {
-        console.log('Setting up Pomodoro event listeners...');
-        
-        // Кнопки управления таймером
+        // Timer control buttons
         if (this.elements.startBtn) {
             this.elements.startBtn.addEventListener('click', () => this.start());
         }
@@ -169,53 +163,51 @@ const PomodoroModule = {
             this.elements.skipBtn.addEventListener('click', () => this.skip());
         }
         
-        // Селектор задач
+        // Task selector
         if (this.elements.taskSelector) {
             this.elements.taskSelector.addEventListener('change', (e) => {
                 this.state.currentTaskId = e.target.value ? parseInt(e.target.value) : null;
             });
         }
         
-        // Настраиваем кнопку настроек
+        // Setup settings button
         this.setupSettingsMenu();
         
-        // Кнопки +/- для времени (с задержкой для инициализации DOM)
-        setTimeout(() => {
-            document.querySelectorAll('.time-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const target = btn.dataset.target;
-                    const input = document.getElementById(target);
-                    const isPlus = btn.classList.contains('time-plus');
-                    const isMinus = btn.classList.contains('time-minus');
+        // +/- time buttons
+        document.querySelectorAll('.time-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = btn.dataset.target;
+                const input = document.getElementById(target);
+                const isPlus = btn.classList.contains('time-plus');
+                const isMinus = btn.classList.contains('time-minus');
+                
+                if (input && (isPlus || isMinus)) {
+                    let value = parseInt(input.value);
+                    const step = parseInt(input.step) || 1;
+                    const min = parseInt(input.min);
+                    const max = parseInt(input.max);
                     
-                    if (input && (isPlus || isMinus)) {
-                        let value = parseInt(input.value);
-                        const step = parseInt(input.step) || 1;
-                        const min = parseInt(input.min);
-                        const max = parseInt(input.max);
-                        
-                        if (isPlus && value < max) {
-                            value += step;
-                        } else if (isMinus && value > min) {
-                            value -= step;
-                        }
-                        
-                        input.value = value;
-                        // Автоматически сохраняем при изменении
-                        this.saveInlineSettings();
-                        
-                        // Если таймер не запущен, обновляем отображение
-                        if (!this.state.isRunning && this.state.currentTime === 0) {
-                            this.updateDisplay();
-                            this.updateProgress();
-                        }
+                    if (isPlus && value < max) {
+                        value += step;
+                    } else if (isMinus && value > min) {
+                        value -= step;
                     }
-                });
+                    
+                    input.value = value;
+                    // Auto save on change
+                    this.saveInlineSettings();
+                    
+                    // If timer is not running, update display
+                    if (!this.state.isRunning && this.state.currentTime === 0) {
+                        this.updateDisplay();
+                        this.updateProgress();
+                    }
+                }
             });
-        }, 150);
+        });
         
-        // Настройки
+        // Settings
         if (this.elements.workTimeInline) {
             this.elements.workTimeInline.addEventListener('change', () => {
                 this.saveInlineSettings();
@@ -247,20 +239,18 @@ const PomodoroModule = {
             this.elements.soundEnabledInline.addEventListener('change', () => this.saveInlineSettings());
         }
         
-        // Кнопки статистики
-        setTimeout(() => {
-            const statsBtn = document.getElementById('pomodoroStatsBtn');
-            const resetStatsBtn = document.getElementById('pomodoroResetStatsBtn');
-            
-            if (statsBtn) {
-                statsBtn.addEventListener('click', () => this.showStatsModal());
-            }
-            if (resetStatsBtn) {
-                resetStatsBtn.addEventListener('click', () => this.resetStats());
-            }
-        }, 150);
+        // Statistics buttons
+        const statsBtn = document.getElementById('pomodoroStatsBtn');
+        const resetStatsBtn = document.getElementById('pomodoroResetStatsBtn');
         
-        // Клавиатурные сокращения
+        if (statsBtn) {
+            statsBtn.addEventListener('click', () => this.showStatsModal());
+        }
+        if (resetStatsBtn) {
+            resetStatsBtn.addEventListener('click', () => this.resetStats());
+        }
+        
+        // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             if (document.querySelector('.modal-overlay.active') || 
                 document.querySelector('.habit-modal.active') ||
@@ -286,16 +276,16 @@ const PomodoroModule = {
             }
         });
         
-        // Обновляем селектор задач при изменениях в TodoModule
-        setInterval(() => {
+        // Subscribe to task updates
+        EventBus.on('tasks:updated', () => {
             if (Dashboard.isActive) {
                 this.updateTaskSelector();
             }
-        }, 2000);
+        });
     },
     
     setupSettingsMenu() {
-        // Избегаем множественного подключения обработчиков
+        // Avoid multiple handler connections
         if (this.settingsMenuInitialized) {
             return;
         }
@@ -303,33 +293,25 @@ const PomodoroModule = {
         const settingsBtn = document.getElementById('pomodoroSettingsBtn');
         const settingsDropdown = document.getElementById('pomodoroSettingsDropdown');
         
-        console.log('Setting up pomodoro settings menu');
-        console.log('Elements found:', { 
-            settingsBtn: !!settingsBtn, 
-            settingsDropdown: !!settingsDropdown
-        });
-        
         if (settingsBtn && settingsDropdown) {
-            // Создаем обработчик клика
+            // Create click handler
             const clickHandler = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Settings button clicked');
                 
                 const isActive = settingsDropdown.classList.contains('active');
                 if (isActive) {
                     settingsDropdown.classList.remove('active');
-                    console.log('Dropdown closed');
                 } else {
+                    // Position dropdown relative to button
+                    this.positionDropdown(settingsBtn, settingsDropdown);
                     settingsDropdown.classList.add('active');
-                    console.log('Dropdown opened');
                 }
             };
             
             settingsBtn.addEventListener('click', clickHandler);
-            console.log('Event listener added to settings button');
             
-            // Закрытие при клике вне меню
+            // Close on click outside menu
             const outsideClickHandler = (e) => {
                 if (!settingsDropdown.contains(e.target) && !settingsBtn.contains(e.target)) {
                     settingsDropdown.classList.remove('active');
@@ -337,7 +319,7 @@ const PomodoroModule = {
             };
             document.addEventListener('click', outsideClickHandler);
             
-            // Закрытие по ESC
+            // Close on ESC
             const escKeyHandler = (e) => {
                 if (e.key === 'Escape' && settingsDropdown.classList.contains('active')) {
                     settingsDropdown.classList.remove('active');
@@ -346,9 +328,34 @@ const PomodoroModule = {
             document.addEventListener('keydown', escKeyHandler);
             
             this.settingsMenuInitialized = true;
-            console.log('Pomodoro settings menu initialized successfully');
-        } else {
-            console.warn('Pomodoro settings elements not found:', { settingsBtn, settingsDropdown });
+        }
+    },
+    
+    setupEventBusListeners() {
+        // Subscribe to events from other modules via EventBus
+        // Additional subscriptions can be added here in the future
+    },
+    
+    positionDropdown(button, dropdown) {
+        const buttonRect = button.getBoundingClientRect();
+        const dropdownWidth = 280; // Width from CSS
+        
+        // Position below button on the right
+        dropdown.style.top = (buttonRect.bottom + 5) + 'px';
+        dropdown.style.left = (buttonRect.right - dropdownWidth) + 'px';
+        
+        // Check if it goes beyond screen boundaries
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
+        
+        if (buttonRect.right - dropdownWidth < 0) {
+            // If doesn't fit on right, position to left of button
+            dropdown.style.left = buttonRect.left + 'px';
+        }
+        
+        if (buttonRect.bottom + 200 > screenHeight) {
+            // If doesn't fit below, position above
+            dropdown.style.top = (buttonRect.top - 200) + 'px';
         }
     },
     
@@ -364,12 +371,12 @@ const PomodoroModule = {
         this.elements.startBtn.style.display = 'none';
         this.elements.pauseBtn.style.display = 'flex';
         
-        // Добавляем класс активности для анимации
+        // Add activity class for animation
         if (this.elements.timerCircle) {
             this.elements.timerCircle.classList.add('active');
         }
         
-        // Отключаем селектор задач во время работы
+        // Disable task selector during work
         if (this.elements.taskSelector) {
             this.elements.taskSelector.disabled = true;
         }
@@ -386,7 +393,7 @@ const PomodoroModule = {
         this.elements.startBtn.style.display = 'flex';
         this.elements.pauseBtn.style.display = 'none';
         
-        // Убираем класс активности
+        // Remove activity class
         if (this.elements.timerCircle) {
             this.elements.timerCircle.classList.remove('active');
         }
@@ -402,7 +409,7 @@ const PomodoroModule = {
         this.state.currentTime = 0;
         this.state.isPaused = false;
         
-        // Включаем селектор задач
+        // Enable task selector
         if (this.elements.taskSelector) {
             this.elements.taskSelector.disabled = false;
         }
@@ -430,29 +437,33 @@ const PomodoroModule = {
     completeSession() {
         this.pause();
         
-        // Сохраняем статистику только для рабочих сессий
+        // Save statistics only for work sessions
         if (this.state.currentSession === 'work') {
             this.updateStats();
             
-            // Обновляем время задачи если она была выбрана
-            if (this.state.currentTaskId && window.TodoModule) {
-                window.TodoModule.updateTaskTime(this.state.currentTaskId, this.settings.workTime);
-                
-                // Обновляем аналитику
-                if (window.AnalyticsModule) {
-                    window.AnalyticsModule.refreshData();
-                }
+            // Update task time if one was selected
+            if (this.state.currentTaskId) {
+                EventBus.emit('pomodoro:task-time-updated', {
+                    taskId: this.state.currentTaskId,
+                    minutes: this.settings.workTime
+                });
             }
+            
+            // Send session completed event
+            EventBus.emit('pomodoro:session-completed', {
+                sessionType: this.state.currentSession,
+                minutes: this.settings.workTime
+            });
         }
         
         if (this.settings.soundEnabled) {
             this.playNotificationSound();
         }
         
-        // Показываем уведомление
+        // Show notification
         this.showNotification();
         
-        // Переключаемся на следующую сессию
+        // Switch to next session
         this.switchToNextSession();
     },
     
@@ -460,7 +471,7 @@ const PomodoroModule = {
         if (this.state.currentSession === 'work') {
             this.state.sessionsCompleted++;
             
-            // Каждые 4 рабочие сессии - длинный перерыв
+            // Every 4 work sessions - long break
             if (this.state.sessionsCompleted % 4 === 0) {
                 this.state.currentSession = 'longBreak';
             } else {
@@ -470,7 +481,7 @@ const PomodoroModule = {
             this.state.currentSession = 'work';
         }
         
-        // Включаем селектор задач для рабочих сессий
+        // Enable task selector for work sessions
         if (this.elements.taskSelector) {
             this.elements.taskSelector.disabled = this.state.currentSession !== 'work';
         }
@@ -559,7 +570,7 @@ const PomodoroModule = {
                 oscillator.start(this.notificationSound.currentTime);
                 oscillator.stop(this.notificationSound.currentTime + 0.3);
             } catch (error) {
-                console.log('Не удалось воспроизвести звук:', error);
+                // Тихо игнорируем ошибки звука
             }
         };
     },
@@ -615,8 +626,8 @@ const PomodoroModule = {
         
         localStorage.setItem('pomodoro_settings', JSON.stringify(this.settings));
         
-        // Обновляем отображение если таймер не запущен
-        if (!this.state.isRunning && this.state.currentTime === 0) {
+                        // Update display if timer is not running
+                if (!this.state.isRunning && this.state.currentTime === 0) {
             this.updateDisplay();
             this.updateProgress();
         }
@@ -657,7 +668,7 @@ const PomodoroModule = {
         }
         this.stats.weekly[weekStart] += this.settings.workTime;
         
-        // Сохраняем и обновляем отображение
+        // Save and update display
         localStorage.setItem('pomodoro_stats', JSON.stringify(this.stats));
         this.updateStatsDisplay();
     },
@@ -883,8 +894,13 @@ const PomodoroModule = {
             
             alert('Statistics have been reset successfully.');
         }
+    },
+    
+    // Публичные методы для получения статистики (для analytics.js)
+    getDailyStats() {
+        return this.stats ? this.stats.daily : {};
     }
 };
 
-// Экспорт модуля
+// Export module
 window.PomodoroModule = PomodoroModule;

@@ -1,49 +1,23 @@
-// Модуль редактора приложений
+// Application editor module
 const Editor = {
-    modal: null,
-    form: null,
     currentApp: null,
     currentIcon: null,
+    currentModal: null,
     
     init() {
-        this.modal = document.getElementById('editorModal');
-        this.form = document.getElementById('editorForm');
-        
-        if (!this.modal || !this.form) {
-            console.error('Editor elements not found');
-            return;
-        }
-        
         this.setupEventListeners();
     },
     
     setupEventListeners() {
-        // Кнопка добавления нового приложения
+        // Add new application button
         const addBtn = document.getElementById('addAppBtn');
         if (addBtn) {
             addBtn.addEventListener('click', () => this.openEditor());
         }
         
-        // Закрытие модального окна
-        const closeBtn = document.getElementById('modalClose');
-        if (closeBtn) {
-            closeBtn.addEventListener('click', () => this.closeEditor());
-        }
+
         
-        // Клик по оверлею
-        this.modal.addEventListener('click', (e) => {
-            if (e.target === this.modal) {
-                this.closeEditor();
-            }
-        });
-        
-        // Отправка формы
-        this.form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.saveApp();
-        });
-        
-        // Кнопка загрузки иконки
+        // Icon upload button
         const uploadBtn = document.getElementById('uploadIconBtn');
         const fileInput = document.getElementById('iconFile');
         const autoFaviconBtn = document.getElementById('autoFaviconBtn');
@@ -53,18 +27,18 @@ const Editor = {
             fileInput.addEventListener('change', (e) => this.handleIconUpload(e));
         }
         
-        // Кнопка автоматического получения фавиконки
+        // Auto favicon button
         if (autoFaviconBtn) {
             autoFaviconBtn.addEventListener('click', () => this.loadAutoFavicon());
         }
         
-        // Кнопка удаления
+        // Delete button
         const deleteBtn = document.getElementById('deleteAppBtn');
         if (deleteBtn) {
             deleteBtn.addEventListener('click', () => this.deleteApp());
         }
         
-        // Автоматическое получение фавиконки при изменении URL
+        // Auto favicon loading on URL change
         const urlInput = document.getElementById('appUrl');
         if (urlInput) {
             let urlTimeout;
@@ -72,7 +46,7 @@ const Editor = {
                 clearTimeout(urlTimeout);
                 urlTimeout = setTimeout(() => {
                     this.tryLoadFavicon(e.target.value);
-                }, 1000); // Задержка в 1 секунду после окончания ввода
+                }, 1000); // 1 second delay after input ends
             });
         }
     },
@@ -80,94 +54,86 @@ const Editor = {
     openEditor(appId = null) {
         this.currentApp = null;
         this.currentIcon = null;
-        const deleteBtn = document.getElementById('deleteAppBtn');
         
         if (appId) {
-            // Редактирование существующего приложения
+            // Edit existing application
             const apps = Storage.getApps();
             this.currentApp = apps.find(app => app.id === appId);
-            
-            if (this.currentApp) {
-                this.populateForm(this.currentApp);
-                // Показываем кнопку удаления только для пользовательских приложений
-                deleteBtn.style.display = this.currentApp.isCustom ? 'block' : 'none';
-            }
-        } else {
-            // Новое приложение
-            this.clearForm();
-            deleteBtn.style.display = 'none';
         }
         
-        this.modal.classList.add('active');
+        // Create form for modal window
+        const formContent = this.createFormContent();
         
-        // Устанавливаем фокус на поле названия после открытия модального окна
-        setTimeout(() => {
-            const nameField = document.getElementById('appName');
-            if (nameField) {
-                nameField.focus();
+        const title = this.currentApp ? 'Edit Application' : 'Add Application';
+        
+        this.currentModal = Modal.open(title, formContent, {
+            className: 'editor-modal',
+            onOpen: (modal) => {
+                this.setupFormEventListeners(modal);
+                // Fill form if editing
+                if (this.currentApp) {
+                    this.populateForm(this.currentApp, modal);
+                }
+                // Set focus
+                setTimeout(() => {
+                    const nameField = modal.querySelector('#appName');
+                    if (nameField) {
+                        nameField.focus();
+                    }
+                }, 100);
             }
-        }, 100);
+        });
     },
     
     closeEditor() {
-        this.modal.classList.remove('active');
+        if (this.currentModal) {
+            Modal.close();
+            this.currentModal = null;
+        }
         this.currentApp = null;
         this.currentIcon = null;
-        this.clearForm();
     },
     
-    populateForm(app) {
-        document.getElementById('appName').value = app.name || '';
-        document.getElementById('appUrl').value = app.url || '';
+    populateForm(app, modal) {
+        modal.querySelector('#appName').value = app.name || '';
+        modal.querySelector('#appUrl').value = app.url || '';
         
-        const preview = document.getElementById('iconPreview');
+        const preview = modal.querySelector('#iconPreview');
         if (app.icon) {
             preview.innerHTML = `<img src="${app.icon}" alt="${app.name}">`;
             // Сохраняем текущую иконку
             this.currentIcon = app.icon;
         }
-    },
-    
-    clearForm() {
-        this.form.reset();
-        const preview = document.getElementById('iconPreview');
-        preview.innerHTML = `
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                <polyline points="21 15 16 10 5 21"></polyline>
-            </svg>
-        `;
-        // Очищаем сохраненную иконку
-        this.currentIcon = null;
         
-        // Сбрасываем текст кнопки
-        const uploadBtn = document.getElementById('uploadIconBtn');
-        if (uploadBtn) {
-            uploadBtn.textContent = 'Choose file';
+        // Show delete button for custom applications
+        const deleteBtn = modal.querySelector('#deleteAppBtn');
+        if (deleteBtn) {
+            deleteBtn.style.display = app.isCustom ? 'block' : 'none';
         }
     },
     
-    async handleIconUpload(event) {
+
+    
+    async handleIconUpload(event, modal) {
         const file = event.target.files[0];
         if (!file) return;
         
-        // Проверяем размер файла (максимум 500KB)
+        // Check file size (maximum 500KB)
         if (file.size > 500 * 1024) {
-                            alert('File too large. Maximum size: 500KB');
+            Modal.confirm('File too large. Maximum size: 500KB');
             return;
         }
         
         try {
             const base64 = await Storage.fileToBase64(file);
-            const preview = document.getElementById('iconPreview');
+            const preview = modal.querySelector('#iconPreview');
             preview.innerHTML = `<img src="${base64}" alt="Icon preview">`;
             
-            // Сохраняем иконку в переменной
+            // Save icon in variable
             this.currentIcon = base64;
             
-            // Обновляем текст кнопки
-            const uploadBtn = document.getElementById('uploadIconBtn');
+            // Update button text
+            const uploadBtn = modal.querySelector('#uploadIconBtn');
             if (uploadBtn) {
                 uploadBtn.textContent = 'Icon uploaded ✓';
                 setTimeout(() => {
@@ -175,45 +141,45 @@ const Editor = {
                 }, 2000);
             }
             
-            // Очищаем input для возможности повторной загрузки того же файла
+            // Clear input for possible re-upload of same file
             event.target.value = '';
         } catch (error) {
             console.error('Error uploading icon:', error);
-            alert('Error loading icon. Try another file.');
+            Modal.confirm('Error loading icon. Try another file.');
         }
     },
     
-    saveApp() {
+    saveApp(modal) {
         const formData = {
-            name: document.getElementById('appName').value.trim(),
-            url: document.getElementById('appUrl').value.trim(),
+            name: modal.querySelector('#appName').value.trim(),
+            url: modal.querySelector('#appUrl').value.trim(),
             icon: this.currentIcon || null
         };
         
         if (!formData.name || !formData.url) {
-            alert('Please fill in all required fields');
+            Modal.confirm('Please fill in all required fields');
             return;
         }
         
         if (this.currentApp) {
-            // Обновляем существующее приложение
+            // Update existing application
             Storage.updateApp(this.currentApp.id, formData);
         } else {
-            // Проверяем, не достигнут ли лимит в 12 приложений
+            // Check if application limit is reached
             const currentApps = Storage.getApps();
-            if (currentApps.length >= 12) {
-                alert('Maximum number of applications reached (12). Delete one of the existing applications.');
+            if (currentApps.length >= CONFIG.maxApps) {
+                Modal.confirm(`Maximum number of applications reached (${CONFIG.maxApps}). Delete one of the existing applications.`);
                 return;
             }
             
-            // Создаем новое приложение
+            // Create new application
             const newApp = {
                 id: `custom_${Date.now()}`,
                 ...formData,
                 isCustom: true
             };
             
-            // Если иконка не выбрана, используем дефолтную
+            // If no icon selected, use default
             if (!newApp.icon) {
                 newApp.icon = 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2Utd2lkdGg9IjIiPjxyZWN0IHg9IjMiIHk9IjMiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjIiIHJ5PSIyIj48L3JlY3Q+PC9zdmc+';
             }
@@ -221,7 +187,7 @@ const Editor = {
             Storage.saveApp(newApp);
         }
         
-        // Перезагружаем приложения
+        // Reload applications
         Apps.loadApps();
         this.closeEditor();
     },
@@ -229,71 +195,74 @@ const Editor = {
     deleteApp() {
         if (!this.currentApp || !this.currentApp.isCustom) return;
         
-        if (confirm(`Удалить приложение "${this.currentApp.name}"?`)) {
+        Modal.confirm(`Delete application "${this.currentApp.name}"?`, () => {
             Storage.deleteApp(this.currentApp.id);
             Apps.loadApps();
             this.closeEditor();
-        }
+        });
     },
     
-    tryLoadFavicon(url, force = false) {
-        // Проверяем, что URL валидный и иконка еще не была установлена пользователем (если не принудительно)
+    tryLoadFavicon(url, force = false, modal = null) {
+        // Check if URL is valid and icon hasn't been set by user (unless forced)
         if (!url.trim() || (!force && this.currentIcon)) return;
         
         try {
             const urlObj = new URL(url);
             const domain = urlObj.hostname;
             
-            // Используем Google Favicon Service как основной источник
+            // Use Google Favicon Service as main source
             const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
             
-            // Прямо устанавливаем URL без проверки загрузки
-            const preview = document.getElementById('iconPreview');
-            preview.innerHTML = `<img src="${faviconUrl}" alt="Favicon" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2Utd2lkdGg9IjIiPjxyZWN0IHg9IjMiIHk9IjMiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjIiIHJ5PSIyIj48L3JlY3Q+PC9zdmc+';">`;
-            this.currentIcon = faviconUrl;
+            // Directly set URL without load verification
+            const preview = modal ? modal.querySelector('#iconPreview') : document.getElementById('iconPreview');
+            if (preview) {
+                preview.innerHTML = `<img src="${faviconUrl}" alt="Favicon" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2Utd2lkdGg9IjIiPjxyZWN0IHg9IjMiIHk9IjMiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjIiIHJ5PSIyIj48L3JlY3Q+PC9zdmc+';">`;
+                this.currentIcon = faviconUrl;
+            }
             
-            // Обновляем UI для обратной связи
+            // Update UI for feedback
             if (force) {
-                const autoFaviconBtn = document.getElementById('autoFaviconBtn');
+                const autoFaviconBtn = modal ? modal.querySelector('#autoFaviconBtn') : document.getElementById('autoFaviconBtn');
                 if (autoFaviconBtn) {
-                                         autoFaviconBtn.textContent = 'Favicon loaded ✓';
-                     autoFaviconBtn.disabled = false;
-                     setTimeout(() => {
-                         autoFaviconBtn.textContent = 'Get automatically';
-                     }, 2000);
+                    autoFaviconBtn.textContent = 'Favicon loaded ✓';
+                    autoFaviconBtn.disabled = false;
+                    setTimeout(() => {
+                        autoFaviconBtn.textContent = 'Get automatically';
+                    }, 2000);
                 }
             }
         } catch (error) {
-            console.log('Invalid URL for favicon detection:', url);
+            // Invalid URL for favicon detection
             if (force) {
-                                 alert('Failed to load favicon. Check the URL.');
+                Modal.confirm('Failed to load favicon. Check the URL.');
             }
         }
     },
     
-    loadAutoFavicon() {
-        const urlInput = document.getElementById('appUrl');
+    loadAutoFavicon(modal) {
+        const urlInput = modal.querySelector('#appUrl');
         const url = urlInput.value.trim();
         
         if (!url) {
-            alert('Please enter the application URL first');
-            urlInput.focus();
+            Modal.confirm('Please enter the application URL first', () => {
+                urlInput.focus();
+            });
             return;
         }
         
-        // Показываем индикатор загрузки
-        const autoFaviconBtn = document.getElementById('autoFaviconBtn');
+        // Show loading indicator
+        const autoFaviconBtn = modal.querySelector('#autoFaviconBtn');
         const originalText = autoFaviconBtn.textContent;
         autoFaviconBtn.textContent = 'Loading...';
         autoFaviconBtn.disabled = true;
         
-        // Сбрасываем текущую иконку
+        // Reset current icon
         this.currentIcon = null;
         
-        // Получаем фавиконку
-        this.tryLoadFavicon(url, true);
+        // Get favicon
+        this.tryLoadFavicon(url, true, modal);
         
-        // Восстанавливаем кнопку через небольшую задержку
+        // Restore button after small delay
         setTimeout(() => {
             if (autoFaviconBtn.textContent === 'Loading...') {
                 autoFaviconBtn.textContent = originalText;
@@ -308,6 +277,102 @@ const Editor = {
             return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
         } catch {
             return 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2Utd2lkdGg9IjIiPjxyZWN0IHg9IjMiIHk9IjMiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjIiIHJ5PSIyIj48L3JlY3Q+PC9zdmc+';
+        }
+    },
+    
+    createFormContent() {
+        const content = document.createElement('div');
+        content.innerHTML = `
+            <form class="editor-form" id="editorForm">
+                <div class="form-group">
+                    <label for="appName">Application name</label>
+                    <input type="text" id="appName" required placeholder="E.g.: YouTube">
+                </div>
+                
+                <div class="form-group">
+                    <label for="appUrl">Application URL</label>
+                    <input type="url" id="appUrl" required placeholder="https://example.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="appIcon">Application icon</label>
+                    <div class="icon-upload-container">
+                        <div class="icon-preview" id="iconPreview">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <polyline points="21 15 16 10 5 21"></polyline>
+                            </svg>
+                        </div>
+                        <div class="icon-upload-controls">
+                            <input type="file" id="iconFile" accept="image/*" hidden>
+                            <button type="button" class="btn-secondary" id="autoFaviconBtn">
+                                Get automatically
+                            </button>
+                            <button type="button" class="btn-secondary" id="uploadIconBtn">
+                                Choose file
+                            </button>
+                            <small class="help-text">
+                                SVG format recommended.<br>
+                                Maximum size: 500KB<br>
+                                Find icons: <a href="https://icons8.com" target="_blank">icons8.com</a>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn-danger" id="deleteAppBtn" style="display: none;">
+                        Delete
+                    </button>
+                    <button type="submit" class="btn-primary">
+                        Save
+                    </button>
+                </div>
+            </form>
+        `;
+        return content;
+    },
+    
+    setupFormEventListeners(modal) {
+        const form = modal.querySelector('#editorForm');
+        const uploadBtn = modal.querySelector('#uploadIconBtn');
+        const fileInput = modal.querySelector('#iconFile');
+        const autoFaviconBtn = modal.querySelector('#autoFaviconBtn');
+        const deleteBtn = modal.querySelector('#deleteAppBtn');
+        const urlInput = modal.querySelector('#appUrl');
+        
+        // Form submission
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.saveApp(modal);
+        });
+        
+        // Icon file upload
+        if (uploadBtn && fileInput) {
+            uploadBtn.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', (e) => this.handleIconUpload(e, modal));
+        }
+        
+        // Auto favicon loading
+        if (autoFaviconBtn) {
+            autoFaviconBtn.addEventListener('click', () => this.loadAutoFavicon(modal));
+        }
+        
+        // Delete button
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', () => this.deleteApp());
+        }
+        
+        // Auto favicon loading on URL change
+        if (urlInput) {
+            let urlTimeout;
+            urlInput.addEventListener('input', (e) => {
+                clearTimeout(urlTimeout);
+                urlTimeout = setTimeout(() => {
+                    this.tryLoadFavicon(e.target.value, false, modal);
+                }, 1000);
+            });
         }
     }
 };

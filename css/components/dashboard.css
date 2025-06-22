@@ -107,6 +107,14 @@
     padding: 0 20px;
 }
 
+/* 4 колонки для широких экранов */
+@media (min-width: 1400px) {
+    .dashboard-grid {
+        grid-template-columns: repeat(4, 1fr);
+        max-width: 1600px;
+    }
+}
+
 /* Специфичные стили для FullHD ноутбуков */
 @media (min-width: 1920px) and (max-height: 1080px) {
     .dashboard-content {
@@ -160,6 +168,29 @@
 .analytics-widget {
     grid-column: 2;
     grid-row: 2;
+}
+
+/* Позиционирование виджетов для 4 колонок */
+@media (min-width: 1400px) {
+    .pomodoro-widget {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .habits-widget {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    .todo-widget {
+        grid-column: 3;
+        grid-row: 1;
+    }
+
+    .analytics-widget {
+        grid-column: 4;
+        grid-row: 1;
+    }
 }
 
 /* Базовые стили виджетов */
@@ -267,9 +298,7 @@
 
 /* Выпадающие настройки помодоро */
 .pomodoro-settings-dropdown {
-    position: absolute;
-    top: 100%;
-    right: 0;
+    position: fixed;
     width: 280px;
     background: rgba(0, 0, 0, 0.95);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -277,7 +306,7 @@
     padding: 20px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(20px);
-    z-index: 100;
+    z-index: 1000;
     opacity: 0;
     visibility: hidden;
     transform: translateY(-10px);

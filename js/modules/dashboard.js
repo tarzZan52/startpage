@@ -1,4 +1,4 @@
-// Модуль управления дашбордом
+// Dashboard management module
 const Dashboard = {
     isActive: false,
     mainContent: null,
@@ -24,16 +24,16 @@ const Dashboard = {
             this.toggle();
         });
         
-        // Клавиатурные сокращения
+        // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-            // Игнорируем если открыто модальное окно или фокус в поле ввода
+            // Ignore if modal is open or focus is in input field
             if (document.querySelector('.modal-overlay.active') || 
                 document.querySelector('.habit-modal.active') ||
                 ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
                 return;
             }
             
-            // Ctrl/Cmd + D для переключения дашборда
+            // Ctrl/Cmd + D to toggle dashboard
             if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
                 e.preventDefault();
                 this.toggle();
@@ -54,69 +54,67 @@ const Dashboard = {
     showDashboard() {
         this.isActive = true;
         
-        // Сначала полностью скрываем главную страницу с анимацией
+        // First completely hide main page with animation
         this.mainContent.style.opacity = '0';
         this.mainContent.style.transform = 'translateY(-20px)';
         
-        setTimeout(() => {
-            // Активируем режим дашборда
+        // Small delay for smooth animation
+        requestAnimationFrame(() => {
+            // Activate dashboard mode
             document.body.classList.add('dashboard-mode');
             
-            // Показываем дашборд
+            // Show dashboard
             this.dashboardContent.style.display = 'block';
             
-            setTimeout(() => {
+            requestAnimationFrame(() => {
                 this.dashboardContent.classList.add('active');
-            }, 50);
-        }, 200);
+            });
+        });
         
-        // Инициализируем виджеты при первом показе
+        // Initialize widgets on first show
         if (!this.dashboardContent.dataset.initialized) {
             this.initializeWidgets();
             this.dashboardContent.dataset.initialized = 'true';
         }
         
-        // Обновляем данные виджетов
+        // Update widget data
         this.refreshWidgets();
     },
     
     showMain() {
         this.isActive = false;
         
-        // Автосохранение заметок при выходе из дашборда
-        if (typeof NotesModule !== 'undefined' && NotesModule.cleanup) {
-            NotesModule.cleanup();
-        }
+
         
-        // Сначала скрываем дашборд с анимацией
+        // First hide dashboard with animation
         this.dashboardContent.classList.remove('active');
         
-        setTimeout(() => {
+        requestAnimationFrame(() => {
             this.dashboardContent.style.display = 'none';
             
-            // Убираем режим дашборда
+            // Remove dashboard mode
             document.body.classList.remove('dashboard-mode');
             
-            // Сбрасываем все inline стили главной страницы
+            // Reset all inline styles of main page
             this.mainContent.removeAttribute('style');
             
-            setTimeout(() => {
-                // Принудительно перезапускаем стили главной страницы
+            requestAnimationFrame(() => {
+                // Force restart main page styles
                 this.mainContent.style.opacity = '0';
                 this.mainContent.style.transform = 'translateY(20px)';
                 
-                // Анимируем появление
+                // Animate appearance
                 requestAnimationFrame(() => {
                     this.mainContent.style.transition = 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
                     this.mainContent.style.opacity = '1';
                     this.mainContent.style.transform = 'translateY(0)';
                 });
-            }, 50);
-        }, 200);
+            });
+        });
     },
     
     initializeWidgets() {
-        // Инициализируем все виджеты
+        // Initialize all widgets
         if (typeof PomodoroModule !== 'undefined') {
             PomodoroModule.init();
         }
@@ -125,48 +123,38 @@ const Dashboard = {
             HabitsModule.init();
         }
         
-        if (typeof NotesModule !== 'undefined') {
-            NotesModule.init();
-        }
+
         
         if (typeof TodoModule !== 'undefined') {
             TodoModule.init();
         }
         
-        // Инициализируем модуль аналитики
+        // Initialize analytics module
         if (typeof AnalyticsModule !== 'undefined') {
-            // Небольшая задержка для загрузки Chart.js
-            setTimeout(() => {
-                AnalyticsModule.init();
-            }, 300);
+            AnalyticsModule.init();
         }
     },
     
     refreshWidgets() {
-        // Обновляем данные виджетов
+        // Update widget data
         if (typeof HabitsModule !== 'undefined' && this.isActive) {
             HabitsModule.updateStats();
         }
         
-        if (typeof NotesModule !== 'undefined' && this.isActive) {
-            // Заметки не нуждаются в refresh'е, они обновляются автоматически
-        }
+
         
         if (typeof AnalyticsModule !== 'undefined' && this.isActive) {
-            // Обновляем аналитику с небольшой задержкой
-            setTimeout(() => {
-                AnalyticsModule.refreshData();
-            }, 500);
+            AnalyticsModule.refreshData();
         }
     },
     
     loadState() {
-        // Всегда начинаем с главной страницы при открытии новой вкладки
+        // Always start with main page when opening new tab
         this.ensureMainState();
     },
     
     ensureMainState() {
-        // Принудительно сбрасываем состояние к главной странице
+        // Force reset state to main page
         document.body.classList.remove('dashboard-mode');
         this.dashboardContent.style.display = 'none';
         this.dashboardContent.classList.remove('active');

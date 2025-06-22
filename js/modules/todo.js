@@ -1,9 +1,9 @@
-// Модуль управления задачами
+// Task management module
 const TodoModule = {
     tasks: [],
     currentFilter: 'all',
     
-    // DOM элементы
+    // DOM elements
     elements: {
         input: null,
         addBtn: null,
@@ -15,7 +15,7 @@ const TodoModule = {
         deadlineInput: null
     },
     
-    // Инициализация модуля
+    // Module initialization
     init() {
         if (!this.loadElements()) {
             console.error('Todo module initialization failed: missing elements');
@@ -23,11 +23,11 @@ const TodoModule = {
         }
         this.loadTasks();
         this.setupEventListeners();
+        this.setupEventBusListeners();
         this.render();
-        console.log('Todo module initialized successfully');
     },
     
-    // Загрузка DOM элементов
+    // Loading DOM elements
     loadElements() {
         this.elements.input = document.getElementById('todoInput');
         this.elements.addBtn = document.getElementById('todoAddBtn');
@@ -36,10 +36,10 @@ const TodoModule = {
         this.elements.prioritySelect = document.getElementById('todoPriority');
         this.elements.filters = document.querySelectorAll('.todo-filter');
         this.elements.clearCompleted = document.getElementById('todoClearCompleted');
-        // deadlineInput не используется в текущей версии
+        // deadlineInput is not used in current version
         this.elements.deadlineInput = null;
         
-        // Проверяем что ключевые элементы найдены
+        // Check that key elements are found
         const requiredElements = ['input', 'addBtn', 'list', 'stats', 'prioritySelect'];
         const missingElements = requiredElements.filter(key => !this.elements[key]);
         
@@ -51,9 +51,9 @@ const TodoModule = {
         return true;
     },
     
-    // Настройка обработчиков событий
+    // Setup event handlers
     setupEventListeners() {
-        // Добавление задачи
+        // Task addition
         this.elements.addBtn.addEventListener('click', () => this.addTask());
         this.elements.input.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
@@ -61,26 +61,26 @@ const TodoModule = {
             }
         });
         
-        // Фильтры
+        // Filters
         this.elements.filters.forEach(filter => {
             filter.addEventListener('click', (e) => {
                 this.setFilter(e.target.dataset.filter);
             });
         });
         
-        // Очистка выполненных
+        // Clear completed
         this.elements.clearCompleted.addEventListener('click', () => {
             this.clearCompleted();
         });
         
-        // Глобальные горячие клавиши
+        // Global hotkeys
         document.addEventListener('keydown', (e) => {
             if (!Dashboard.isActive || 
                 ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
                 return;
             }
             
-            // Ctrl/Cmd + Enter - добавить задачу
+            // Ctrl/Cmd + Enter - add task
             if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
                 e.preventDefault();
                 this.elements.input.focus();
@@ -88,7 +88,15 @@ const TodoModule = {
         });
     },
     
-    // Добавление новой задачи
+    // Setup EventBus listeners
+    setupEventBusListeners() {
+        // Listen to events from Pomodoro module
+        EventBus.on('pomodoro:task-time-updated', (data) => {
+            this.updateTaskTime(data.taskId, data.minutes);
+        });
+    },
+    
+    // Adding new task
     addTask() {
         const text = this.elements.input.value.trim();
         if (!text) return;
@@ -101,28 +109,31 @@ const TodoModule = {
             deadline: this.elements.deadlineInput ? this.elements.deadlineInput.value : null,
             createdAt: new Date().toISOString(),
             completedAt: null,
-            // Новые поля для отслеживания времени
-            timeSpent: 0, // в минутах
+            // New fields for time tracking
+            timeSpent: 0, // in minutes
             pomodoroSessions: 0,
             lastWorkedAt: null
         };
         
-        this.tasks.unshift(task); // Добавляем в начало
+        this.tasks.unshift(task); // Add to beginning
         this.saveTasks();
         this.render();
         
-        // Очистка формы
+        // Send task update event
+        EventBus.emit('tasks:updated');
+        
+        // Clear form
         this.elements.input.value = '';
         this.elements.prioritySelect.value = 'medium';
         if (this.elements.deadlineInput) {
             this.elements.deadlineInput.value = '';
         }
         
-        // Анимация добавления
+        // Add animation
         this.animateTaskAdd();
     },
     
-    // Переключение состояния задачи
+    // Toggle task state
     toggleTask(id) {
         const task = this.tasks.find(t => t.id === id);
         if (task) {
@@ -131,31 +142,35 @@ const TodoModule = {
             this.saveTasks();
             this.render();
             
-            // Обновляем статистику для аналитики
-            if (window.AnalyticsModule) {
-                window.AnalyticsModule.refreshData();
-            }
+            // Send task update events
+            EventBus.emit('tasks:updated');
         }
     },
     
-    // Удаление задачи
+    // Task deletion
     deleteTask(id) {
         this.tasks = this.tasks.filter(t => t.id !== id);
         this.saveTasks();
         this.render();
+        
+        // Send task update event
+        EventBus.emit('tasks:updated');
     },
     
-    // Редактирование задачи
+    // Task editing
     editTask(id, newText) {
         const task = this.tasks.find(t => t.id === id);
         if (task) {
             task.text = newText.trim();
             this.saveTasks();
             this.render();
+            
+            // Send task update event
+            EventBus.emit('tasks:updated');
         }
     },
     
-    // Изменение приоритета задачи
+    // Change task priority
     changePriority(id, newPriority) {
         const task = this.tasks.find(t => t.id !== id);
         if (task) {
@@ -165,7 +180,7 @@ const TodoModule = {
         }
     },
     
-    // Обновление времени работы над задачей
+    // Update task work time
     updateTaskTime(taskId, minutes) {
         const task = this.tasks.find(t => t.id === taskId);
         if (task) {
@@ -174,24 +189,27 @@ const TodoModule = {
             task.lastWorkedAt = new Date().toISOString();
             this.saveTasks();
             this.render();
+            
+            // Send task update event
+            EventBus.emit('tasks:updated');
         }
     },
     
-    // Получение активных задач для выбора в Pomodoro
+    // Get active tasks for Pomodoro selection
     getActiveTasks() {
         return this.tasks.filter(t => !t.completed);
     },
     
-    // Получение задачи по ID
+    // Get task by ID
     getTaskById(id) {
         return this.tasks.find(t => t.id === id);
     },
     
-    // Установка фильтра
+    // Set filter
     setFilter(filter) {
         this.currentFilter = filter;
         
-        // Обновление активного фильтра
+        // Update active filter
         this.elements.filters.forEach(f => {
             f.classList.toggle('active', f.dataset.filter === filter);
         });
@@ -199,19 +217,22 @@ const TodoModule = {
         this.render();
     },
     
-    // Очистка выполненных задач
+    // Clear completed tasks
     clearCompleted() {
         const completedCount = this.tasks.filter(t => t.completed).length;
         if (completedCount === 0) return;
         
-        if (confirm(`Delete ${completedCount} completed tasks?`)) {
+        Modal.confirm(`Delete ${completedCount} completed tasks?`, () => {
             this.tasks = this.tasks.filter(t => !t.completed);
             this.saveTasks();
             this.render();
-        }
+            
+            // Send task update event
+            EventBus.emit('tasks:updated');
+        });
     },
     
-    // Получение отфильтрованных задач
+    // Get filtered tasks
     getFilteredTasks() {
         let filtered = [...this.tasks];
         
@@ -224,13 +245,13 @@ const TodoModule = {
                 break;
         }
         
-        // Сортировка: сначала по выполнению, потом по последней работе, потом по приоритету
+        // Sorting: first by completion, then by last work, then by priority
         return filtered.sort((a, b) => {
             if (a.completed !== b.completed) {
                 return a.completed ? 1 : -1;
             }
             
-            // Сортировка по последней работе (недавно использованные первые)
+            // Sort by last work (recently used first)
             if (!a.completed && a.lastWorkedAt && b.lastWorkedAt) {
                 return new Date(b.lastWorkedAt) - new Date(a.lastWorkedAt);
             } else if (!a.completed && a.lastWorkedAt && !b.lastWorkedAt) {
@@ -239,7 +260,7 @@ const TodoModule = {
                 return 1;
             }
             
-            // Сортировка по дедлайну (ближайшие первые)
+            // Sort by deadline (nearest first)
             if (!a.completed && a.deadline && b.deadline) {
                 return new Date(a.deadline) - new Date(b.deadline);
             } else if (!a.completed && a.deadline && !b.deadline) {
@@ -257,7 +278,7 @@ const TodoModule = {
         });
     },
     
-    // Форматирование времени
+    // Time formatting
     formatTime(minutes) {
         if (minutes < 60) {
             return `${minutes}m`;
@@ -267,7 +288,7 @@ const TodoModule = {
         return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
     },
     
-    // Создание HTML элемента задачи
+    // Create task HTML element
     createTaskElement(task) {
         const item = document.createElement('div');
         item.className = `todo-item priority-${task.priority}`;
@@ -312,7 +333,7 @@ const TodoModule = {
             deadlineHtml = `<span class="${deadlineClass}">📅 ${deadlineText}</span>`;
         }
         
-        // Время работы над задачей
+        // Task work time
         let timeHtml = '';
         if (task.timeSpent > 0) {
             timeHtml = `<span class="todo-time" title="${task.pomodoroSessions} Pomodoro sessions">
@@ -342,7 +363,7 @@ const TodoModule = {
             </button>
         `;
         
-        // Обработчики событий
+        // Event handlers
         const checkbox = item.querySelector('.todo-checkbox');
         const text = item.querySelector('.todo-text');
         const deleteBtn = item.querySelector('.todo-delete');
@@ -353,13 +374,13 @@ const TodoModule = {
             this.deleteTask(task.id);
         });
         
-        // Редактирование по двойному клику
+        // Edit on double click
         text.addEventListener('dblclick', () => this.startEdit(task.id, text));
         
         return item;
     },
     
-    // Начало редактирования задачи
+    // Start task editing
     startEdit(taskId, textElement) {
         const task = this.tasks.find(t => t.id === taskId);
         if (!task || task.completed) return;
@@ -394,7 +415,7 @@ const TodoModule = {
         });
     },
     
-    // Анимация добавления задачи
+    // Task add animation
     animateTaskAdd() {
         const firstTask = this.elements.list.querySelector('.todo-item');
         if (firstTask) {
@@ -409,14 +430,14 @@ const TodoModule = {
         }
     },
     
-    // Отрисовка списка задач
+    // Render task list
     render() {
         const filteredTasks = this.getFilteredTasks();
         
-        // Очистка списка
+        // Clear list
         this.elements.list.innerHTML = '';
         
-        // Добавление задач
+        // Add tasks
         if (filteredTasks.length === 0) {
             this.elements.list.innerHTML = this.getEmptyMessage();
         } else {
@@ -425,10 +446,10 @@ const TodoModule = {
             });
         }
         
-        // Обновление статистики
+        // Update statistics
         this.updateStats();
         
-        // Обновление кнопки очистки
+        // Update clear button
         const completedCount = this.tasks.filter(t => t.completed).length;
         this.elements.clearCompleted.style.display = completedCount > 0 ? 'block' : 'none';
     },
@@ -449,7 +470,7 @@ const TodoModule = {
         `;
     },
     
-    // Обновление статистики
+    // Update statistics
     updateStats() {
         const total = this.tasks.length;
         const completed = this.tasks.filter(t => t.completed).length;
@@ -465,7 +486,7 @@ const TodoModule = {
         }
     },
     
-    // Получение статистики для аналитики
+    // Get statistics for analytics
     getStatisticsData() {
         const now = new Date();
         const stats = {
@@ -476,7 +497,7 @@ const TodoModule = {
             regularTasks: 0
         };
         
-        // Анализируем выполненные задачи
+        // Analyze completed tasks
         this.tasks.filter(t => t.completed && t.completedAt).forEach(task => {
             const completedDate = new Date(task.completedAt);
             const dateKey = completedDate.toISOString().split('T')[0];
@@ -536,10 +557,19 @@ const TodoModule = {
     
     // Очистка при выходе из дашборда
     cleanup() {
-        // Сохраняем данные при смене режима
+        // Save data when switching modes
         this.saveTasks();
+    },
+    
+    // Public methods for getting data (for analytics.js)
+    getTasks() {
+        return this.tasks;
+    },
+    
+    getCompletedTasks() {
+        return this.tasks.filter(t => t.completed);
     }
 };
 
-// Экспорт модуля
+// Export module
 window.TodoModule = TodoModule;

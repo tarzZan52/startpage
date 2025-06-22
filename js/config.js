@@ -66,5 +66,8 @@ const CONFIG = {
     animation: {
         parallaxSpeed: 0.5,
         fogDriftSpeed: 60
-    }
+    },
+    
+    // Application limits
+    maxApps: 12
 };
