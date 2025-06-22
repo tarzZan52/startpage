@@ -1,22 +1,22 @@
-// Конфигурация приложения
+// Application configuration
 const CONFIG = {
-    // Поисковые системы
+    // Search engines
     searchEngines: {
         duckduckgo: { 
             url: 'https://duckduckgo.com/?q=', 
-            placeholder: 'Поиск в DuckDuckGo...' 
+            placeholder: 'Search on DuckDuckGo...' 
         },
         google: { 
             url: 'https://www.google.com/search?q=', 
-            placeholder: 'Поиск в Google...' 
+            placeholder: 'Search on Google...' 
         },
         yandex: { 
             url: 'https://yandex.ru/search/?text=', 
-            placeholder: 'Поиск в Яндексе...' 
+            placeholder: 'Search on Yandex...' 
         }
     },
     
-    // Приложения по умолчанию
+    // Default applications
     apps: [
         {
             id: 'default_chatgpt',
@@ -55,14 +55,14 @@ const CONFIG = {
         }
     ],
     
-    // Настройки частиц
+    // Particles settings
     particles: {
         count: 100,
         minDuration: 15,
         maxDuration: 35
     },
     
-    // Настройки анимации
+    // Animation settings
     animation: {
         parallaxSpeed: 0.5,
         fogDriftSpeed: 60

@@ -72,15 +72,13 @@
 
 /* Дашборд контент */
 .dashboard-content {
-    padding: 20px;
-    height: 100vh;
-    overflow: hidden;
+    padding: 60px 20px 20px;
+    min-height: 100vh;
     opacity: 0;
     transform: translateY(20px);
     transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
     position: relative;
     z-index: 10;
-    box-sizing: border-box;
 }
 
 .dashboard-content.active {
@@ -102,73 +100,48 @@
 /* Сетка дашборда */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    gap: 20px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
     max-width: 1400px;
     margin: 0 auto;
     padding: 0 20px;
-    height: calc(100vh - 40px);
-    max-height: calc(100vh - 40px);
-    overflow: hidden;
 }
 
-/* Размещение виджетов */
+/* Позиционирование виджетов */
 .pomodoro-widget {
-    grid-column: 1 / 2;
-    grid-row: 1 / 3;
-}
-
-.notes-widget {
-    grid-column: 2 / 4;
-    grid-row: 1 / 2;
-}
-
-.todo-widget {
-    grid-column: 2 / 4;
-    grid-row: 2 / 3;
+    grid-column: 1;
+    grid-row: 1;
 }
 
 .habits-widget {
-    grid-column: 4 / 5;
-    grid-row: 1 / 3;
+    grid-column: 2;
+    grid-row: 1;
 }
 
-.calendar-widget {
-    grid-column: 1 / 2;
-    grid-row: 3 / 4;
-}
-
-.quicklinks-widget {
-    grid-column: 2 / 3;
-    grid-row: 3 / 4;
-}
-
-.quote-widget {
-    grid-column: 3 / 5;
-    grid-row: 3 / 4;
+.todo-widget {
+    grid-column: 3;
+    grid-row: 1;
 }
 
 /* Базовые стили виджетов */
 .widget {
     background: rgba(0, 0, 0, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 24px;
-    padding: 24px;
+    border-radius: 20px;
+    padding: 20px;
     display: flex;
     flex-direction: column;
     position: relative;
     overflow: hidden;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    backdrop-filter: blur(10px);
     min-height: 0;
+    backdrop-filter: blur(10px);
 }
 
 .widget:hover {
     border-color: rgba(255, 255, 255, 0.2);
     transform: translateY(-2px);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    background: rgba(0, 0, 0, 0.5);
 }
 
 .widget::before {
@@ -214,7 +187,8 @@
 }
 
 .widget-settings-btn,
-.notes-add-btn {
+.notes-add-btn,
+.habits-add-btn {
     background: none;
     border: none;
     color: var(--text-secondary);
@@ -226,13 +200,15 @@
 }
 
 .widget-settings-btn:hover,
-.notes-add-btn:hover {
+.notes-add-btn:hover,
+.habits-add-btn:hover {
     background: rgba(255, 255, 255, 0.1);
     color: var(--text-primary);
 }
 
 .widget-settings-btn svg,
-.notes-add-btn svg {
+.notes-add-btn svg,
+.habits-add-btn svg {
     width: 18px;
     height: 18px;
 }
@@ -244,56 +220,210 @@
     margin-left: auto;
 }
 
-/* Инлайн настройки помодоро */
-.pomodoro-settings-inline {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 20px;
-    padding: 12px;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+/* Выпадающие настройки помодоро */
+.pomodoro-settings-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 280px;
+    background: rgba(0, 0, 0, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(20px);
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-.settings-row {
+.pomodoro-settings-dropdown.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.settings-group {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.setting-item label {
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    flex: 1;
+}
+
+.time-input-group {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 0.8rem;
-}
-
-.settings-row label {
-    color: var(--text-secondary);
-    min-width: 45px;
-    font-size: 0.75rem;
-}
-
-.settings-row input[type="number"] {
-    width: 40px;
-    padding: 2px 4px;
+    gap: 8px;
     background: rgba(0, 0, 0, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
+    border-radius: 12px;
+    padding: 4px;
+}
+
+.time-btn {
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 8px;
     color: var(--text-primary);
-    font-size: 0.75rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.time-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+.time-btn:active {
+    transform: scale(0.95);
+}
+
+.time-input-group input[type="number"] {
+    width: 50px;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 600;
     text-align: center;
-}
-
-.settings-row input[type="number"]:focus {
     outline: none;
-    border-color: var(--dashboard-accent);
 }
 
-.settings-row input[type="checkbox"] {
-    width: 14px;
-    height: 14px;
-    accent-color: var(--dashboard-accent);
-}
-
-.settings-row span {
+.time-unit {
     color: var(--text-secondary);
-    font-size: 0.7rem;
+    font-size: 0.8rem;
+    margin-right: 4px;
+}
+
+/* Переключатель (Toggle) */
+.setting-toggle {
+    align-items: center;
+}
+
+.toggle-switch {
+    position: relative;
+    width: 48px;
+    height: 24px;
+}
+
+.toggle-switch input[type="checkbox"] {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 24px;
+    transition: all 0.3s ease;
+}
+
+.toggle-slider::before {
+    content: '';
+    position: absolute;
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    background: var(--dashboard-accent);
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+    transform: translateX(24px);
+}
+
+/* Разделитель в настройках */
+.settings-separator {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 8px 0;
+}
+
+/* Кнопки действий в настройках */
+.settings-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.settings-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+    text-align: left;
+}
+
+.settings-action-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.settings-action-btn.danger {
+    color: var(--dashboard-danger);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.settings-action-btn.danger:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.5);
+}
+
+.settings-action-btn svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+/* Позиционирование относительно виджета */
+.pomodoro-widget {
+    position: relative;
 }
 
 /* Таймер Помодоро */
@@ -309,15 +439,38 @@
 
 .timer-circle {
     position: relative;
-    width: 200px;
-    height: 200px;
+    width: 220px;
+    height: 220px;
     margin-bottom: 30px;
+    filter: drop-shadow(0 4px 20px rgba(116, 188, 164, 0.15));
 }
 
 .timer-progress {
     width: 100%;
     height: 100%;
     transform: rotate(-90deg);
+}
+
+.timer-progress circle {
+    transition: stroke-dashoffset 0.5s ease-in-out;
+}
+
+.timer-progress circle:last-child {
+    stroke-linecap: round;
+}
+
+/* Анимация пульсации во время работы */
+@keyframes timer-pulse {
+    0%, 100% {
+        filter: drop-shadow(0 4px 20px rgba(116, 188, 164, 0.15));
+    }
+    50% {
+        filter: drop-shadow(0 4px 30px rgba(116, 188, 164, 0.3));
+    }
+}
+
+.timer-circle.active {
+    animation: timer-pulse 2s ease-in-out infinite;
 }
 
 .timer-display {
@@ -329,17 +482,21 @@
 }
 
 .timer-time {
-    font-size: 2.5rem;
-    font-weight: 700;
+    font-size: 3rem;
+    font-weight: 300;
     color: var(--text-primary);
     margin-bottom: 4px;
-    font-feature-settings: 'tnum';
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
 .timer-label {
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: var(--text-secondary);
     font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
 }
 
 .timer-controls {
@@ -349,29 +506,739 @@
 }
 
 .timer-btn {
-    width: 48px;
-    height: 48px;
-    background: rgba(107, 114, 128, 0.2);
-    border: 1px solid rgba(107, 114, 128, 0.3);
+    width: 56px;
+    height: 56px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 50%;
-    color: var(--dashboard-accent);
+    color: var(--text-primary);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.timer-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s ease, height 0.3s ease;
+}
+
+.timer-btn:hover::before {
+    width: 100%;
+    height: 100%;
 }
 
 .timer-btn:hover {
-    background: rgba(156, 163, 175, 0.3);
-    border-color: rgba(156, 163, 175, 0.5);
-    transform: scale(1.05);
-    color: var(--dashboard-accent-hover);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.timer-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .timer-btn svg {
+    width: 22px;
+    height: 22px;
+    position: relative;
+    z-index: 1;
+}
+
+/* Главная кнопка старт/пауза */
+.timer-start,
+.timer-pause {
+    width: 64px;
+    height: 64px;
+    background: var(--dashboard-accent);
+    border-color: var(--dashboard-accent);
+}
+
+.timer-start:hover,
+.timer-pause:hover {
+    background: rgba(116, 188, 164, 0.8);
+    border-color: rgba(116, 188, 164, 0.8);
+}
+
+.timer-start svg,
+.timer-pause svg {
+    width: 26px;
+    height: 26px;
+}
+
+/* Статистика продуктивности */
+.pomodoro-productivity {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.productivity-item {
+    text-align: center;
+}
+
+.productivity-label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+.productivity-value {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--dashboard-accent);
+}
+
+/* Стили для трекера привычек */
+.habits-stats {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-left: auto;
+}
+
+.habits-stats .stats-separator {
+    margin: 0 8px;
+    opacity: 0.5;
+}
+
+.habits-list {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-right: 4px;
+}
+
+.habits-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-secondary);
+}
+
+.habits-empty-icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    opacity: 0.6;
+}
+
+.habits-empty-text {
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+.habit-item {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 16px;
+    transition: all 0.2s ease;
+}
+
+.habit-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    transform: translateX(2px);
+}
+
+.habit-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.habit-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.habit-info {
+    flex: 1;
+}
+
+.habit-name {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.habit-stats {
+    display: flex;
+    gap: 12px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.habit-streak {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.habit-check {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+}
+
+.habit-check:hover {
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: scale(1.1);
+}
+
+.habit-check.checked {
+    background: var(--habit-color);
+    border-color: var(--habit-color);
+}
+
+.habit-check svg {
     width: 20px;
     height: 20px;
+    color: white;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.3s ease;
+}
+
+.habit-check.checked svg {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.habit-progress {
+    margin-bottom: 8px;
+}
+
+.habit-week {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 8px;
+    overflow: hidden;
+}
+
+.habit-day {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+    position: relative;
+}
+
+.habit-day-label {
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+    opacity: 0.6;
+}
+
+.habit-day-marker {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    transition: all 0.2s ease;
+}
+
+.habit-day.completed .habit-day-marker {
+    background: var(--dashboard-success);
+}
+
+.habit-day.today .habit-day-label {
+    color: var(--text-primary);
+    font-weight: 600;
+    opacity: 1;
+}
+
+.habit-progress-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.habit-progress-fill {
+    height: 100%;
+    transition: width 0.3s ease;
+    border-radius: 3px;
+}
+
+.habit-progress-text {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+
+
+.habit-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 8px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.habit-item:hover .habit-actions {
+    opacity: 1;
+}
+
+.habit-action-btn {
+    background: none;
+    border: none;
+    padding: 6px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.habit-action-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.habit-action-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.habit-delete:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--dashboard-danger);
+}
+
+/* Модальное окно для добавления привычки */
+.habit-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.habit-modal.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.habit-modal-content {
+    background: rgba(20, 20, 20, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    width: 90%;
+    max-width: 480px;
+    animation: modalSlideIn 0.3s ease;
+}
+
+.habit-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 28px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.habit-modal-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.habit-modal-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    font-size: 1.5rem;
+}
+
+.habit-modal-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.habit-form {
+    padding: 28px;
+}
+
+.habit-form-group {
+    margin-bottom: 20px;
+}
+
+.habit-form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.habit-form-group input {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.habit-form-group input:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.habit-icon-grid {
+    display: flex;
+    gap: 12px;
+}
+
+.habit-icon-input {
+    flex: 0 0 80px;
+}
+
+.habit-target-input {
+    flex: 1;
+}
+
+.habit-target-input label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.habit-target-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.habit-target-controls .habit-target-btn {
+    width: 32px;
+    height: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.4);
+    color: var(--text-primary);
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.habit-target-controls .habit-target-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.habit-target-controls input[type="number"] {
+    flex: 1;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.habit-color-picker {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.habit-color-option {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.habit-color-option:hover {
+    transform: scale(1.1);
+}
+
+.habit-color-option.selected {
+    border-color: white;
+}
+
+.habit-color-option.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.habit-form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 28px;
+}
+
+.habit-btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.habit-btn-primary {
+    background: rgba(116, 188, 164, 0.2);
+    border: 1px solid rgba(116, 188, 164, 0.4);
+    color: #fff;
+}
+
+.habit-btn-primary:hover {
+    background: rgba(116, 188, 164, 0.3);
+    border-color: rgba(116, 188, 164, 0.6);
+    transform: translateY(-1px);
+}
+
+.habit-btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-primary);
+}
+
+.habit-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Модальное окно деталей привычки */
+.habit-details-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1002;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.habit-details-content {
+    background: rgba(20, 20, 20, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.3s ease;
+}
+
+.habit-details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 28px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.habit-details-header h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.habit-details-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 8px;
+    font-size: 1.5rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.habit-details-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.habit-calendar {
+    padding: 24px;
+}
+
+/* Навигация календаря */
+.calendar-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding: 0 8px;
+}
+
+.calendar-nav-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.calendar-nav-btn:hover {
+    background: var(--dashboard-accent);
+    color: white;
+    transform: scale(1.1);
+}
+
+.calendar-month-year {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: center;
+    min-width: 150px;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.calendar-header {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    padding: 8px 0;
+    font-weight: 500;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+}
+
+.calendar-day.completed {
+    background: var(--dashboard-success);
+    color: white;
+    font-weight: 500;
+}
+
+.calendar-day.today {
+    border: 2px solid var(--dashboard-accent);
+}
+
+.calendar-day.future {
+    opacity: 0.3;
+}
+
+.calendar-day.empty {
+    background: transparent;
+}
+
+.habit-details-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.stat-value {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-primary);
 }
 
 /* Заметки */
@@ -379,13 +1246,17 @@
     display: flex;
     gap: 16px;
     flex: 1;
-    min-height: 0;
+    min-height: 350px;
+    height: auto;
+    overflow: hidden;
 }
 
 .notes-sidebar {
     flex: 0 0 200px;
     display: flex;
     flex-direction: column;
+    height: 100%;
+    min-height: 0;
 }
 
 .notes-list {
@@ -394,6 +1265,7 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
+    min-height: 0;
 }
 
 .note-item {
@@ -449,24 +1321,13 @@
     white-space: nowrap;
 }
 
-.note-tags-preview {
-    display: flex;
-    gap: 4px;
-    margin-top: 4px;
-    flex-wrap: wrap;
-}
-
-.note-tag-preview {
-    font-size: 0.7rem;
-    color: var(--dashboard-accent);
-    opacity: 0.8;
-}
-
 .notes-editor {
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: 12px;
+    height: 100%;
+    min-height: 0;
 }
 
 .notes-editor textarea {
@@ -482,6 +1343,8 @@
     resize: none;
     outline: none;
     transition: all 0.2s ease;
+    min-height: 250px;
+    height: auto;
 }
 
 .notes-editor textarea:focus {
@@ -834,732 +1697,75 @@
     opacity: 0.8;
 }
 
-/* Статистика продуктивности Помодоро */
-.pomodoro-productivity {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.productivity-item {
-    text-align: center;
-}
-
-.productivity-label {
-    display: block;
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    margin-bottom: 4px;
-}
-
-.productivity-value {
-    display: block;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--dashboard-accent);
-}
-
-/* Улучшенные заметки */
-.notes-search {
-    margin-bottom: 12px;
-}
-
-.notes-search input {
-    width: 100%;
-    padding: 8px 12px;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    color: var(--text-primary);
-    font-size: 0.85rem;
-    transition: all 0.2s ease;
-}
-
-.notes-search input:focus {
-    outline: none;
-    border-color: var(--dashboard-accent);
-    background: rgba(0, 0, 0, 0.4);
-}
-
-.notes-tags {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 12px;
-    flex-wrap: wrap;
-}
-
-.note-tag {
-    padding: 4px 10px;
-    background: rgba(107, 114, 128, 0.2);
-    border: 1px solid rgba(107, 114, 128, 0.3);
-    border-radius: 12px;
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.note-tag:hover {
-    background: rgba(156, 163, 175, 0.3);
-    border-color: rgba(156, 163, 175, 0.5);
-    color: var(--text-primary);
-}
-
-.note-tag.active {
-    background: var(--dashboard-accent);
-    border-color: var(--dashboard-accent);
-    color: white;
-}
-
-/* Улучшенный ToDo с дедлайнами */
-.todo-deadline-input {
-    padding: 8px 12px;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    color: var(--text-primary);
-    font-size: 0.85rem;
-    font-family: inherit;
-}
-
-.todo-deadline-input:focus {
-    outline: none;
-    border-color: var(--dashboard-accent);
-}
-
-.todo-deadline {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    margin-left: 8px;
-}
-
-.todo-deadline.overdue {
-    color: var(--dashboard-danger);
-}
-
-.todo-deadline.soon {
-    color: var(--dashboard-warning);
-}
-
-/* Трекер привычек */
-.habits-add-btn {
-    background: none;
-    border: none;
-    color: var(--text-secondary);
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-    margin-left: auto;
-}
-
-.habits-add-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--text-primary);
-}
-
-.habits-add-btn svg {
-    width: 18px;
-    height: 18px;
-}
-
-.habits-content {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    flex: 1;
-    min-height: 0;
-}
-
-.habits-list {
-    flex: 1;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    min-height: 200px;
-    max-height: 350px;
-    padding-right: 4px;
-}
-
-.habit-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    transition: all 0.2s ease;
-}
-
-.habit-item:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
-}
-
-.habit-checkbox {
-    width: 32px;
-    height: 32px;
-    background: rgba(0, 0, 0, 0.3);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-}
-
-.habit-checkbox:hover {
-    border-color: var(--dashboard-accent);
-}
-
-.habit-checkbox.checked {
-    background: var(--dashboard-accent);
-    border-color: var(--dashboard-accent);
-}
-
-.habit-checkbox svg {
-    width: 18px;
-    height: 18px;
-    color: white;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-}
-
-.habit-checkbox.checked svg {
-    opacity: 1;
-}
-
-.habit-name {
-    flex: 1;
-    font-size: 0.9rem;
-    color: var(--text-primary);
-}
-
-.habit-streak {
-    font-size: 0.8rem;
-    color: var(--dashboard-accent);
-    font-weight: 600;
-}
-
-.habits-streak {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    padding: 16px;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.streak-item {
-    text-align: center;
-}
-
-.streak-number {
-    display: block;
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: var(--dashboard-accent);
-    margin-bottom: 4px;
-}
-
-.streak-label {
-    display: block;
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-}
-
-/* Календарь */
-.calendar-nav {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-left: auto;
-}
-
-.calendar-nav-btn {
-    width: 24px;
-    height: 24px;
-    background: none;
-    border: none;
-    color: var(--text-secondary);
-    cursor: pointer;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-}
-
-.calendar-nav-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--text-primary);
-}
-
-.calendar-month {
-    font-size: 0.9rem;
-    color: var(--text-primary);
-    min-width: 120px;
-    text-align: center;
-}
-
-.calendar-content {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    flex: 1;
-}
-
-.calendar-weekdays {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.calendar-weekdays span {
-    text-align: center;
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    font-weight: 600;
-}
-
-.calendar-days {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
-    flex: 1;
-}
-
-.calendar-day {
-    aspect-ratio: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid transparent;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    position: relative;
-}
-
-.calendar-day:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
-}
-
-.calendar-day.other-month {
-    opacity: 0.3;
-}
-
-.calendar-day.today {
-    background: var(--dashboard-accent);
-    color: white;
-    font-weight: 600;
-}
-
-.calendar-day.has-events {
-    font-weight: 600;
-}
-
-.calendar-day.has-events::after {
-    content: '';
-    position: absolute;
-    bottom: 4px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 4px;
-    height: 4px;
-    background: var(--dashboard-accent);
-    border-radius: 50%;
-}
-
-/* Быстрые ссылки */
-.quicklinks-add-btn {
-    background: none;
-    border: none;
-    color: var(--text-secondary);
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-    margin-left: auto;
-}
-
-.quicklinks-add-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--text-primary);
-}
-
-.quicklinks-add-btn svg {
-    width: 18px;
-    height: 18px;
-}
-
-.quicklinks-content {
-    flex: 1;
-    display: flex;
-    align-items: center;
-}
-
-.quicklinks-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    width: 100%;
-}
-
-.quicklink-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    padding: 16px;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-decoration: none;
-}
-
-.quicklink-item:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
-    transform: translateY(-2px);
-}
-
-.quicklink-icon {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.quicklink-icon img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-
-.quicklink-name {
-    font-size: 0.85rem;
-    color: var(--text-primary);
-    text-align: center;
-}
-
-/* Цитата дня */
-.quote-refresh-btn {
-    background: none;
-    border: none;
-    color: var(--text-secondary);
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-    margin-left: auto;
-}
-
-.quote-refresh-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--text-primary);
-}
-
-.quote-refresh-btn svg {
-    width: 18px;
-    height: 18px;
-}
-
-.quote-refresh-btn.rotating svg {
-    animation: rotate 1s ease-in-out;
-}
-
-@keyframes rotate {
-    100% { transform: rotate(360deg); }
-}
-
-.quote-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 20px;
-}
-
-.quote-text {
-    font-size: 1.1rem;
-    line-height: 1.6;
-    color: var(--text-primary);
-    margin-bottom: 16px;
-    font-style: italic;
-    position: relative;
-}
-
-.quote-text::before,
-.quote-text::after {
-    content: '"';
-    font-size: 2rem;
-    color: var(--dashboard-accent);
-    opacity: 0.3;
-    position: absolute;
-}
-
-.quote-text::before {
-    top: -10px;
-    left: -20px;
-}
-
-.quote-text::after {
-    bottom: -20px;
-    right: -20px;
-}
-
-.quote-author {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    font-style: normal;
-}
-
-.quote-author::before {
-    content: '— ';
-}
-
-/* Пустые состояния виджетов */
-.notes-empty,
-.habits-empty,
-.quicklinks-empty {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    text-align: center;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    opacity: 0.7;
-}
-
-/* Стиль для состояния загрузки */
-@keyframes pulse {
-    0% { opacity: 0.6; }
-    50% { opacity: 1; }
-    100% { opacity: 0.6; }
-}
-
-.loading {
-    animation: pulse 1.5s ease-in-out infinite;
-}
-
-/* Улучшенные hover эффекты */
-.widget:hover .widget-header h3 {
-    color: var(--dashboard-accent);
-}
-
-/* Тонкая анимация для иконок виджетов */
-.widget-icon {
-    transition: transform 0.3s ease;
-}
-
-.widget:hover .widget-icon {
-    transform: scale(1.1);
-}
-
-/* Плавные переходы для интерактивных элементов */
-.habit-checkbox,
-.todo-checkbox,
-.calendar-day,
-.quicklink-item,
-.note-tag {
-    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-/* Добавляем box-shadow для активных элементов */
-.note-item.active,
-.note-tag.active,
-.todo-filter.active {
-    box-shadow: 0 2px 8px rgba(116, 188, 164, 0.2);
-}
-
-/* Улучшенная типографика */
-.widget h3 {
-    letter-spacing: -0.02em;
-}
-
-.timer-time {
-    font-variant-numeric: tabular-nums;
-    letter-spacing: -0.03em;
-}
-
-/* Скроллбары для виджетов */
-.notes-list::-webkit-scrollbar,
-.todo-list::-webkit-scrollbar,
-.habits-list::-webkit-scrollbar {
-    width: 4px;
-}
-
-.notes-list::-webkit-scrollbar-track,
-.todo-list::-webkit-scrollbar-track,
-.habits-list::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.notes-list::-webkit-scrollbar-thumb,
-.todo-list::-webkit-scrollbar-thumb,
-.habits-list::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 2px;
-}
-
-.notes-list::-webkit-scrollbar-thumb:hover,
-.todo-list::-webkit-scrollbar-thumb:hover,
-.habits-list::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
-
 /* Адаптивность */
-@media (max-width: 1400px) {
-    .dashboard-grid {
-        grid-template-columns: repeat(3, 1fr);
-        grid-template-rows: repeat(4, 1fr);
-        height: calc(100vh - 40px);
-        max-height: calc(100vh - 40px);
-        overflow: hidden;
-    }
-    
-    .pomodoro-widget {
-        grid-column: 1 / 2;
-        grid-row: 1 / 3;
-    }
-    
-    .notes-widget {
-        grid-column: 2 / 4;
-        grid-row: 1 / 2;
-    }
-    
-    .todo-widget {
-        grid-column: 2 / 4;
-        grid-row: 2 / 3;
-    }
-    
-    .habits-widget {
-        grid-column: 1 / 2;
-        grid-row: 3 / 4;
-    }
-    
-    .calendar-widget {
-        grid-column: 2 / 3;
-        grid-row: 3 / 4;
-    }
-    
-    .quicklinks-widget {
-        grid-column: 3 / 4;
-        grid-row: 3 / 4;
-    }
-    
-    .quote-widget {
-        grid-column: 1 / 4;
-        grid-row: 4 / 5;
-    }
-}
-
 @media (max-width: 1200px) {
     .dashboard-grid {
-        grid-template-columns: repeat(2, 1fr);
-        grid-template-rows: repeat(4, 1fr);
-        gap: 16px;
-        height: calc(100vh - 40px);
-        max-height: calc(100vh - 40px);
-        overflow: hidden;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
     }
-    
+
     .pomodoro-widget {
-        grid-column: 1 / 2;
-        grid-row: auto;
+        grid-column: 1;
+        grid-row: 1;
     }
-    
-    .notes-widget {
-        grid-column: 2 / 3;
-        grid-row: auto;
+
+    .habits-widget {
+        grid-column: 2;
+        grid-row: 1;
     }
-    
+
     .todo-widget {
         grid-column: 1 / 3;
-        grid-row: auto;
-    }
-    
-    .habits-widget {
-        grid-column: 1 / 2;
-        grid-row: auto;
-    }
-    
-    .calendar-widget {
-        grid-column: 2 / 3;
-        grid-row: auto;
-    }
-    
-    .quicklinks-widget {
-        grid-column: 1 / 2;
-        grid-row: auto;
-    }
-    
-    .quote-widget {
-        grid-column: 2 / 3;
-        grid-row: auto;
+        grid-row: 2;
     }
 }
 
 @media (max-width: 768px) {
+    .dashboard-content {
+        padding: 20px 10px;
+    }
+
     .dashboard-grid {
         grid-template-columns: 1fr;
-        grid-template-rows: repeat(7, 1fr);
-        padding: 0 16px;
-        height: calc(100vh - 32px);
-        max-height: calc(100vh - 32px);
-        overflow: hidden;
+        gap: 16px;
     }
-    
+
+    .pomodoro-widget,
+    .habits-widget,
+    .todo-widget {
+        grid-column: 1;
+        grid-row: auto;
+    }
+
     .widget {
         padding: 20px;
-        border-radius: 20px;
+        border-radius: 16px;
     }
-    
-    .notes-content {
-        flex-direction: column;
-    }
-    
-    .notes-sidebar {
-        flex: none;
-        margin-bottom: 16px;
-    }
-    
-    .notes-list {
-        max-height: 150px;
-    }
-    
+
     .mode-toggle {
-        top: 16px;
-        right: 16px;
+        bottom: 20px;
+        right: 20px;
     }
-    
+
     .mode-toggle-btn {
-        width: 48px;
-        height: 48px;
+        width: 50px;
+        height: 50px;
     }
-    
-    .dashboard-content {
-        padding: 16px;
-        height: 100vh;
+
+    .habit-week {
+        gap: 2px;
     }
-} 
+
+    .habit-day-label {
+        font-size: 0.6rem;
+    }
+
+    .pomodoro-settings-dropdown {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90%;
+        max-width: 320px;
+    }
+}

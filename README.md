@@ -1,4 +1,4 @@
-# ⚔️ tarZan's start page
+# ⚔️ tarZan's Start Page
 
 <p align="center">
   <a href="https://github.com/TarzZan52/startpage/stargazers"><img src="https://img.shields.io/github/stars/TarzZan52/startpage?style=for-the-badge&logo=starship&color=C9CBFF&logoColor=D9E0EE&labelColor=302D41" alt="Stars"></a>
@@ -16,30 +16,34 @@
 </p>
 
 <div align="center">
-  <h3>Минималистичная и кастомизируемая стартовая страница для браузера.</h3>
-  <p>Позволяет добавлять ссылки на любимые сайты, переключаться между поисковыми системами и отображает текущее время. Все настройки хранятся локально в вашем браузере.</p>
+  <h3>Minimalist and customizable browser start page.</h3>
+  <p>Add links to your favorite sites, switch between search engines, and display current time. All settings are stored locally in your browser.</p>
 </div>
 
 <br>
 
 <p align="center">
-  <img src="src/image-v3.png" alt="Основной вид страницы" width="90%">
+  <img src="src/image-v3.png" alt="Main page view" width="90%">
+</p>
+
+<p align="center">
+  <img src="src/dashboard-view-v1.png" alt="Dashboard view" width="90%">
 </p>
 
 ---
 
-## ⚡ Быстрая установка
+## ⚡ Quick Installation
 
-**🐧 Linux:** Выполните `./server/install-service-linux.sh`
+**🐧 Linux:** Run `./server/install-service-linux.sh`
 
-После установки откройте http://localhost:8000/ в браузере.
+After installation, open http://localhost:8000/ in your browser.
 
 <details>
-<summary>📋 Подробные инструкции по установке</summary>
+<summary>📋 Detailed Installation Instructions</summary>
 
-### Автоматическая установка (рекомендуется)
+### Automatic Installation (Recommended)
 
-Скачайте проект и запустите **один файл** для автоматической настройки:
+Download the project and run **one file** for automatic setup:
 
 #### 🐧 Linux:
 ```bash
@@ -48,82 +52,103 @@ cd startpage/server
 ./install-service-linux.sh
 ```
 
-После установки startpage будет:
-- ✅ Автоматически запускаться при входе в систему
-- ✅ Работать в фоновом режиме
-- ✅ Доступен по адресу http://localhost:8000/
+After installation, startpage will:
+- ✅ Automatically start on system boot
+- ✅ Run in background
+- ✅ Be available at http://localhost:8000/
 
-### Ручной запуск (без автозапуска)
+### Manual Launch (without auto-start)
 
-Если не хотите автоматический запуск, можете запускать вручную:
+If you don't want automatic startup, you can run manually:
 
-#### macOS / Linux (ручной режим):
+#### macOS / Linux (manual mode):
 ```bash
 cd startpage
 python3 -m http.server 8000
-# Откройте http://localhost:8000/
+# Open http://localhost:8000/
 ```
 
 </details>
 
 ---
 
-## 🏠 Установка как домашняя страница
+## 🏠 Set as Home Page
 
 <details>
-<summary>🔗 Расширения для браузера (рекомендуется)</summary>
+<summary>🔗 Browser Extensions (Recommended)</summary>
 
-Установите расширение для замены новой вкладки:
+Install an extension to replace the new tab:
 
 - **Firefox**: [New Tab Override](https://addons.mozilla.org/firefox/addon/new-tab-override/)
 - **Chrome**: [New Tab Redirect](https://chrome.google.com/webstore/detail/new-tab-redirect/icpgjfneehieebagbmdbhnlpiopdcmna)
 
-После установки:
-1. Откройте настройки расширения
-2. Введите URL: `http://localhost:8000/`
-3. Сохраните изменения
+After installation:
+1. Open extension settings
+2. Enter URL: `http://localhost:8000/`
+3. Save changes
 
 </details>
 
 <details>
-<summary>⚙️ Настройки браузера</summary>
+<summary>⚙️ Browser Settings</summary>
 
 **Firefox:**
-1. Настройки → Начало → Домашняя страница
-2. Введите: `http://localhost:8000/`
+1. Settings → Home → Homepage
+2. Enter: `http://localhost:8000/`
 
 **Chrome/Edge:**
-1. Настройки → При запуске → Открыть страницу
-2. Добавьте: `http://localhost:8000/`
+1. Settings → On startup → Open page
+2. Add: `http://localhost:8000/`
 
 </details>
 
 ---
 
-## 🛠️ Управление сервером
+## 🌟 Features
+
+### 🏠 Start Page
+- **Search engines**: DuckDuckGo, Google, Yandex with easy switching
+- **App tiles**: Add up to 12 custom application shortcuts
+- **Date & Time**: Real-time display with 24-hour format
+- **Responsive design**: Works on desktop and mobile devices
+
+### 📊 Dashboard Mode
+- **🍅 Pomodoro Timer**: Focus sessions with customizable work/break intervals
+- **📅 Habit Tracker**: Track daily habits with weekly goals (1-7 times per week)
+- **✅ Task Manager**: Add, organize, and complete tasks with priority levels
+- **📈 Statistics**: Visual progress tracking for all productivity tools
+
+### 🎨 Customization
+- **App Editor**: Add custom applications with automatic favicon detection
+- **Local Storage**: All data stored securely in your browser
+- **Clean Interface**: Minimalist design with smooth animations
+
+---
+
+## 🛠️ Server Management
 
 <details>
-<summary>🐧 Linux команды</summary>
+<summary>🐧 Linux Commands</summary>
 
-**Управление сервисом:**
+**Service Management:**
 ```bash
-# Проверить статус
+# Check status
 sudo systemctl status dashboard.service
 
-# Остановить
+# Stop
 sudo systemctl stop dashboard.service
 
-# Запустить
+# Start
 sudo systemctl start dashboard.service
 
-# Перезапустить
+# Restart
 sudo systemctl restart dashboard.service
 
-# Просмотр логов
+# View logs
 sudo journalctl -u dashboard.service -f
 ```
 
-**Полное удаление:**
+**Complete Removal:**
 ```bash
 cd startpage/server
 ./uninstall-service-linux.sh
@@ -133,10 +158,10 @@ cd startpage/server
 
 ---
 
-## 🛠️ Устранение неполадок
+## 🛠️ Troubleshooting
 
 <details>
-<summary>❌ Python не найден</summary>
+<summary>❌ Python Not Found</summary>
 
 **Linux:**
 ```bash
@@ -152,53 +177,53 @@ sudo pacman -S python
 
 **macOS:**
 ```bash
-# Через Homebrew
+# Via Homebrew
 brew install python3
 
-# Или скачайте с python.org
+# Or download from python.org
 ```
 
 </details>
 
 <details>
-<summary>🔒 Порт 8000 занят</summary>
+<summary>🔒 Port 8000 Busy</summary>
 
-Если порт 8000 уже используется другим приложением:
+If port 8000 is already in use by another application:
 
-1. **Остановите конфликтующее приложение:**
+1. **Stop conflicting application:**
    ```bash
    # Linux/macOS
    sudo lsof -i :8000
    sudo kill -9 <PID>
    ```
 
-2. **Или измените порт в скриптах** (например, на 8080)
+2. **Or change port in scripts** (e.g., to 8080)
 
 </details>
 
 <details>
-<summary>🌐 Не открывается в браузере</summary>
+<summary>🌐 Can't Open in Browser</summary>
 
-- Проверьте файрвол
-- Попробуйте альтернативные адреса:
+- Check firewall settings
+- Try alternative addresses:
   - `http://127.0.0.1:8000/`
   - `http://0.0.0.0:8000/`
-- Убедитесь, что сервер запущен (см. команды управления выше)
+- Ensure server is running (see management commands above)
 
 </details>
 
 ---
 
-## 📄 Лицензия
+## 📄 License
 
-Этот проект распространяется под лицензией MIT. Подробности в файле [LICENSE](LICENSE).
+This project is licensed under the MIT License. See [LICENSE](LICENSE) file for details.
 
-## 🤝 Вклад в проект
+## 🤝 Contributing
 
-Приветствуются любые предложения и улучшения! Не стесняйтесь создавать Issue или Pull Request.
+Contributions are welcome! Feel free to create Issues or Pull Requests with suggestions and improvements.
 
 ---
 
 <div align="center">
-  <p>Сделано с ❤️ by <a href="https://github.com/TarzZan52">TarzZan52</a></p>
+  <p>Made with ❤️ by <a href="https://github.com/TarzZan52">TarzZan52</a></p>
 </div>

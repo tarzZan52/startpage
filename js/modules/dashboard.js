@@ -28,6 +28,7 @@ const Dashboard = {
         document.addEventListener('keydown', (e) => {
             // Игнорируем если открыто модальное окно или фокус в поле ввода
             if (document.querySelector('.modal-overlay.active') || 
+                document.querySelector('.habit-modal.active') ||
                 ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
                 return;
             }
@@ -120,6 +121,10 @@ const Dashboard = {
             PomodoroModule.init();
         }
         
+        if (typeof HabitsModule !== 'undefined') {
+            HabitsModule.init();
+        }
+        
         if (typeof NotesModule !== 'undefined') {
             NotesModule.init();
         }
@@ -127,34 +132,18 @@ const Dashboard = {
         if (typeof TodoModule !== 'undefined') {
             TodoModule.init();
         }
-        
-        if (typeof HabitsModule !== 'undefined') {
-            HabitsModule.init();
-        }
-        
-        if (typeof CalendarModule !== 'undefined') {
-            CalendarModule.init();
-        }
-        
-        if (typeof QuickLinksModule !== 'undefined') {
-            QuickLinksModule.init();
-        }
-        
-        if (typeof QuoteModule !== 'undefined') {
-            QuoteModule.init();
-        }
     },
     
     refreshWidgets() {
         // Обновляем данные виджетов
+        if (typeof HabitsModule !== 'undefined' && this.isActive) {
+            HabitsModule.updateStats();
+        }
+        
         if (typeof NotesModule !== 'undefined' && this.isActive) {
             // Заметки не нуждаются в refresh'е, они обновляются автоматически
         }
-        
-
     },
-    
-
     
     loadState() {
         // Всегда начинаем с главной страницы при открытии новой вкладки
@@ -169,4 +158,4 @@ const Dashboard = {
         this.mainContent.removeAttribute('style');
         this.isActive = false;
     }
-}; 
+};

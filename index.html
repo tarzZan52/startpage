@@ -4,19 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="format-detection" content="telephone=no">
-    <title>Домашняя страница</title>
+    <title>Start Page</title>
     
     <!-- CSS -->
-    <link rel="stylesheet" href="css/variables.css?v=3.0">
-    <link rel="stylesheet" href="css/main.css?v=3.0">
-    <link rel="stylesheet" href="css/animations.css?v=3.0">
-    <link rel="stylesheet" href="css/components/effects.css?v=3.0">
-    <link rel="stylesheet" href="css/components/datetime.css?v=3.0">
-    <link rel="stylesheet" href="css/components/search.css?v=3.0">
-    <link rel="stylesheet" href="css/components/apps.css?v=3.0">
-    <link rel="stylesheet" href="css/components/editor.css?v=3.0">
-    <link rel="stylesheet" href="css/components/dashboard.css?v=3.0">
-    <link rel="stylesheet" href="css/responsive.css?v=3.0">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/components/effects.css">
+    <link rel="stylesheet" href="css/components/datetime.css">
+    <link rel="stylesheet" href="css/components/search.css">
+    <link rel="stylesheet" href="css/components/apps.css">
+    <link rel="stylesheet" href="css/components/editor.css">
+    <link rel="stylesheet" href="css/components/dashboard.css">
+    <link rel="stylesheet" href="css/responsive.css">
 </head>
 <body>
     <!-- Фоновые эффекты -->
@@ -32,7 +32,7 @@
 
     <!-- Тумблер переключения режимов -->
     <div class="mode-toggle">
-        <button class="mode-toggle-btn" id="modeToggleBtn" title="Переключить режим">
+        <button class="mode-toggle-btn" id="modeToggleBtn" title="Toggle mode">
             <svg class="mode-icon-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 <polyline points="9,22 9,12 15,12 15,22"></polyline>
@@ -68,7 +68,7 @@
                 </button>
             </div>
             <form class="search-container" id="searchForm">
-                <input type="text" class="search-box" id="searchBox" placeholder="Поиск в DuckDuckGo..." autofocus tabindex="1" autocomplete="off" spellcheck="false">
+                <input type="text" class="search-box" id="searchBox" placeholder="Search on DuckDuckGo..." autofocus tabindex="1" autocomplete="off" spellcheck="false">
                 <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="11" cy="11" r="8"></circle>
                     <path d="m21 21-4.35-4.35"></path>
@@ -82,7 +82,7 @@
             </div>
             
             <!-- Кнопка добавления новой плитки -->
-            <button class="add-app-btn" id="addAppBtn" title="Добавить приложение">
+            <button class="add-app-btn" id="addAppBtn" title="Add application">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -93,6 +93,8 @@
 
     <!-- Дашборд -->
     <div class="dashboard-content" id="dashboardContent" style="display: none;">
+        <h1 class="site-title">Dashboard</h1>
+        
         <div class="dashboard-grid">
             <!-- Таймер Помодоро -->
             <div class="widget pomodoro-widget">
@@ -101,65 +103,131 @@
                         <circle cx="12" cy="12" r="10"></circle>
                         <polyline points="12,6 12,12 16,14"></polyline>
                     </svg>
-                    <h3>Помодоро</h3>
+                    <h3>Pomodoro</h3>
                     <div class="pomodoro-stats">
-                        <span id="pomodoroSessions">0</span> сессий
+                        <span id="pomodoroSessions">0</span> sessions
                     </div>
+                    <button class="widget-settings-btn" id="pomodoroSettingsBtn" title="Settings">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"></path>
+                        </svg>
+                    </button>
                 </div>
                 
-                <div class="pomodoro-settings-inline" id="pomodoroSettingsInline">
-                    <div class="settings-row">
-                        <label>Работа:</label>
-                        <input type="number" id="workTimeInline" min="1" max="60" value="25">
-                        <span>мин</span>
-                    </div>
-                    <div class="settings-row">
-                        <label>Перерыв:</label>
-                        <input type="number" id="shortBreakInline" min="1" max="30" value="5">
-                        <span>мин</span>
-                    </div>
-                    <div class="settings-row">
-                        <label>Длинный:</label>
-                        <input type="number" id="longBreakInline" min="1" max="60" value="15">
-                        <span>мин</span>
-                    </div>
-                    <div class="settings-row">
-                        <label>Звук:</label>
-                        <input type="checkbox" id="soundEnabledInline" checked>
+                <!-- Выпадающие настройки -->
+                <div class="pomodoro-settings-dropdown" id="pomodoroSettingsDropdown">
+                    <div class="settings-group">
+                        <div class="setting-item">
+                            <label for="workTimeInline">Work period</label>
+                            <div class="time-input-group">
+                                <button class="time-btn time-minus" data-target="workTimeInline">−</button>
+                                <input type="number" id="workTimeInline" min="5" max="60" value="25" step="5">
+                                <button class="time-btn time-plus" data-target="workTimeInline">+</button>
+                                <span class="time-unit">min</span>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label for="shortBreakInline">Short break</label>
+                            <div class="time-input-group">
+                                <button class="time-btn time-minus" data-target="shortBreakInline">−</button>
+                                <input type="number" id="shortBreakInline" min="1" max="30" value="5" step="1">
+                                <button class="time-btn time-plus" data-target="shortBreakInline">+</button>
+                                <span class="time-unit">min</span>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label for="longBreakInline">Long break</label>
+                            <div class="time-input-group">
+                                <button class="time-btn time-minus" data-target="longBreakInline">−</button>
+                                <input type="number" id="longBreakInline" min="10" max="60" value="15" step="5">
+                                <button class="time-btn time-plus" data-target="longBreakInline">+</button>
+                                <span class="time-unit">min</span>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item setting-toggle">
+                            <label for="soundEnabledInline">Sound notifications</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="soundEnabledInline" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="settings-separator"></div>
+                        
+                        <div class="settings-actions">
+                            <button class="settings-action-btn" id="pomodoroStatsBtn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 3v18h18"></path>
+                                    <path d="m19 9-5 5-4-4-3 3"></path>
+                                </svg>
+                                View Statistics
+                            </button>
+                            
+                            <button class="settings-action-btn danger" id="pomodoroResetStatsBtn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3,6 5,6 21,6"></polyline>
+                                    <path d="m19,6v14a2,2 0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2v2"></path>
+                                </svg>
+                                Reset Statistics
+                            </button>
+                        </div>
                     </div>
                 </div>
                 
                 <div class="pomodoro-timer">
                     <div class="timer-circle">
-                        <svg class="timer-progress" viewBox="0 0 100 100">
-                            <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
-                            <circle cx="50" cy="50" r="45" fill="none" stroke="var(--dashboard-accent)" stroke-width="2" 
-                                    stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="283" id="timerProgress"/>
+                        <svg class="timer-progress" id="timerProgress" viewBox="0 0 100 100">
+                            <circle
+                                cx="50"
+                                cy="50"
+                                r="45"
+                                fill="none"
+                                stroke="rgba(255, 255, 255, 0.1)"
+                                stroke-width="3"
+                            />
+                            <circle
+                                cx="50"
+                                cy="50"
+                                r="45"
+                                fill="none"
+                                stroke="var(--dashboard-accent)"
+                                stroke-width="3"
+                                stroke-dasharray="283"
+                                stroke-dashoffset="283"
+                            />
                         </svg>
                         <div class="timer-display">
                             <div class="timer-time" id="timerTime">25:00</div>
-                            <div class="timer-label" id="timerLabel">Фокус</div>
+                            <div class="timer-label" id="timerLabel">Work</div>
                         </div>
                     </div>
+                    
                     <div class="timer-controls">
-                        <button class="timer-btn timer-start" id="timerStart" title="Пробел - старт/пауза">
+                        <button class="timer-btn timer-reset" id="timerReset" title="Reset (R)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="1 4 1 10 7 10"></polyline>
+                                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                            </svg>
+                        </button>
+                        
+                        <button class="timer-btn timer-start" id="timerStart" title="Start/Pause (Space)">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <polygon points="5,3 19,12 5,21"></polygon>
                             </svg>
                         </button>
-                        <button class="timer-btn timer-pause" id="timerPause" style="display: none;" title="Пробел - старт/пауза">
+                        
+                        <button class="timer-btn timer-pause" id="timerPause" title="Pause (Space)" style="display: none;">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="6" y="4" width="4" height="16"></rect>
                                 <rect x="14" y="4" width="4" height="16"></rect>
                             </svg>
                         </button>
-                        <button class="timer-btn timer-reset" id="timerReset" title="R - сброс">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="23,4 23,10 17,10"></polyline>
-                                <path d="M20.49 15A9 9 0 1 1 5.64 5.64L23 10"></path>
-                            </svg>
-                        </button>
-                        <button class="timer-btn timer-skip" id="timerSkip" title="S - пропустить">
+                        
+                        <button class="timer-btn timer-skip" id="timerSkip" title="Skip (S)">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <polygon points="5,4 15,12 5,20"></polygon>
                                 <line x1="19" y1="5" x2="19" y2="19"></line>
@@ -168,31 +236,30 @@
                     </div>
                 </div>
                 
-                <!-- Статистика продуктивности -->
                 <div class="pomodoro-productivity">
                     <div class="productivity-item">
-                        <span class="productivity-label">Сегодня:</span>
-                        <span class="productivity-value" id="todayMinutes">0 мин</span>
+                        <span class="productivity-label">Today:</span>
+                        <span class="productivity-value" id="todayMinutes">0 min</span>
                     </div>
                     <div class="productivity-item">
-                        <span class="productivity-label">Эта неделя:</span>
-                        <span class="productivity-value" id="weekMinutes">0 мин</span>
+                        <span class="productivity-label">This week:</span>
+                        <span class="productivity-value" id="weekMinutes">0 min</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Заметки -->
-            <div class="widget notes-widget">
+            <!-- Трекер привычек -->
+            <div class="widget habits-widget">
                 <div class="widget-header">
                     <svg class="widget-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14,2 14,8 20,8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                        <polyline points="10,9 9,9 8,9"></polyline>
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
                     </svg>
-                    <h3>Заметки</h3>
-                    <button class="notes-add-btn" id="addNoteBtn" title="Ctrl+N - новая заметка">
+                    <h3>Habits</h3>
+                    <div class="habits-stats" id="habitsStats">
+                        <!-- Statistics will be updated via JS -->
+                    </div>
+                    <button class="habits-add-btn" id="addHabitBtn" title="Ctrl+H - new habit">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
                             <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -200,26 +267,8 @@
                     </button>
                 </div>
                 
-                <div class="notes-content">
-                    <div class="notes-sidebar">
-                        <div class="notes-search">
-                            <input type="text" id="notesSearchInput" placeholder="Поиск заметок...">
-                        </div>
-                        <div class="notes-list" id="notesList">
-                            <!-- Список заметок будет сгенерирован JS -->
-                        </div>
-                    </div>
-                    
-                    <div class="notes-editor">
-                        <div class="notes-tags" id="notesTags">
-                            <!-- Теги будут добавлены через JS -->
-                        </div>
-                        <textarea id="noteTextarea" placeholder="Начните писать заметку..."></textarea>
-                        <div class="notes-actions">
-                            <button class="notes-btn" id="saveNoteBtn" title="Ctrl+S - сохранить">Сохранить</button>
-                            <button class="notes-btn notes-btn-danger" id="deleteNoteBtn" title="Удалить заметку">Удалить</button>
-                        </div>
-                    </div>
+                <div class="habits-list" id="habitsList">
+                    <!-- Список привычек будет сгенерирован JS -->
                 </div>
             </div>
 
@@ -230,15 +279,14 @@
                         <path d="M9 11l3 3L22 4"></path>
                         <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
                     </svg>
-                    <h3>Задачи</h3>
+                    <h3>Tasks</h3>
                     <div class="todo-stats" id="todoStats">0/0</div>
                 </div>
                 
                 <div class="todo-input">
                     <div class="todo-input-row">
-                        <input type="text" id="todoInput" placeholder="Добавить задачу..." maxlength="100">
-                        <input type="date" id="todoDeadline" class="todo-deadline-input" title="Дедлайн">
-                        <select id="todoPriority" class="todo-priority-select" title="Приоритет">
+                        <input type="text" id="todoInput" placeholder="Add task..." maxlength="100">
+                        <select id="todoPriority" class="todo-priority-select" title="Priority">
                             <option value="low">●</option>
                             <option value="medium" selected>●●</option>
                             <option value="high">●●●</option>
@@ -253,10 +301,10 @@
                 </div>
                 
                 <div class="todo-filters">
-                    <button class="todo-filter active" data-filter="all">Все</button>
-                    <button class="todo-filter" data-filter="active">Активные</button>
-                    <button class="todo-filter" data-filter="completed">Готовые</button>
-                    <button class="todo-clear-completed" id="todoClearCompleted">Очистить</button>
+                    <button class="todo-filter active" data-filter="all">All</button>
+                    <button class="todo-filter" data-filter="active">Active</button>
+                    <button class="todo-filter" data-filter="completed">Completed</button>
+                    <button class="todo-clear-completed" id="todoClearCompleted">Clear</button>
                 </div>
                 
                 <div class="todo-list" id="todoList">
@@ -264,127 +312,71 @@
                 </div>
             </div>
 
-            <!-- Трекер привычек -->
-            <div class="widget habits-widget">
-                <div class="widget-header">
-                    <svg class="widget-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="9,11 12,14 22,4"></polyline>
-                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                    </svg>
-                    <h3>Привычки</h3>
-                    <button class="habits-add-btn" id="addHabitBtn" title="Добавить привычку">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                    </button>
-                </div>
-                
-                <div class="habits-content">
-                    <div class="habits-list" id="habitsList">
-                        <!-- Привычки будут сгенерированы JS -->
-                    </div>
-                    <div class="habits-streak">
-                        <div class="streak-item">
-                            <span class="streak-number" id="currentStreak">0</span>
-                            <span class="streak-label">Текущая серия</span>
-                        </div>
-                        <div class="streak-item">
-                            <span class="streak-number" id="bestStreak">0</span>
-                            <span class="streak-label">Лучшая серия</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Календарь -->
-            <div class="widget calendar-widget">
-                <div class="widget-header">
-                    <svg class="widget-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                        <line x1="16" y1="2" x2="16" y2="6"></line>
-                        <line x1="8" y1="2" x2="8" y2="6"></line>
-                        <line x1="3" y1="10" x2="21" y2="10"></line>
-                    </svg>
-                    <h3>Календарь</h3>
-                    <div class="calendar-nav">
-                        <button class="calendar-nav-btn" id="calPrevMonth">‹</button>
-                        <span class="calendar-month" id="calCurrentMonth">Январь 2024</span>
-                        <button class="calendar-nav-btn" id="calNextMonth">›</button>
-                    </div>
-                </div>
-                
-                <div class="calendar-content">
-                    <div class="calendar-weekdays">
-                        <span>Пн</span>
-                        <span>Вт</span>
-                        <span>Ср</span>
-                        <span>Чт</span>
-                        <span>Пт</span>
-                        <span>Сб</span>
-                        <span>Вс</span>
-                    </div>
-                    <div class="calendar-days" id="calendarDays">
-                        <!-- Дни будут сгенерированы JS -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Быстрые ссылки -->
-            <div class="widget quicklinks-widget">
-                <div class="widget-header">
-                    <svg class="widget-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-                    </svg>
-                    <h3>Быстрые ссылки</h3>
-                    <button class="quicklinks-add-btn" id="addQuickLinkBtn" title="Добавить ссылку">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                    </button>
-                </div>
-                
-                <div class="quicklinks-content">
-                    <div class="quicklinks-grid" id="quickLinksGrid">
-                        <!-- Ссылки будут сгенерированы JS -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Цитата дня -->
-            <div class="widget quote-widget">
-                <div class="widget-header">
-                    <svg class="widget-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"></path>
-                        <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"></path>
-                    </svg>
-                    <h3>Цитата дня</h3>
-                    <button class="quote-refresh-btn" id="refreshQuoteBtn" title="Обновить цитату">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="23,4 23,10 17,10"></polyline>
-                            <polyline points="1,20 1,14 7,14"></polyline>
-                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-                        </svg>
-                    </button>
-                </div>
-                
-                <div class="quote-content">
-                    <blockquote class="quote-text" id="quoteText">
-                        Загружаем вдохновляющую цитату...
-                    </blockquote>
-                    <cite class="quote-author" id="quoteAuthor"></cite>
-                </div>
-            </div>
         </div>
     </div>
 
-    <!-- Модальное окно редактора -->
+    <!-- Модальное окно для привычек -->
+    <div class="habit-modal" id="habitModal">
+        <div class="habit-modal-content">
+            <div class="habit-modal-header">
+                <h2 class="habit-modal-title">Add Habit</h2>
+                <button class="habit-modal-close" id="habitModalClose">✕</button>
+            </div>
+            
+            <form class="habit-form" id="habitForm">
+                <div class="habit-form-group">
+                    <label for="habitName">Habit name</label>
+                    <input type="text" id="habitName" required placeholder="E.g.: Morning exercise" maxlength="50">
+                </div>
+                
+                <div class="habit-form-group">
+                    <label>Details</label>
+                    <div class="habit-icon-grid">
+                        <div class="habit-icon-input">
+                            <input type="text" id="habitIcon" placeholder="Emoji" value="🎯" maxlength="2">
+                        </div>
+                        <div class="habit-target-input">
+                            <label for="habitTarget">Weekly goal</label>
+                            <div class="habit-target-controls">
+                                <button type="button" class="habit-target-btn" id="habitTargetMinus">−</button>
+                                <input type="number" id="habitTarget" min="1" max="7" value="7" readonly>
+                                <button type="button" class="habit-target-btn" id="habitTargetPlus">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="habit-form-group">
+                    <label>Habit color</label>
+                    <div class="habit-color-picker">
+                        <button type="button" class="habit-color-option selected" data-color="#22c55e" style="background: #22c55e"></button>
+                        <button type="button" class="habit-color-option" data-color="#3b82f6" style="background: #3b82f6"></button>
+                        <button type="button" class="habit-color-option" data-color="#f59e0b" style="background: #f59e0b"></button>
+                        <button type="button" class="habit-color-option" data-color="#ef4444" style="background: #ef4444"></button>
+                        <button type="button" class="habit-color-option" data-color="#a855f7" style="background: #a855f7"></button>
+                        <button type="button" class="habit-color-option" data-color="#ec4899" style="background: #ec4899"></button>
+                        <button type="button" class="habit-color-option" data-color="#14b8a6" style="background: #14b8a6"></button>
+                        <button type="button" class="habit-color-option" data-color="#6366f1" style="background: #6366f1"></button>
+                    </div>
+                </div>
+                
+                <div class="habit-form-actions">
+                    <button type="button" class="habit-btn habit-btn-secondary" onclick="HabitsModule.closeModal()">
+                        Cancel
+                    </button>
+                    <button type="submit" class="habit-btn habit-btn-primary">
+                        Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальное окно редактора приложений -->
     <div class="modal-overlay" id="editorModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">Редактировать приложение</h2>
+                <h2 class="modal-title">Edit Application</h2>
                 <button class="modal-close" id="modalClose">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -395,17 +387,17 @@
             
             <form class="editor-form" id="editorForm">
                 <div class="form-group">
-                    <label for="appName">Название приложения</label>
-                    <input type="text" id="appName" required placeholder="Например: YouTube">
+                    <label for="appName">Application name</label>
+                    <input type="text" id="appName" required placeholder="E.g.: YouTube">
                 </div>
                 
                 <div class="form-group">
-                    <label for="appUrl">URL приложения</label>
+                    <label for="appUrl">Application URL</label>
                     <input type="url" id="appUrl" required placeholder="https://example.com">
                 </div>
                 
                 <div class="form-group">
-                    <label for="appIcon">Иконка приложения</label>
+                    <label for="appIcon">Application icon</label>
                     <div class="icon-upload-container">
                         <div class="icon-preview" id="iconPreview">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -417,15 +409,15 @@
                         <div class="icon-upload-controls">
                             <input type="file" id="iconFile" accept="image/*" hidden>
                             <button type="button" class="btn-secondary" id="autoFaviconBtn">
-                                Получить автоматически
+                                Get automatically
                             </button>
                             <button type="button" class="btn-secondary" id="uploadIconBtn">
-                                Выбрать файл
+                                Choose file
                             </button>
                             <small class="help-text">
-                                Рекомендуется SVG формат.<br>
-                                Максимальный размер: 500KB<br>
-                                Найти иконки: <a href="https://icons8.com" target="_blank">icons8.com</a>
+                                SVG format recommended.<br>
+                                Maximum size: 500KB<br>
+                                Find icons: <a href="https://icons8.com" target="_blank">icons8.com</a>
                             </small>
                         </div>
                     </div>
@@ -433,10 +425,10 @@
                 
                 <div class="form-actions">
                     <button type="button" class="btn-danger" id="deleteAppBtn" style="display: none;">
-                        Удалить
+                        Delete
                     </button>
                     <button type="submit" class="btn-primary">
-                        Сохранить
+                        Save
                     </button>
                 </div>
             </form>
@@ -444,21 +436,17 @@
     </div>
 
     <!-- JavaScript -->
-    <script src="js/config.js?v=3.0"></script>
-    <script src="js/modules/storage.js?v=3.0"></script>
-    <script src="js/modules/datetime.js?v=3.0"></script>
-    <script src="js/modules/particles.js?v=3.0"></script>
-    <script src="js/modules/search.js?v=3.0"></script>
-    <script src="js/modules/apps.js?v=3.0"></script>
-    <script src="js/modules/editor.js?v=3.0"></script>
-    <script src="js/modules/dashboard.js?v=3.0"></script>
-    <script src="js/modules/pomodoro.js?v=3.0"></script>
-    <script src="js/modules/notes.js?v=3.0"></script>
-    <script src="js/modules/todo.js?v=3.0"></script>
-    <script src="js/modules/habits.js?v=3.0"></script>
-    <script src="js/modules/calendar.js?v=3.0"></script>
-    <script src="js/modules/quicklinks.js?v=3.0"></script>
-    <script src="js/modules/quote.js?v=3.0"></script>
-    <script src="js/main.js?v=3.0"></script>
+    <script src="js/config.js"></script>
+    <script src="js/modules/storage.js"></script>
+    <script src="js/modules/datetime.js"></script>
+    <script src="js/modules/particles.js"></script>
+    <script src="js/modules/search.js"></script>
+    <script src="js/modules/apps.js"></script>
+    <script src="js/modules/editor.js"></script>
+    <script src="js/modules/dashboard.js"></script>
+    <script src="js/modules/pomodoro.js"></script>
+    <script src="js/modules/habits.js"></script>
+    <script src="js/modules/todo.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>

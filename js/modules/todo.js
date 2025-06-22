@@ -17,10 +17,14 @@ const TodoModule = {
     
     // Инициализация модуля
     init() {
-        this.loadElements();
+        if (!this.loadElements()) {
+            console.error('Todo module initialization failed: missing elements');
+            return;
+        }
         this.loadTasks();
         this.setupEventListeners();
         this.render();
+        console.log('Todo module initialized successfully');
     },
     
     // Загрузка DOM элементов
@@ -32,7 +36,19 @@ const TodoModule = {
         this.elements.prioritySelect = document.getElementById('todoPriority');
         this.elements.filters = document.querySelectorAll('.todo-filter');
         this.elements.clearCompleted = document.getElementById('todoClearCompleted');
-        this.elements.deadlineInput = document.getElementById('todoDeadline');
+        // deadlineInput не используется в текущей версии
+        this.elements.deadlineInput = null;
+        
+        // Проверяем что ключевые элементы найдены
+        const requiredElements = ['input', 'addBtn', 'list', 'stats', 'prioritySelect'];
+        const missingElements = requiredElements.filter(key => !this.elements[key]);
+        
+        if (missingElements.length > 0) {
+            console.error('Missing Todo elements:', missingElements);
+            return false;
+        }
+        
+        return true;
     },
     
     // Настройка обработчиков событий
@@ -82,7 +98,7 @@ const TodoModule = {
             text: text,
             completed: false,
             priority: this.elements.prioritySelect.value,
-            deadline: this.elements.deadlineInput.value || null,
+            deadline: this.elements.deadlineInput ? this.elements.deadlineInput.value : null,
             createdAt: new Date().toISOString(),
             completedAt: null
         };
@@ -94,7 +110,9 @@ const TodoModule = {
         // Очистка формы
         this.elements.input.value = '';
         this.elements.prioritySelect.value = 'medium';
-        this.elements.deadlineInput.value = '';
+        if (this.elements.deadlineInput) {
+            this.elements.deadlineInput.value = '';
+        }
         
         // Анимация добавления
         this.animateTaskAdd();
@@ -155,7 +173,7 @@ const TodoModule = {
         const completedCount = this.tasks.filter(t => t.completed).length;
         if (completedCount === 0) return;
         
-        if (confirm(`Удалить ${completedCount} выполненных задач?`)) {
+        if (confirm(`Delete ${completedCount} completed tasks?`)) {
             this.tasks = this.tasks.filter(t => !t.completed);
             this.saveTasks();
             this.render();
@@ -213,7 +231,7 @@ const TodoModule = {
             high: '●●●'
         };
         
-        // Определяем статус дедлайна
+        // Determine deadline status
         let deadlineHtml = '';
         if (task.deadline && !task.completed) {
             const today = new Date();
@@ -227,18 +245,18 @@ const TodoModule = {
             
             if (daysLeft < 0) {
                 deadlineClass += ' overdue';
-                deadlineText = `Просрочено на ${Math.abs(daysLeft)} дн.`;
+                deadlineText = `Overdue by ${Math.abs(daysLeft)} days`;
             } else if (daysLeft === 0) {
                 deadlineClass += ' soon';
-                deadlineText = 'Сегодня';
+                deadlineText = 'Today';
             } else if (daysLeft === 1) {
                 deadlineClass += ' soon';
-                deadlineText = 'Завтра';
+                deadlineText = 'Tomorrow';
             } else if (daysLeft <= 3) {
                 deadlineClass += ' soon';
-                deadlineText = `Через ${daysLeft} дн.`;
+                deadlineText = `In ${daysLeft} days`;
             } else {
-                deadlineText = deadline.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+                deadlineText = deadline.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
             }
             
             deadlineHtml = `<span class="${deadlineClass}">📅 ${deadlineText}</span>`;
@@ -252,8 +270,8 @@ const TodoModule = {
             </div>
             <div class="todo-text" data-id="${task.id}">${this.escapeHtml(task.text)}</div>
             ${deadlineHtml}
-            <div class="todo-priority" title="Приоритет: ${task.priority}">${priorityDots[task.priority]}</div>
-            <button class="todo-delete" data-id="${task.id}" title="Удалить задачу">
+            <div class="todo-priority" title="Priority: ${task.priority}">${priorityDots[task.priority]}</div>
+            <button class="todo-delete" data-id="${task.id}" title="Delete task">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="3,6 5,6 21,6"></polyline>
                     <path d="M19 6l-2 14H7L5 6"></path>
@@ -352,12 +370,12 @@ const TodoModule = {
         this.elements.clearCompleted.style.display = completedCount > 0 ? 'block' : 'none';
     },
     
-    // Сообщение о пустом списке
+    // Empty list message
     getEmptyMessage() {
         const messages = {
-            all: 'Нет задач. Добавьте первую!',
-            active: 'Все задачи выполнены! 🎉',
-            completed: 'Нет выполненных задач'
+            all: 'No tasks. Add your first one!',
+            active: 'All tasks completed! 🎉',
+            completed: 'No completed tasks'
         };
         
         return `
@@ -376,10 +394,10 @@ const TodoModule = {
         
         this.elements.stats.textContent = `${completed}/${total}`;
         
-        // Показать процент выполнения
+        // Show completion percentage
         if (total > 0) {
             const percent = Math.round((completed / total) * 100);
-            this.elements.stats.title = `Выполнено ${percent}% (${active} активных)`;
+            this.elements.stats.title = `Completed ${percent}% (${active} active)`;
         }
     },
     

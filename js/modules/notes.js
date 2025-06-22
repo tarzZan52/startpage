@@ -105,11 +105,11 @@ const NotesModule = {
                 this.notes = [
                     {
                         id: Date.now(),
-                        title: 'Добро пожаловать!',
-                        content: 'Это ваш личный блокнот.\n\nВы можете:\n• Создавать новые заметки\n• Редактировать существующие\n• Удалять ненужные\n• Использовать #теги для организации\n• Искать заметки по содержимому\n\nВсе заметки автоматически сохраняются.',
+                        title: 'Welcome!',
+                        content: 'This is your personal notepad.\n\nYou can:\n• Create new notes\n• Edit existing ones\n• Delete unnecessary ones\n• Use #tags for organization\n• Search notes by content\n\nAll notes are automatically saved.',
                         createdAt: new Date().toISOString(),
                         updatedAt: new Date().toISOString(),
-                        tags: ['помощь']
+                        tags: ['help']
                     }
                 ];
                 this.saveNotes();
@@ -126,7 +126,7 @@ const NotesModule = {
             localStorage.setItem('notes_data', JSON.stringify(this.notes));
         } catch (error) {
             console.error('Error saving notes:', error);
-            alert('Ошибка сохранения заметок. Возможно, превышен лимит хранилища.');
+            alert('Error saving notes. Storage limit may have been exceeded.');
         }
     },
     
@@ -181,7 +181,7 @@ const NotesModule = {
         if (filteredNotes.length === 0) {
             this.elements.notesList.innerHTML = `
                 <div class="notes-empty">
-                    <p>${this.searchQuery || this.activeTags.size > 0 ? 'Ничего не найдено' : 'Нет заметок. Добавьте первую!'}</p>
+                    <p>${this.searchQuery || this.activeTags.size > 0 ? 'Nothing found' : 'No notes. Add your first one!'}</p>
                 </div>
             `;
             return;
@@ -195,7 +195,7 @@ const NotesModule = {
             }
             
             const preview = this.getPreview(note.content);
-            const date = new Date(note.updatedAt).toLocaleDateString('ru-RU', {
+            const date = new Date(note.updatedAt).toLocaleDateString('en-US', {
                 day: 'numeric',
                 month: 'short'
             });
@@ -249,16 +249,17 @@ const NotesModule = {
             this.elements.textarea.focus();
         }
         
-        // Обновляем состояние кнопки удаления
+        // Update delete button state - always enable it
         if (this.elements.deleteBtn) {
-            this.elements.deleteBtn.disabled = this.notes.length <= 1;
+            this.elements.deleteBtn.disabled = false;
+            this.elements.deleteBtn.style.display = 'inline-block';
         }
     },
     
     createNewNote() {
         const newNote = {
             id: Date.now(),
-            title: 'Новая заметка',
+            title: 'New Note',
             content: '',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -325,20 +326,22 @@ const NotesModule = {
     },
     
     deleteCurrentNote() {
-        if (!this.currentNoteId || this.notes.length <= 1) return;
+        if (!this.currentNoteId) return;
         
         const note = this.notes.find(n => n.id === this.currentNoteId);
         if (!note) return;
         
-        if (confirm(`Удалить заметку "${note.title}"?`)) {
-            // Удаляем заметку
+        if (confirm(`Delete note "${note.title}"?`)) {
+            // Delete the note
             this.notes = this.notes.filter(n => n.id !== this.currentNoteId);
             
-            // Выбираем следующую заметку
+            // Select next note or create a new one if no notes left
             if (this.notes.length > 0) {
                 this.currentNoteId = this.notes[0].id;
             } else {
-                this.currentNoteId = null;
+                // Create a new note if all are deleted
+                this.createNewNote();
+                return;
             }
             
             this.saveNotes();
@@ -347,24 +350,24 @@ const NotesModule = {
     },
     
     generateTitle(content) {
-        if (!content.trim()) return 'Без названия';
+        if (!content.trim()) return 'Untitled';
         
-        // Берем первую непустую строку
+        // Take the first non-empty line
         const firstLine = content.split('\n').find(line => line.trim()) || '';
         
-        // Ограничиваем длину
+        // Limit length
         const maxLength = 50;
         if (firstLine.length > maxLength) {
             return firstLine.substring(0, maxLength) + '...';
         }
         
-        return firstLine || 'Без названия';
+        return firstLine || 'Untitled';
     },
     
     showSaveIndicator() {
         if (this.elements.saveBtn) {
             const originalText = this.elements.saveBtn.textContent;
-            this.elements.saveBtn.textContent = 'Сохранено ✓';
+            this.elements.saveBtn.textContent = 'Saved ✓';
             this.elements.saveBtn.classList.add('saved');
             
             setTimeout(() => {
@@ -402,10 +405,10 @@ const NotesModule = {
                     this.notes = [...this.notes, ...imported];
                     this.saveNotes();
                     this.render();
-                    alert('Заметки успешно импортированы!');
+                    alert('Notes imported successfully!');
                 }
             } catch (error) {
-                alert('Ошибка импорта заметок. Проверьте формат файла.');
+                alert('Error importing notes. Check file format.');
             }
         };
         reader.readAsText(file);
@@ -444,7 +447,7 @@ const NotesModule = {
         if (this.allTags.size > 0) {
             const allTag = document.createElement('span');
             allTag.className = 'note-tag';
-            allTag.textContent = 'Все';
+            allTag.textContent = 'All';
             if (this.activeTags.size === 0) {
                 allTag.classList.add('active');
             }

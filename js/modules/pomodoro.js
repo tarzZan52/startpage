@@ -18,18 +18,12 @@ const PomodoroModule = {
         totalTime: 0
     },
     
-    // Статистика продуктивности
-    stats: {
-        today: 0,
-        week: 0,
-        history: {}
-    },
-    
     // DOM элементы
     elements: {
         timerTime: null,
         timerLabel: null,
         timerProgress: null,
+        timerCircle: null,
         startBtn: null,
         pauseBtn: null,
         resetBtn: null,
@@ -46,19 +40,25 @@ const PomodoroModule = {
     timer: null,
     
     init() {
+        console.log('Initializing Pomodoro module...');
         this.loadElements();
         this.loadSettings();
         this.loadStats();
-        this.setupEventListeners();
         this.updateDisplay();
-        this.updateProductivityStats();
+        this.updateStatsDisplay();
         this.createNotificationSound();
+        
+        // Setup event listeners with delay to ensure DOM is ready
+        setTimeout(() => {
+            this.setupEventListeners();
+        }, 100);
     },
     
     loadElements() {
         this.elements.timerTime = document.getElementById('timerTime');
         this.elements.timerLabel = document.getElementById('timerLabel');
         this.elements.timerProgress = document.getElementById('timerProgress');
+        this.elements.timerCircle = document.querySelector('.timer-circle');
         this.elements.startBtn = document.getElementById('timerStart');
         this.elements.pauseBtn = document.getElementById('timerPause');
         this.elements.resetBtn = document.getElementById('timerReset');
@@ -70,24 +70,97 @@ const PomodoroModule = {
         this.elements.soundEnabledInline = document.getElementById('soundEnabledInline');
         this.elements.todayMinutes = document.getElementById('todayMinutes');
         this.elements.weekMinutes = document.getElementById('weekMinutes');
+        
+        // Проверяем, что основные элементы найдены
+        const requiredElements = ['timerTime', 'timerLabel', 'startBtn', 'pauseBtn'];
+        const missingElements = requiredElements.filter(key => !this.elements[key]);
+        
+        if (missingElements.length > 0) {
+            console.warn('Missing Pomodoro elements:', missingElements);
+        }
     },
     
     setupEventListeners() {
-        // Кнопки управления таймером
-        this.elements.startBtn.addEventListener('click', () => this.start());
-        this.elements.pauseBtn.addEventListener('click', () => this.pause());
-        this.elements.resetBtn.addEventListener('click', () => this.reset());
-        this.elements.skipBtn.addEventListener('click', () => this.skip());
+        console.log('Setting up Pomodoro event listeners...');
         
-        // Инлайн настройки
-        this.elements.workTimeInline.addEventListener('change', () => this.saveInlineSettings());
-        this.elements.shortBreakInline.addEventListener('change', () => this.saveInlineSettings());
-        this.elements.longBreakInline.addEventListener('change', () => this.saveInlineSettings());
-        this.elements.soundEnabledInline.addEventListener('change', () => this.saveInlineSettings());
+        // Кнопки управления таймером
+        if (this.elements.startBtn) {
+            this.elements.startBtn.addEventListener('click', () => this.start());
+        }
+        if (this.elements.pauseBtn) {
+            this.elements.pauseBtn.addEventListener('click', () => this.pause());
+        }
+        if (this.elements.resetBtn) {
+            this.elements.resetBtn.addEventListener('click', () => this.reset());
+        }
+        if (this.elements.skipBtn) {
+            this.elements.skipBtn.addEventListener('click', () => this.skip());
+        }
+        
+        // Настраиваем кнопку настроек
+        this.setupSettingsMenu();
+        
+        // Кнопки +/- для времени (с задержкой для инициализации DOM)
+        setTimeout(() => {
+            document.querySelectorAll('.time-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const target = e.target.dataset.target;
+                    const input = document.getElementById(target);
+                    const isPlus = e.target.classList.contains('time-plus');
+                    const isMinus = e.target.classList.contains('time-minus');
+                    
+                    if (input && (isPlus || isMinus)) {
+                        let value = parseInt(input.value);
+                        const step = parseInt(input.step) || 1;
+                        const min = parseInt(input.min);
+                        const max = parseInt(input.max);
+                        
+                        if (isPlus && value < max) {
+                            value += step;
+                        } else if (isMinus && value > min) {
+                            value -= step;
+                        }
+                        
+                        input.value = value;
+                        this.saveInlineSettings();
+                    }
+                });
+            });
+        }, 150);
+        
+        // Настройки
+        if (this.elements.workTimeInline) {
+            this.elements.workTimeInline.addEventListener('change', () => this.saveInlineSettings());
+        }
+        if (this.elements.shortBreakInline) {
+            this.elements.shortBreakInline.addEventListener('change', () => this.saveInlineSettings());
+        }
+        if (this.elements.longBreakInline) {
+            this.elements.longBreakInline.addEventListener('change', () => this.saveInlineSettings());
+        }
+        if (this.elements.soundEnabledInline) {
+            this.elements.soundEnabledInline.addEventListener('change', () => this.saveInlineSettings());
+        }
+        
+        // Кнопки статистики
+        setTimeout(() => {
+            const statsBtn = document.getElementById('pomodoroStatsBtn');
+            const resetStatsBtn = document.getElementById('pomodoroResetStatsBtn');
+            
+            if (statsBtn) {
+                statsBtn.addEventListener('click', () => this.showStatsModal());
+            }
+            if (resetStatsBtn) {
+                resetStatsBtn.addEventListener('click', () => this.resetStats());
+            }
+        }, 150);
         
         // Клавиатурные сокращения
         document.addEventListener('keydown', (e) => {
             if (document.querySelector('.modal-overlay.active') || 
+                document.querySelector('.habit-modal.active') ||
+                document.querySelector('.pomodoro-settings-dropdown.active') ||
                 ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName) ||
                 !Dashboard.isActive) {
                 return;
@@ -110,6 +183,64 @@ const PomodoroModule = {
         });
     },
     
+    setupSettingsMenu() {
+        // Избегаем множественного подключения обработчиков
+        if (this.settingsMenuInitialized) {
+            return;
+        }
+        
+        const settingsBtn = document.getElementById('pomodoroSettingsBtn');
+        const settingsDropdown = document.getElementById('pomodoroSettingsDropdown');
+        
+        console.log('Setting up pomodoro settings menu');
+        console.log('Elements found:', { 
+            settingsBtn: !!settingsBtn, 
+            settingsDropdown: !!settingsDropdown
+        });
+        
+        if (settingsBtn && settingsDropdown) {
+            // Создаем обработчик клика
+            const clickHandler = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Settings button clicked');
+                
+                const isActive = settingsDropdown.classList.contains('active');
+                if (isActive) {
+                    settingsDropdown.classList.remove('active');
+                    console.log('Dropdown closed');
+                } else {
+                    settingsDropdown.classList.add('active');
+                    console.log('Dropdown opened');
+                }
+            };
+            
+            settingsBtn.addEventListener('click', clickHandler);
+            console.log('Event listener added to settings button');
+            
+            // Закрытие при клике вне меню
+            const outsideClickHandler = (e) => {
+                if (!settingsDropdown.contains(e.target) && !settingsBtn.contains(e.target)) {
+                    settingsDropdown.classList.remove('active');
+                }
+            };
+            document.addEventListener('click', outsideClickHandler);
+            
+            // Закрытие по ESC
+            const escKeyHandler = (e) => {
+                if (e.key === 'Escape' && settingsDropdown.classList.contains('active')) {
+                    settingsDropdown.classList.remove('active');
+                }
+            };
+            document.addEventListener('keydown', escKeyHandler);
+            
+            this.settingsMenuInitialized = true;
+            console.log('Pomodoro settings menu initialized successfully');
+        } else {
+            console.warn('Pomodoro settings elements not found:', { settingsBtn, settingsDropdown });
+        }
+    },
+    
     start() {
         if (this.state.currentTime === 0) {
             this.state.currentTime = this.getCurrentSessionTime() * 60;
@@ -122,6 +253,11 @@ const PomodoroModule = {
         this.elements.startBtn.style.display = 'none';
         this.elements.pauseBtn.style.display = 'flex';
         
+        // Добавляем класс активности для анимации
+        if (this.elements.timerCircle) {
+            this.elements.timerCircle.classList.add('active');
+        }
+        
         this.timer = setInterval(() => {
             this.tick();
         }, 1000);
@@ -133,6 +269,11 @@ const PomodoroModule = {
         
         this.elements.startBtn.style.display = 'flex';
         this.elements.pauseBtn.style.display = 'none';
+        
+        // Убираем класс активности
+        if (this.elements.timerCircle) {
+            this.elements.timerCircle.classList.remove('active');
+        }
         
         if (this.timer) {
             clearInterval(this.timer);
@@ -167,9 +308,9 @@ const PomodoroModule = {
     completeSession() {
         this.pause();
         
-        // Обновляем статистику если завершена рабочая сессия
+        // Сохраняем статистику только для рабочих сессий
         if (this.state.currentSession === 'work') {
-            this.updateStats(this.settings.workTime);
+            this.updateStats();
         }
         
         if (this.settings.soundEnabled) {
@@ -218,13 +359,13 @@ const PomodoroModule = {
     getSessionLabel() {
         switch (this.state.currentSession) {
             case 'work':
-                return 'Фокус';
+                return 'Focus';
             case 'shortBreak':
-                return 'Короткий перерыв';
+                return 'Short Break';
             case 'longBreak':
-                return 'Длинный перерыв';
+                return 'Long Break';
             default:
-                return 'Фокус';
+                return 'Focus';
         }
     },
     
@@ -284,10 +425,10 @@ const PomodoroModule = {
     showNotification() {
         if ('Notification' in window && Notification.permission === 'granted') {
             const message = this.state.currentSession === 'work' 
-                ? 'Время для перерыва!' 
-                : 'Время работать!';
+                ? 'Time for a break!' 
+                : 'Time to work!';
                 
-            new Notification('Помодоро', {
+            new Notification('Pomodoro', {
                 body: message,
                 icon: '/favicon.ico',
                 silent: !this.settings.soundEnabled
@@ -331,84 +472,261 @@ const PomodoroModule = {
     },
     
     loadStats() {
-        const savedStats = localStorage.getItem('pomodoro_stats');
-        if (savedStats) {
-            this.stats = { ...this.stats, ...JSON.parse(savedStats) };
+        const stats = localStorage.getItem('pomodoro_stats');
+        if (stats) {
+            this.stats = JSON.parse(stats);
+        } else {
+            this.stats = {
+                daily: {},
+                weekly: {}
+            };
         }
-        this.cleanOldStats();
-        this.calculateWeekStats();
     },
     
-    saveStats() {
+    updateStats() {
+        const today = new Date().toDateString();
+        const weekStart = this.getWeekStart();
+        
+        // Обновляем дневную статистику
+        if (!this.stats.daily[today]) {
+            this.stats.daily[today] = 0;
+        }
+        this.stats.daily[today] += this.settings.workTime;
+        
+        // Обновляем недельную статистику
+        if (!this.stats.weekly[weekStart]) {
+            this.stats.weekly[weekStart] = 0;
+        }
+        this.stats.weekly[weekStart] += this.settings.workTime;
+        
+        // Сохраняем и обновляем отображение
         localStorage.setItem('pomodoro_stats', JSON.stringify(this.stats));
+        this.updateStatsDisplay();
     },
     
-    updateStats(minutes) {
-        const today = new Date().toISOString().split('T')[0];
+    updateStatsDisplay() {
+        if (!this.elements.todayMinutes || !this.elements.weekMinutes) return;
         
-        if (!this.stats.history[today]) {
-            this.stats.history[today] = 0;
+        const today = new Date().toDateString();
+        const weekStart = this.getWeekStart();
+        
+        const todayMinutes = this.stats.daily[today] || 0;
+        const weekMinutes = this.stats.weekly[weekStart] || 0;
+        
+        this.elements.todayMinutes.textContent = `${todayMinutes} min`;
+        this.elements.weekMinutes.textContent = `${weekMinutes} min`;
+    },
+    
+    getWeekStart() {
+        const date = new Date();
+        const day = date.getDay();
+        const diff = date.getDate() - day + (day === 0 ? -6 : 1); // Monday as week start
+        const weekStart = new Date(date.setDate(diff));
+        return weekStart.toDateString();
+    },
+    
+    // Show statistics modal similar to habits tracker
+    showStatsModal() {
+        const modal = document.createElement('div');
+        modal.className = 'habit-details-modal';
+        modal.style.opacity = '1';
+        
+        const currentDate = new Date();
+        const currentMonth = currentDate.getMonth();
+        const currentYear = currentDate.getFullYear();
+        
+        modal.innerHTML = `
+            <div class="habit-details-content">
+                <div class="habit-details-header">
+                    <h3>
+                        📊 Pomodoro Statistics
+                    </h3>
+                    <button class="habit-details-close" onclick="this.closest('.habit-details-modal').remove()">×</button>
+                </div>
+                
+                <div class="habit-calendar">
+                    <div class="calendar-navigation">
+                        <button class="calendar-nav-btn" onclick="PomodoroModule.changeStatsMonth(-1)">‹</button>
+                        <div class="calendar-month-year" id="pomodoroStatsMonthYear">${this.getMonthName(currentMonth)} ${currentYear}</div>
+                        <button class="calendar-nav-btn" onclick="PomodoroModule.changeStatsMonth(1)">›</button>
+                    </div>
+                    <div id="pomodoroStatsCalendar">${this.renderStatsCalendar(currentMonth, currentYear)}</div>
+                </div>
+                
+                <div class="habit-details-stats">
+                    <div class="stat-item">
+                        <div class="stat-label">This Month</div>
+                        <div class="stat-value" id="pomodoroMonthMinutes">${this.getMonthMinutes(currentMonth, currentYear)} min</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">This Week</div>
+                        <div class="stat-value">${this.getWeekMinutes()} min</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Today</div>
+                        <div class="stat-value">${this.getTodayMinutes()} min</div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Add ESC key handler
+        const escHandler = (e) => {
+            if (e.key === 'Escape') {
+                modal.remove();
+                document.removeEventListener('keydown', escHandler);
+            }
+        };
+        document.addEventListener('keydown', escHandler);
+        
+        // Store current viewing month/year
+        this.statsViewDate = { month: currentMonth, year: currentYear };
+    },
+    
+    // Change stats viewing month
+    changeStatsMonth(direction) {
+        if (!this.statsViewDate) return;
+        
+        this.statsViewDate.month += direction;
+        
+        if (this.statsViewDate.month > 11) {
+            this.statsViewDate.month = 0;
+            this.statsViewDate.year++;
+        } else if (this.statsViewDate.month < 0) {
+            this.statsViewDate.month = 11;
+            this.statsViewDate.year--;
         }
         
-        this.stats.history[today] += minutes;
-        this.stats.today = this.stats.history[today];
+        // Update display
+        const monthYearElement = document.getElementById('pomodoroStatsMonthYear');
+        const calendarElement = document.getElementById('pomodoroStatsCalendar');
+        const monthMinutesElement = document.getElementById('pomodoroMonthMinutes');
         
-        this.calculateWeekStats();
-        this.saveStats();
-        this.updateProductivityStats();
+        if (monthYearElement) {
+            monthYearElement.textContent = `${this.getMonthName(this.statsViewDate.month)} ${this.statsViewDate.year}`;
+        }
+        if (calendarElement) {
+            calendarElement.innerHTML = this.renderStatsCalendar(this.statsViewDate.month, this.statsViewDate.year);
+        }
+        if (monthMinutesElement) {
+            monthMinutesElement.textContent = `${this.getMonthMinutes(this.statsViewDate.month, this.statsViewDate.year)} min`;
+        }
     },
     
-    calculateWeekStats() {
+    // Get month name
+    getMonthName(month) {
+        const monthNames = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+        return monthNames[month];
+    },
+    
+    // Render calendar for statistics
+    renderStatsCalendar(month, year) {
         const today = new Date();
-        const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
         
-        this.stats.week = 0;
+        let html = '<div class="calendar-grid">';
         
-        Object.entries(this.stats.history).forEach(([date, minutes]) => {
-            const dateObj = new Date(date);
-            if (dateObj >= weekAgo && dateObj <= today) {
-                this.stats.week += minutes;
-            }
+        // Days of the week
+        const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        daysOfWeek.forEach(day => {
+            html += `<div class="calendar-header">${day}</div>`;
         });
         
-        // Обновляем сегодняшнюю статистику
-        const todayKey = today.toISOString().split('T')[0];
-        this.stats.today = this.stats.history[todayKey] || 0;
-    },
-    
-    cleanOldStats() {
-        const monthAgo = new Date();
-        monthAgo.setMonth(monthAgo.getMonth() - 1);
+        // First day of the month
+        const firstDay = new Date(year, month, 1);
+        const firstDayOfWeek = (firstDay.getDay() + 6) % 7; // Convert Sunday (0) to 6
         
-        Object.keys(this.stats.history).forEach(date => {
-            if (new Date(date) < monthAgo) {
-                delete this.stats.history[date];
-            }
-        });
-    },
-    
-    updateProductivityStats() {
-        if (this.elements.todayMinutes) {
-            const hours = Math.floor(this.stats.today / 60);
-            const minutes = this.stats.today % 60;
-            if (hours > 0) {
-                this.elements.todayMinutes.textContent = `${hours}ч ${minutes}м`;
-            } else {
-                this.elements.todayMinutes.textContent = `${minutes} мин`;
-            }
+        // Empty cells before first day
+        for (let i = 0; i < firstDayOfWeek; i++) {
+            html += '<div class="calendar-day empty"></div>';
         }
         
-        if (this.elements.weekMinutes) {
-            const hours = Math.floor(this.stats.week / 60);
-            const minutes = this.stats.week % 60;
-            if (hours > 0) {
-                this.elements.weekMinutes.textContent = `${hours}ч ${minutes}м`;
-            } else {
-                this.elements.weekMinutes.textContent = `${minutes} мин`;
+        // Days of the month
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        for (let day = 1; day <= daysInMonth; day++) {
+            const date = new Date(year, month, day);
+            const dateKey = date.toDateString();
+            const minutes = this.stats.daily[dateKey] || 0;
+            const isToday = date.toDateString() === today.toDateString();
+            const isFuture = date > today;
+            
+            const intensity = minutes > 0 ? Math.min(Math.floor(minutes / 25) + 1, 4) : 0;
+            
+            html += `
+                <div class="calendar-day ${minutes > 0 ? 'completed' : ''} ${isToday ? 'today' : ''} ${isFuture ? 'future' : ''}" 
+                     style="background: ${this.getIntensityColor(intensity)};"
+                     title="${minutes} minutes worked">
+                    ${day}
+                </div>
+            `;
+        }
+        
+        html += '</div>';
+        return html;
+    },
+    
+    // Get color intensity based on minutes worked
+    getIntensityColor(intensity) {
+        const colors = [
+            'rgba(255, 255, 255, 0.05)',
+            'rgba(116, 188, 164, 0.3)',
+            'rgba(116, 188, 164, 0.5)',
+            'rgba(116, 188, 164, 0.7)',
+            'rgba(116, 188, 164, 0.9)'
+        ];
+        return colors[intensity] || colors[0];
+    },
+    
+    // Get today's minutes
+    getTodayMinutes() {
+        const today = new Date().toDateString();
+        return this.stats.daily[today] || 0;
+    },
+    
+    // Get this week's minutes
+    getWeekMinutes() {
+        const weekStart = this.getWeekStart();
+        return this.stats.weekly[weekStart] || 0;
+    },
+    
+    // Get specific month's minutes
+    getMonthMinutes(month, year) {
+        let total = 0;
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        
+        for (let day = 1; day <= daysInMonth; day++) {
+            const date = new Date(year, month, day);
+            const dateKey = date.toDateString();
+            total += this.stats.daily[dateKey] || 0;
+        }
+        
+        return total;
+    },
+    
+    // Reset statistics
+    resetStats() {
+        if (confirm('Are you sure you want to reset all Pomodoro statistics? This action cannot be undone.')) {
+            this.stats = {
+                daily: {},
+                weekly: {}
+            };
+            localStorage.setItem('pomodoro_stats', JSON.stringify(this.stats));
+            this.updateStatsDisplay();
+            
+            // Close any open modals
+            const modal = document.querySelector('.habit-details-modal');
+            if (modal) {
+                modal.remove();
             }
+            
+            alert('Statistics have been reset successfully.');
         }
     }
-}; 
+};
 
 // Экспорт модуля
-window.PomodoroModule = PomodoroModule; 
+window.PomodoroModule = PomodoroModule;

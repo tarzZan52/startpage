@@ -18,6 +18,7 @@ const Apps = {
         
         // Загружаем приложения из Storage
         const apps = Storage.getApps();
+        console.log('Loading apps:', apps);
         
         // Ограничиваем количество до 12
         const appsToShow = apps.slice(0, 12);

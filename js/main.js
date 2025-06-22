@@ -1,29 +1,66 @@
 // Главный модуль приложения
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Starting application...');
+    
+    // Инициализация основных модулей
     try {
-        // Инициализация всех модулей
-        DateTime.init();
-        Particles.init();
         Search.init();
-        Apps.init();
-        Editor.init();
-        Dashboard.init();
-        
-        console.log('Dashboard initialized successfully');
-        
-        // Останавливаем индикатор загрузки
-        window.addEventListener('load', () => {
-            document.body.classList.add('loaded');
-            console.log('Page fully loaded');
-        });
-        
-        // Если страница уже загружена
-        if (document.readyState === 'complete') {
-            document.body.classList.add('loaded');
-        }
-        
+        console.log('✅ Search module initialized');
     } catch (error) {
-        console.error('Error initializing dashboard:', error);
+        console.error('❌ Search module failed:', error);
     }
+
+    try {
+        Apps.init();
+        console.log('✅ Apps module initialized');
+    } catch (error) {
+        console.error('❌ Apps module failed:', error);
+    }
+
+    try {
+        Editor.init();
+        console.log('✅ Editor module initialized');
+    } catch (error) {
+        console.error('❌ Editor module failed:', error);
+    }
+
+    try {
+        DateTime.init();
+        console.log('✅ DateTime module initialized');
+    } catch (error) {
+        console.error('❌ DateTime module failed:', error);
+    }
+
+    try {
+        Dashboard.init();
+        console.log('✅ Dashboard module initialized');
+    } catch (error) {
+        console.error('❌ Dashboard module failed:', error);
+    }
+
+    try {
+        Particles.init();
+        console.log('✅ Particles module initialized');
+    } catch (error) {
+        console.error('❌ Particles module failed:', error);
+    }
+
+    try {
+        TodoModule.init();
+        console.log('✅ Todo module initialized');
+    } catch (error) {
+        console.error('❌ Todo module failed:', error);
+    }
+
+    // Дополнительное логирование для отладки
+    setTimeout(() => {
+        console.log('🔍 Post-init check:');
+        console.log('Dashboard active:', Dashboard?.isActive);
+        console.log('Pomodoro initialized:', typeof PomodoroModule !== 'undefined');
+        console.log('Settings button exists:', !!document.getElementById('pomodoroSettingsBtn'));
+        console.log('Settings dropdown exists:', !!document.getElementById('pomodoroSettingsDropdown'));
+    }, 1000);
+    
+    console.log('🎉 Application initialization complete');
 });

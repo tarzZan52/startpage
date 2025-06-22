@@ -1,4 +1,4 @@
-// Модуль для работы с датой и временем
+// Date and time module
 const DateTime = {
     timeElement: null,
     dateElement: null,
@@ -15,20 +15,21 @@ const DateTime = {
         
         this.updateTime();
         
-        // Сохраняем ID интервала для возможности очистки
+        // Save interval ID for possible cleanup
         this.intervalId = setInterval(() => this.updateTime(), 1000);
     },
     
     updateTime() {
         const now = new Date();
         
-        this.timeElement.textContent = now.toLocaleTimeString('ru-RU', { 
+        this.timeElement.textContent = now.toLocaleTimeString('en-US', { 
             hour: '2-digit', 
             minute: '2-digit', 
-            second: '2-digit' 
+            second: '2-digit',
+            hour12: false
         });
         
-        this.dateElement.textContent = now.toLocaleDateString('ru-RU', { 
+        this.dateElement.textContent = now.toLocaleDateString('en-US', { 
             weekday: 'long', 
             day: 'numeric', 
             month: 'long' 

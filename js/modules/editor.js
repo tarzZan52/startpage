@@ -154,7 +154,7 @@ const Editor = {
         
         // Проверяем размер файла (максимум 500KB)
         if (file.size > 500 * 1024) {
-            alert('Файл слишком большой. Максимальный размер: 500KB');
+                            alert('File too large. Maximum size: 500KB');
             return;
         }
         
@@ -179,7 +179,7 @@ const Editor = {
             event.target.value = '';
         } catch (error) {
             console.error('Error uploading icon:', error);
-            alert('Ошибка при загрузке иконки. Попробуйте другой файл.');
+                                alert('Error loading icon. Try another file.');
         }
     },
     
@@ -191,7 +191,7 @@ const Editor = {
         };
         
         if (!formData.name || !formData.url) {
-            alert('Пожалуйста, заполните обязательные поля');
+            alert('Please fill in all required fields');
             return;
         }
         
@@ -202,7 +202,7 @@ const Editor = {
             // Проверяем, не достигнут ли лимит в 12 приложений
             const currentApps = Storage.getApps();
             if (currentApps.length >= 12) {
-                alert('Достигнут максимум приложений (12). Удалите одно из существующих приложений.');
+                alert('Maximum number of applications reached (12). Delete one of the existing applications.');
                 return;
             }
             
@@ -255,7 +255,7 @@ const Editor = {
         } catch (error) {
             console.log('Invalid URL for favicon detection:', url);
             if (force) {
-                alert('Не удалось загрузить фавиконку. Проверьте URL.');
+                alert('Failed to load favicon. Check the URL.');
             }
         }
     },
@@ -318,7 +318,7 @@ const Editor = {
         const url = urlInput.value.trim();
         
         if (!url) {
-            alert('Сначала введите URL приложения');
+            alert('Please enter the application URL first');
             urlInput.focus();
             return;
         }
