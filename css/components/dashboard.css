@@ -888,7 +888,7 @@
     padding: 16px;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     position: relative;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .habit-item::before {
@@ -1125,39 +1125,52 @@
     gap: 8px;
     justify-content: flex-end;
     margin-top: 12px;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-}
-
-.habit-item:hover .habit-actions {
     opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 10;
 }
 
 .habit-action-btn {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 8px;
     color: var(--text-secondary);
     cursor: pointer;
     border-radius: 8px;
     transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    min-height: 32px;
+    position: relative;
+    z-index: 11;
 }
 
 .habit-action-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.15);
     color: var(--text-primary);
-    transform: translateY(-2px);
+    transform: translateY(-2px) scale(1.05);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.habit-action-btn:active {
+    transform: translateY(0) scale(1);
 }
 
 .habit-action-btn svg {
     width: 16px;
     height: 16px;
+    pointer-events: none;
 }
 
 .habit-delete:hover {
     background: rgba(239, 68, 68, 0.2);
     color: var(--dashboard-danger);
-    border-color: rgba(239, 68, 68, 0.3);
+    border-color: rgba(239, 68, 68, 0.4);
 }
 
 /* Модальное окно для добавления привычки - улучшенное */

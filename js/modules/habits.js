@@ -26,20 +26,18 @@ const HabitsModule = {
     },
     
     setupEventListeners() {
-        // Добавление новой привычки
+        // Add new habit
         if (this.elements.addBtn) {
             this.elements.addBtn.addEventListener('click', () => this.openModal());
         }
         
-
-        
-        // Горячие клавиши
+        // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             if (!Dashboard.isActive || document.querySelector('.modal-overlay.active')) {
                 return;
             }
             
-            // Ctrl/Cmd + H - новая привычка
+            // Ctrl/Cmd + H - new habit
             if ((e.ctrlKey || e.metaKey) && e.key === 'h') {
                 e.preventDefault();
                 this.openModal();
@@ -48,7 +46,7 @@ const HabitsModule = {
     },
     
     setupEventBusListeners() {
-        // В будущем здесь можно добавить подписки на события от других модулей
+        // Future event subscriptions from other modules can be added here
     },
     
     loadData() {
@@ -116,7 +114,7 @@ const HabitsModule = {
             this.elements.habitsList.innerHTML = `
                 <div class="habits-empty">
                     <div class="habits-empty-icon">🎯</div>
-                    <div class="habits-empty-text">No habits. Add your first one!</div>
+                    <div class="habits-empty-text">No habits yet. Add your first one!</div>
                 </div>
             `;
             return;
@@ -145,14 +143,14 @@ const HabitsModule = {
                 </div>
                 <div class="habit-info">
                     <div class="habit-name">${this.escapeHtml(habit.name)}</div>
-                                    <div class="habit-stats">
-                    <span class="habit-streak" title="Current streak">
-                        🔥 ${streak} ${this.getDayWord(streak)}
-                    </span>
-                    <span class="habit-rate" title="Completion rate for last 30 days">
-                        ${completionRate}%
-                    </span>
-                </div>
+                    <div class="habit-stats">
+                        <span class="habit-streak" title="Current streak">
+                            🔥 ${streak} ${this.getDayWord(streak)}
+                        </span>
+                        <span class="habit-rate" title="Completion rate for last 30 days">
+                            ${completionRate}%
+                        </span>
+                    </div>
                 </div>
                 <button class="habit-check ${isCompleted ? 'checked' : ''}" 
                         data-id="${habit.id}" 
@@ -178,19 +176,19 @@ const HabitsModule = {
             </div>
             
             <div class="habit-actions">
-                <button class="habit-action-btn" data-action="details" data-habit-id="${habit.id}" title="Details">
+                <button class="habit-action-btn" data-action="details" data-habit-id="${habit.id}" title="View details">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                         <circle cx="12" cy="12" r="3"></circle>
                     </svg>
                 </button>
-                <button class="habit-action-btn" data-action="edit" data-habit-id="${habit.id}" title="Edit">
+                <button class="habit-action-btn" data-action="edit" data-habit-id="${habit.id}" title="Edit habit">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                     </svg>
                 </button>
-                <button class="habit-action-btn habit-delete" data-action="delete" data-habit-id="${habit.id}" title="Delete">
+                <button class="habit-action-btn habit-delete" data-action="delete" data-habit-id="${habit.id}" title="Delete habit">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="3,6 5,6 21,6"></polyline>
                         <path d="M19 6l-2 14H7L5 6"></path>
@@ -199,18 +197,18 @@ const HabitsModule = {
             </div>
         `;
         
-        // Обработчик клика по чекбоксу
+        // Click handler for checkbox
         const checkBtn = item.querySelector('.habit-check');
         checkBtn.addEventListener('click', () => this.toggleHabit(habit.id));
         
-        // Обработчики для кнопок действий
+        // Handlers for action buttons
         const actionBtns = item.querySelectorAll('.habit-action-btn');
         actionBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 const action = btn.dataset.action;
-                const habitId = btn.dataset.habitId;
+                const habitId = parseInt(btn.dataset.habitId); // Convert to number immediately
                 
                 switch(action) {
                     case 'details':
@@ -405,12 +403,12 @@ const HabitsModule = {
         const color = modal.querySelector('.habit-color-option.selected').dataset.color;
         
         if (!name) {
-            Modal.confirm('Enter habit name');
+            Modal.confirm('Please enter a habit name');
             return;
         }
         
         if (this.currentEditId) {
-            // Editing
+            // Editing existing habit
             const habit = this.habits.find(h => h.id === this.currentEditId);
             if (habit) {
                 habit.name = name;
@@ -419,7 +417,7 @@ const HabitsModule = {
                 habit.color = color;
             }
         } else {
-            // New habit
+            // Creating new habit
             const newHabit = {
                 id: Date.now(),
                 name,
@@ -443,24 +441,22 @@ const HabitsModule = {
     },
     
     editHabit(habitId) {
-        // Convert habitId to number if it's a string
-        const id = typeof habitId === 'string' ? parseInt(habitId) : habitId;
-        this.openModal(id);
+        // habitId is now properly converted to number
+        this.openModal(habitId);
     },
     
     deleteHabit(habitId) {
-        // Convert habitId to number if it's a string
-        const id = typeof habitId === 'string' ? parseInt(habitId) : habitId;
-        const habit = this.habits.find(h => h.id === id);
+        // habitId is now properly converted to number
+        const habit = this.habits.find(h => h.id === habitId);
         
         if (!habit) {
             console.warn('Habit not found for deletion:', habitId, 'Available habits:', this.habits.map(h => h.id));
             return;
         }
         
-        Modal.confirm(`Delete habit "${habit.name}"? Completion history will also be deleted.`, () => {
-            this.habits = this.habits.filter(h => h.id !== id);
-            delete this.habitLogs[id];
+        Modal.confirm(`Delete habit "${habit.name}"? All completion history will also be deleted.`, () => {
+            this.habits = this.habits.filter(h => h.id !== habitId);
+            delete this.habitLogs[habitId];
             
             this.saveData();
             this.render();
@@ -472,9 +468,8 @@ const HabitsModule = {
     },
     
     showDetails(habitId) {
-        // Convert habitId to number if it's a string
-        const id = typeof habitId === 'string' ? parseInt(habitId) : habitId;
-        const habit = this.habits.find(h => h.id === id);
+        // habitId is now properly converted to number
+        const habit = this.habits.find(h => h.id === habitId);
         
         if (!habit) {
             console.warn('Habit not found for details:', habitId, 'Available habits:', this.habits.map(h => h.id));
@@ -483,12 +478,12 @@ const HabitsModule = {
         
         // Calendar state
         this.calendarState = {
-            habitId: id,
+            habitId: habitId,
             currentMonth: new Date().getMonth(),
             currentYear: new Date().getFullYear()
         };
         
-        // Create modal window with calendar
+        // Create modal with calendar
         const modal = document.createElement('div');
         modal.className = 'habit-details-modal';
         modal.innerHTML = `
@@ -508,11 +503,11 @@ const HabitsModule = {
                 <div class="habit-details-stats">
                     <div class="stat-item">
                         <div class="stat-label">Best Streak</div>
-                        <div class="stat-value">${this.getBestStreak(id)} ${this.getDayWord(this.getBestStreak(id))}</div>
+                        <div class="stat-value">${this.getBestStreak(habitId)} ${this.getDayWord(this.getBestStreak(habitId))}</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Total Completed</div>
-                        <div class="stat-value">${this.getTotalCompleted(id)} times</div>
+                        <div class="stat-value">${this.getTotalCompleted(habitId)} times</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Created</div>
@@ -549,12 +544,12 @@ const HabitsModule = {
             this.updateCalendar();
         });
         
-        // Appearance animation
+        // Show animation
         setTimeout(() => {
             modal.style.opacity = '1';
         }, 10);
         
-        // Close modal window
+        // Close modal
         const closeBtn = modal.querySelector('.habit-details-close');
         closeBtn.addEventListener('click', () => {
             modal.style.opacity = '0';
@@ -724,7 +719,7 @@ const HabitsModule = {
             <form class="habit-form" id="habitForm">
                 <div class="habit-form-group">
                     <label for="habitName">Habit name</label>
-                    <input type="text" id="habitName" required placeholder="E.g.: Morning exercise" maxlength="50">
+                    <input type="text" id="habitName" required placeholder="e.g., Morning exercise" maxlength="50">
                 </div>
                 
                 <div class="habit-form-group">
@@ -779,18 +774,18 @@ const HabitsModule = {
         const colorButtons = modal.querySelectorAll('.habit-color-option');
         const cancelBtn = modal.querySelector('#habitCancel');
         
-        // Отправка формы
+        // Form submission
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             this.saveHabit(modal);
         });
         
-        // Кнопка отмены
+        // Cancel button
         if (cancelBtn) {
             cancelBtn.addEventListener('click', () => this.closeModal());
         }
         
-        // Цветовые кнопки
+        // Color buttons
         colorButtons.forEach(btn => {
             btn.addEventListener('click', () => {
                 colorButtons.forEach(b => b.classList.remove('selected'));
@@ -798,7 +793,7 @@ const HabitsModule = {
             });
         });
         
-        // Кнопки изменения цели
+        // Target adjustment buttons
         if (targetMinusBtn && targetPlusBtn && targetInput) {
             targetMinusBtn.addEventListener('click', () => {
                 const currentValue = parseInt(targetInput.value);
@@ -821,7 +816,7 @@ const HabitsModule = {
         modal.querySelector('#habitIcon').value = habit.icon;
         modal.querySelector('#habitTarget').value = habit.target;
         
-        // Устанавливаем выбранный цвет
+        // Set selected color
         modal.querySelectorAll('.habit-color-option').forEach(btn => {
             btn.classList.toggle('selected', btn.dataset.color === habit.color);
         });
