@@ -298,25 +298,29 @@
 
 /* Выпадающие настройки помодоро */
 .pomodoro-settings-dropdown {
-    position: fixed;
-    width: 280px;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 300px;
     background: rgba(0, 0, 0, 0.95);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
     padding: 20px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(20px);
-    z-index: 1000;
+    z-index: 9999;
     opacity: 0;
     visibility: hidden;
     transform: translateY(-10px);
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: all 0.3s ease;
+    margin-top: 8px;
 }
 
 .pomodoro-settings-dropdown.active {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) !important;
+    display: block !important;
 }
 
 .settings-group {
@@ -497,6 +501,10 @@
 
 /* Позиционирование относительно виджета */
 .pomodoro-widget {
+    position: relative;
+}
+
+.pomodoro-widget .widget-header {
     position: relative;
 }
 
@@ -1887,7 +1895,7 @@
 
 .analytics-summary {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 16px;
     margin-top: 20px;
     padding-top: 20px;
@@ -2005,14 +2013,7 @@
         font-size: 0.6rem;
     }
 
-    .pomodoro-settings-dropdown {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 90%;
-        max-width: 320px;
-    }
+
     
     .analytics-summary {
         grid-template-columns: 1fr;

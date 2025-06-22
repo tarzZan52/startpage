@@ -119,9 +119,6 @@ const TodoModule = {
         this.saveTasks();
         this.render();
         
-        // Send task update event
-        EventBus.emit('tasks:updated');
-        
         // Clear form
         this.elements.input.value = '';
         this.elements.prioritySelect.value = 'medium';
@@ -141,9 +138,6 @@ const TodoModule = {
             task.completedAt = task.completed ? new Date().toISOString() : null;
             this.saveTasks();
             this.render();
-            
-            // Send task update events
-            EventBus.emit('tasks:updated');
         }
     },
     
@@ -152,9 +146,6 @@ const TodoModule = {
         this.tasks = this.tasks.filter(t => t.id !== id);
         this.saveTasks();
         this.render();
-        
-        // Send task update event
-        EventBus.emit('tasks:updated');
     },
     
     // Task editing
@@ -164,9 +155,6 @@ const TodoModule = {
             task.text = newText.trim();
             this.saveTasks();
             this.render();
-            
-            // Send task update event
-            EventBus.emit('tasks:updated');
         }
     },
     
@@ -189,9 +177,6 @@ const TodoModule = {
             task.lastWorkedAt = new Date().toISOString();
             this.saveTasks();
             this.render();
-            
-            // Send task update event
-            EventBus.emit('tasks:updated');
         }
     },
     
@@ -226,9 +211,6 @@ const TodoModule = {
             this.tasks = this.tasks.filter(t => !t.completed);
             this.saveTasks();
             this.render();
-            
-            // Send task update event
-            EventBus.emit('tasks:updated');
         });
     },
     
@@ -486,40 +468,7 @@ const TodoModule = {
         }
     },
     
-    // Get statistics for analytics
-    getStatisticsData() {
-        const now = new Date();
-        const stats = {
-            daily: {},
-            weekly: {},
-            tasksByDay: {},
-            pomodoroTasks: 0,
-            regularTasks: 0
-        };
-        
-        // Analyze completed tasks
-        this.tasks.filter(t => t.completed && t.completedAt).forEach(task => {
-            const completedDate = new Date(task.completedAt);
-            const dateKey = completedDate.toISOString().split('T')[0];
-            
-            // Подсчет по дням
-            if (!stats.daily[dateKey]) {
-                stats.daily[dateKey] = { total: 0, withPomodoro: 0, withoutPomodoro: 0 };
-            }
-            
-            stats.daily[dateKey].total++;
-            
-            if (task.pomodoroSessions > 0) {
-                stats.daily[dateKey].withPomodoro++;
-                stats.pomodoroTasks++;
-            } else {
-                stats.daily[dateKey].withoutPomodoro++;
-                stats.regularTasks++;
-            }
-        });
-        
-        return stats;
-    },
+
     
     // Экранирование HTML
     escapeHtml(text) {
@@ -566,9 +515,7 @@ const TodoModule = {
         return this.tasks;
     },
     
-    getCompletedTasks() {
-        return this.tasks.filter(t => t.completed);
-    }
+
 };
 
 // Export module

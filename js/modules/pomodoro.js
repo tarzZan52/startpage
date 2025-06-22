@@ -293,19 +293,30 @@ const PomodoroModule = {
         const settingsBtn = document.getElementById('pomodoroSettingsBtn');
         const settingsDropdown = document.getElementById('pomodoroSettingsDropdown');
         
+        console.log('Settings setup:', { settingsBtn, settingsDropdown }); // Debug info
+        
         if (settingsBtn && settingsDropdown) {
             // Create click handler
             const clickHandler = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 
+                console.log('Settings button clicked!'); // Debug info
+                
                 const isActive = settingsDropdown.classList.contains('active');
+                console.log('Is active:', isActive); // Debug info
+                
                 if (isActive) {
                     settingsDropdown.classList.remove('active');
                 } else {
-                    // Position dropdown relative to button
-                    this.positionDropdown(settingsBtn, settingsDropdown);
+                    // Add active class first, then position
                     settingsDropdown.classList.add('active');
+                    console.log('Added active class'); // Debug info
+                    console.log('Dropdown styles after adding active:', window.getComputedStyle(settingsDropdown)); // Debug styles
+                    // Small delay to ensure the dropdown is rendered before positioning
+                    requestAnimationFrame(() => {
+                        this.positionDropdown(settingsBtn, settingsDropdown);
+                    });
                 }
             };
             
@@ -337,25 +348,23 @@ const PomodoroModule = {
     },
     
     positionDropdown(button, dropdown) {
-        const buttonRect = button.getBoundingClientRect();
-        const dropdownWidth = 280; // Width from CSS
+        // CSS handles positioning, just check for overflow
+        const dropdownRect = dropdown.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
         
-        // Position below button on the right
-        dropdown.style.top = (buttonRect.bottom + 5) + 'px';
-        dropdown.style.left = (buttonRect.right - dropdownWidth) + 'px';
-        
-        // Check if it goes beyond screen boundaries
-        const screenWidth = window.innerWidth;
-        const screenHeight = window.innerHeight;
-        
-        if (buttonRect.right - dropdownWidth < 0) {
-            // If doesn't fit on right, position to left of button
-            dropdown.style.left = buttonRect.left + 'px';
+        // If dropdown goes off-screen to the right, flip to left
+        if (dropdownRect.right > viewportWidth - 20) {
+            dropdown.style.right = 'auto';
+            dropdown.style.left = '0';
         }
         
-        if (buttonRect.bottom + 200 > screenHeight) {
-            // If doesn't fit below, position above
-            dropdown.style.top = (buttonRect.top - 200) + 'px';
+        // If dropdown goes off-screen at bottom, position above
+        if (dropdownRect.bottom > viewportHeight - 20) {
+            dropdown.style.top = 'auto';
+            dropdown.style.bottom = '100%';
+            dropdown.style.marginTop = '0';
+            dropdown.style.marginBottom = '8px';
         }
     },
     

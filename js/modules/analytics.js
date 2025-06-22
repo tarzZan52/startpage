@@ -1,17 +1,14 @@
 // Analytics and progress module
 const AnalyticsModule = {
     charts: {
-        pomodoro: null,
-        tasks: null
+        pomodoro: null
     },
     
     elements: {
         widget: null,
         pomodoroChart: null,
-        tasksChart: null,
         refreshBtn: null,
         totalFocusTime: null,
-        totalTasksCompleted: null,
         bestHabitStreak: null
     },
     
@@ -51,10 +48,8 @@ const AnalyticsModule = {
         if (!this.elements.widget) return;
         
         this.elements.pomodoroChart = this.elements.widget.querySelector('.pomodoro-chart');
-        this.elements.tasksChart = this.elements.widget.querySelector('.tasks-chart');
         this.elements.refreshBtn = this.elements.widget.querySelector('.analytics-refresh-btn');
         this.elements.totalFocusTime = this.elements.widget.querySelector('.total-focus-time');
-        this.elements.totalTasksCompleted = this.elements.widget.querySelector('.total-tasks-completed');
         this.elements.bestHabitStreak = this.elements.widget.querySelector('.best-habit-streak');
     },
     
@@ -77,11 +72,6 @@ const AnalyticsModule = {
             this.updatePomodoroChart();
             this.updateSummaryStats();
         });
-        
-        EventBus.on('tasks:updated', () => {
-            this.updateTasksChart();
-            this.updateSummaryStats();
-        });
     },
     
     initializeCharts() {
@@ -93,7 +83,6 @@ const AnalyticsModule = {
         
         // Initialize charts
         this.initPomodoroChart();
-        this.initTasksChart();
     },
     
     initPomodoroChart() {
@@ -152,86 +141,10 @@ const AnalyticsModule = {
     
 
     
-    initTasksChart() {
-        if (!this.elements.tasksChart) return;
-        
-        const ctx = this.elements.tasksChart.getContext('2d');
-        this.charts.tasks = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: [],
-                datasets: [
-                    {
-                        label: 'With Pomodoro',
-                        data: [],
-                        borderColor: 'rgba(116, 188, 164, 1)',
-                        backgroundColor: 'rgba(116, 188, 164, 0.1)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.4
-                    },
-                    {
-                        label: 'Without Pomodoro',
-                        data: [],
-                        borderColor: 'rgba(156, 163, 175, 1)',
-                        backgroundColor: 'rgba(156, 163, 175, 0.1)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.4
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: {
-                    mode: 'index',
-                    intersect: false
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            color: 'rgba(255, 255, 255, 0.7)',
-                            stepSize: 1
-                        },
-                        grid: {
-                            color: 'rgba(255, 255, 255, 0.1)'
-                        }
-                    },
-                    x: {
-                        ticks: {
-                            color: 'rgba(255, 255, 255, 0.7)'
-                        },
-                        grid: {
-                            color: 'rgba(255, 255, 255, 0.1)'
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        labels: {
-                            color: 'rgba(255, 255, 255, 0.7)'
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            title: function(context) {
-                                return context[0].label;
-                            },
-                            label: function(context) {
-                                return `${context.dataset.label}: ${context.parsed.y} tasks`;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    },
+
     
     refreshData() {
         this.updatePomodoroChart();
-        this.updateTasksChart();
         this.updateSummaryStats();
     },
     
@@ -261,39 +174,7 @@ const AnalyticsModule = {
     
 
     
-    updateTasksChart() {
-        if (!this.charts.tasks || !window.TodoModule) return;
-        
-        const stats = window.TodoModule.getStatisticsData() || { daily: {} };
-        const labels = [];
-        const pomodoroData = [];
-        const regularData = [];
-        
-        // Get data for the last 14 days
-        const today = new Date();
-        for (let i = 13; i >= 0; i--) {
-            const date = new Date(today);
-            date.setDate(date.getDate() - i);
-            const dateKey = date.toISOString().split('T')[0];
-            
-            // Format date for display
-            const label = date.toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric' 
-            });
-            labels.push(label);
-            
-            // Add data
-            const dayStats = stats.daily[dateKey] || { withPomodoro: 0, withoutPomodoro: 0 };
-            pomodoroData.push(dayStats.withPomodoro);
-            regularData.push(dayStats.withoutPomodoro);
-        }
-        
-        this.charts.tasks.data.labels = labels;
-        this.charts.tasks.data.datasets[0].data = pomodoroData;
-        this.charts.tasks.data.datasets[1].data = regularData;
-        this.charts.tasks.update();
-    },
+
     
     updateSummaryStats() {
         // Total focus time
@@ -307,11 +188,7 @@ const AnalyticsModule = {
             this.elements.totalFocusTime.textContent = timeStr;
         }
         
-        // Total completed tasks
-        if (window.TodoModule && this.elements.totalTasksCompleted) {
-            const completedTasks = window.TodoModule.getCompletedTasks().length;
-            this.elements.totalTasksCompleted.textContent = completedTasks;
-        }
+
         
         // Best habit streak
         if (window.HabitsModule && this.elements.bestHabitStreak) {
