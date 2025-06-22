@@ -23,7 +23,7 @@
 <br>
 
 <p align="center">
-  <img src="src/image-v3.png" alt="Main page view" width="90%">
+  <img src="src/image-v4.png" alt="Main page view" width="90%">
 </p>
 
 <p align="center">
