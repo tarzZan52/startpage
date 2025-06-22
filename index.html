@@ -17,6 +17,9 @@
     <link rel="stylesheet" href="css/components/editor.css">
     <link rel="stylesheet" href="css/components/dashboard.css">
     <link rel="stylesheet" href="css/responsive.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 </head>
 <body>
     <!-- Фоновые эффекты -->
@@ -376,7 +379,7 @@
     <div class="modal-overlay" id="editorModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">Edit Application</h2>
+                <h2 class="modal-title">Редактировать приложение</h2>
                 <button class="modal-close" id="modalClose">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -387,17 +390,17 @@
             
             <form class="editor-form" id="editorForm">
                 <div class="form-group">
-                    <label for="appName">Application name</label>
-                    <input type="text" id="appName" required placeholder="E.g.: YouTube">
+                    <label for="appName">Название приложения</label>
+                    <input type="text" id="appName" required placeholder="Например: YouTube">
                 </div>
                 
                 <div class="form-group">
-                    <label for="appUrl">Application URL</label>
+                    <label for="appUrl">URL приложения</label>
                     <input type="url" id="appUrl" required placeholder="https://example.com">
                 </div>
                 
                 <div class="form-group">
-                    <label for="appIcon">Application icon</label>
+                    <label for="appIcon">Иконка приложения</label>
                     <div class="icon-upload-container">
                         <div class="icon-preview" id="iconPreview">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -409,15 +412,15 @@
                         <div class="icon-upload-controls">
                             <input type="file" id="iconFile" accept="image/*" hidden>
                             <button type="button" class="btn-secondary" id="autoFaviconBtn">
-                                Get automatically
+                                Получить автоматически
                             </button>
                             <button type="button" class="btn-secondary" id="uploadIconBtn">
-                                Choose file
+                                Выбрать файл
                             </button>
                             <small class="help-text">
-                                SVG format recommended.<br>
-                                Maximum size: 500KB<br>
-                                Find icons: <a href="https://icons8.com" target="_blank">icons8.com</a>
+                                Рекомендуется формат SVG.<br>
+                                Максимальный размер: 500KB<br>
+                                Найти иконки: <a href="https://icons8.com" target="_blank">icons8.com</a>
                             </small>
                         </div>
                     </div>
@@ -425,10 +428,10 @@
                 
                 <div class="form-actions">
                     <button type="button" class="btn-danger" id="deleteAppBtn" style="display: none;">
-                        Delete
+                        Удалить
                     </button>
                     <button type="submit" class="btn-primary">
-                        Save
+                        Сохранить
                     </button>
                 </div>
             </form>
@@ -447,6 +450,7 @@
     <script src="js/modules/pomodoro.js"></script>
     <script src="js/modules/habits.js"></script>
     <script src="js/modules/todo.js"></script>
+    <script src="js/modules/analytics.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>

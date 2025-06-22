@@ -15,7 +15,8 @@ const PomodoroModule = {
         currentTime: 0,
         currentSession: 'work', // work, shortBreak, longBreak
         sessionsCompleted: 0,
-        totalTime: 0
+        totalTime: 0,
+        currentTaskId: null // ID текущей задачи
     },
     
     // DOM элементы
@@ -34,7 +35,8 @@ const PomodoroModule = {
         longBreakInline: null,
         soundEnabledInline: null,
         todayMinutes: null,
-        weekMinutes: null
+        weekMinutes: null,
+        taskSelector: null
     },
     
     timer: null,
@@ -47,6 +49,7 @@ const PomodoroModule = {
         this.updateDisplay();
         this.updateStatsDisplay();
         this.createNotificationSound();
+        this.createTaskSelector();
         
         // Setup event listeners with delay to ensure DOM is ready
         setTimeout(() => {
@@ -80,6 +83,75 @@ const PomodoroModule = {
         }
     },
     
+    createTaskSelector() {
+        // Создаем селектор задач после таймера
+        const timerContainer = document.querySelector('.pomodoro-timer');
+        if (!timerContainer) return;
+        
+        const selectorContainer = document.createElement('div');
+        selectorContainer.className = 'pomodoro-task-selector';
+        selectorContainer.innerHTML = `
+            <label for="pomodoroTaskSelect">Current task:</label>
+            <select id="pomodoroTaskSelect" class="task-select">
+                <option value="">No task selected</option>
+            </select>
+        `;
+        
+        // Вставляем после кругового таймера
+        const timerCircle = timerContainer.querySelector('.timer-circle');
+        if (timerCircle && timerCircle.nextSibling) {
+            timerContainer.insertBefore(selectorContainer, timerCircle.nextSibling);
+        } else {
+            timerContainer.appendChild(selectorContainer);
+        }
+        
+        this.elements.taskSelector = document.getElementById('pomodoroTaskSelect');
+        this.updateTaskSelector();
+    },
+    
+    updateTaskSelector() {
+        if (!this.elements.taskSelector || !window.TodoModule) return;
+        
+        const activeTasks = window.TodoModule.getActiveTasks();
+        const currentValue = this.elements.taskSelector.value;
+        
+        // Очищаем и заполняем селектор
+        this.elements.taskSelector.innerHTML = '<option value="">No task selected</option>';
+        
+        activeTasks.forEach(task => {
+            const option = document.createElement('option');
+            option.value = task.id;
+            
+            // Обрезаем длинный текст
+            let taskText = task.text;
+            if (taskText.length > 40) {
+                taskText = taskText.substring(0, 40) + '...';
+            }
+            
+            // Добавляем информацию о времени если есть
+            if (task.timeSpent > 0) {
+                taskText += ` (${window.TodoModule.formatTime(task.timeSpent)})`;
+            }
+            
+            option.textContent = taskText;
+            
+            // Выделяем задачи с высоким приоритетом
+            if (task.priority === 'high') {
+                option.style.fontWeight = 'bold';
+            }
+            
+            this.elements.taskSelector.appendChild(option);
+        });
+        
+        // Восстанавливаем выбранное значение если оно все еще актуально
+        if (currentValue && activeTasks.find(t => t.id == currentValue)) {
+            this.elements.taskSelector.value = currentValue;
+            this.state.currentTaskId = parseInt(currentValue);
+        } else {
+            this.state.currentTaskId = null;
+        }
+    },
+    
     setupEventListeners() {
         console.log('Setting up Pomodoro event listeners...');
         
@@ -97,6 +169,13 @@ const PomodoroModule = {
             this.elements.skipBtn.addEventListener('click', () => this.skip());
         }
         
+        // Селектор задач
+        if (this.elements.taskSelector) {
+            this.elements.taskSelector.addEventListener('change', (e) => {
+                this.state.currentTaskId = e.target.value ? parseInt(e.target.value) : null;
+            });
+        }
+        
         // Настраиваем кнопку настроек
         this.setupSettingsMenu();
         
@@ -105,10 +184,10 @@ const PomodoroModule = {
             document.querySelectorAll('.time-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.preventDefault();
-                    const target = e.target.dataset.target;
+                    const target = btn.dataset.target;
                     const input = document.getElementById(target);
-                    const isPlus = e.target.classList.contains('time-plus');
-                    const isMinus = e.target.classList.contains('time-minus');
+                    const isPlus = btn.classList.contains('time-plus');
+                    const isMinus = btn.classList.contains('time-minus');
                     
                     if (input && (isPlus || isMinus)) {
                         let value = parseInt(input.value);
@@ -123,7 +202,14 @@ const PomodoroModule = {
                         }
                         
                         input.value = value;
+                        // Автоматически сохраняем при изменении
                         this.saveInlineSettings();
+                        
+                        // Если таймер не запущен, обновляем отображение
+                        if (!this.state.isRunning && this.state.currentTime === 0) {
+                            this.updateDisplay();
+                            this.updateProgress();
+                        }
                     }
                 });
             });
@@ -131,13 +217,31 @@ const PomodoroModule = {
         
         // Настройки
         if (this.elements.workTimeInline) {
-            this.elements.workTimeInline.addEventListener('change', () => this.saveInlineSettings());
+            this.elements.workTimeInline.addEventListener('change', () => {
+                this.saveInlineSettings();
+                if (!this.state.isRunning && this.state.currentTime === 0) {
+                    this.updateDisplay();
+                    this.updateProgress();
+                }
+            });
         }
         if (this.elements.shortBreakInline) {
-            this.elements.shortBreakInline.addEventListener('change', () => this.saveInlineSettings());
+            this.elements.shortBreakInline.addEventListener('change', () => {
+                this.saveInlineSettings();
+                if (!this.state.isRunning && this.state.currentTime === 0 && this.state.currentSession !== 'work') {
+                    this.updateDisplay();
+                    this.updateProgress();
+                }
+            });
         }
         if (this.elements.longBreakInline) {
-            this.elements.longBreakInline.addEventListener('change', () => this.saveInlineSettings());
+            this.elements.longBreakInline.addEventListener('change', () => {
+                this.saveInlineSettings();
+                if (!this.state.isRunning && this.state.currentTime === 0 && this.state.currentSession === 'longBreak') {
+                    this.updateDisplay();
+                    this.updateProgress();
+                }
+            });
         }
         if (this.elements.soundEnabledInline) {
             this.elements.soundEnabledInline.addEventListener('change', () => this.saveInlineSettings());
@@ -181,6 +285,13 @@ const PomodoroModule = {
                 this.skip();
             }
         });
+        
+        // Обновляем селектор задач при изменениях в TodoModule
+        setInterval(() => {
+            if (Dashboard.isActive) {
+                this.updateTaskSelector();
+            }
+        }, 2000);
     },
     
     setupSettingsMenu() {
@@ -258,6 +369,11 @@ const PomodoroModule = {
             this.elements.timerCircle.classList.add('active');
         }
         
+        // Отключаем селектор задач во время работы
+        if (this.elements.taskSelector) {
+            this.elements.taskSelector.disabled = true;
+        }
+        
         this.timer = setInterval(() => {
             this.tick();
         }, 1000);
@@ -285,6 +401,12 @@ const PomodoroModule = {
         this.pause();
         this.state.currentTime = 0;
         this.state.isPaused = false;
+        
+        // Включаем селектор задач
+        if (this.elements.taskSelector) {
+            this.elements.taskSelector.disabled = false;
+        }
+        
         this.updateDisplay();
         this.updateProgress();
     },
@@ -311,6 +433,16 @@ const PomodoroModule = {
         // Сохраняем статистику только для рабочих сессий
         if (this.state.currentSession === 'work') {
             this.updateStats();
+            
+            // Обновляем время задачи если она была выбрана
+            if (this.state.currentTaskId && window.TodoModule) {
+                window.TodoModule.updateTaskTime(this.state.currentTaskId, this.settings.workTime);
+                
+                // Обновляем аналитику
+                if (window.AnalyticsModule) {
+                    window.AnalyticsModule.refreshData();
+                }
+            }
         }
         
         if (this.settings.soundEnabled) {
@@ -336,6 +468,11 @@ const PomodoroModule = {
             }
         } else {
             this.state.currentSession = 'work';
+        }
+        
+        // Включаем селектор задач для рабочих сессий
+        if (this.elements.taskSelector) {
+            this.elements.taskSelector.disabled = this.state.currentSession !== 'work';
         }
         
         this.state.currentTime = 0;
@@ -390,7 +527,12 @@ const PomodoroModule = {
         const currentTime = this.state.currentTime || totalTime;
         const progress = ((totalTime - currentTime) / totalTime) * 283; // 283 = 2πr где r=45
         
-        this.elements.timerProgress.style.strokeDashoffset = 283 - progress;
+        if (this.elements.timerProgress) {
+            const circle = this.elements.timerProgress.querySelector('circle:last-child');
+            if (circle) {
+                circle.style.strokeDashoffset = 283 - progress;
+            }
+        }
     },
     
     createNotificationSound() {
@@ -443,17 +585,33 @@ const PomodoroModule = {
     },
     
     updateInlineSettings() {
-        this.elements.workTimeInline.value = this.settings.workTime;
-        this.elements.shortBreakInline.value = this.settings.shortBreak;
-        this.elements.longBreakInline.value = this.settings.longBreak;
-        this.elements.soundEnabledInline.checked = this.settings.soundEnabled;
+        if (this.elements.workTimeInline) {
+            this.elements.workTimeInline.value = this.settings.workTime;
+        }
+        if (this.elements.shortBreakInline) {
+            this.elements.shortBreakInline.value = this.settings.shortBreak;
+        }
+        if (this.elements.longBreakInline) {
+            this.elements.longBreakInline.value = this.settings.longBreak;
+        }
+        if (this.elements.soundEnabledInline) {
+            this.elements.soundEnabledInline.checked = this.settings.soundEnabled;
+        }
     },
     
     saveInlineSettings() {
-        this.settings.workTime = parseInt(this.elements.workTimeInline.value);
-        this.settings.shortBreak = parseInt(this.elements.shortBreakInline.value);
-        this.settings.longBreak = parseInt(this.elements.longBreakInline.value);
-        this.settings.soundEnabled = this.elements.soundEnabledInline.checked;
+        if (this.elements.workTimeInline) {
+            this.settings.workTime = parseInt(this.elements.workTimeInline.value);
+        }
+        if (this.elements.shortBreakInline) {
+            this.settings.shortBreak = parseInt(this.elements.shortBreakInline.value);
+        }
+        if (this.elements.longBreakInline) {
+            this.settings.longBreak = parseInt(this.elements.longBreakInline.value);
+        }
+        if (this.elements.soundEnabledInline) {
+            this.settings.soundEnabled = this.elements.soundEnabledInline.checked;
+        }
         
         localStorage.setItem('pomodoro_settings', JSON.stringify(this.settings));
         

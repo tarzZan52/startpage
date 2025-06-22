@@ -132,6 +132,14 @@ const Dashboard = {
         if (typeof TodoModule !== 'undefined') {
             TodoModule.init();
         }
+        
+        // Инициализируем модуль аналитики
+        if (typeof AnalyticsModule !== 'undefined') {
+            // Небольшая задержка для загрузки Chart.js
+            setTimeout(() => {
+                AnalyticsModule.init();
+            }, 300);
+        }
     },
     
     refreshWidgets() {
@@ -142,6 +150,13 @@ const Dashboard = {
         
         if (typeof NotesModule !== 'undefined' && this.isActive) {
             // Заметки не нуждаются в refresh'е, они обновляются автоматически
+        }
+        
+        if (typeof AnalyticsModule !== 'undefined' && this.isActive) {
+            // Обновляем аналитику с небольшой задержкой
+            setTimeout(() => {
+                AnalyticsModule.refreshData();
+            }, 500);
         }
     },
     

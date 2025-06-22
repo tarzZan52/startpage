@@ -100,9 +100,9 @@
 /* Сетка дашборда */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-    max-width: 1400px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    max-width: 100%;
     margin: 0 auto;
     padding: 0 20px;
 }
@@ -119,16 +119,21 @@
 }
 
 .todo-widget {
-    grid-column: 3;
-    grid-row: 1;
+    grid-column: 1;
+    grid-row: 2;
+}
+
+.analytics-widget {
+    grid-column: 2;
+    grid-row: 2;
 }
 
 /* Базовые стили виджетов */
 .widget {
     background: rgba(0, 0, 0, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    padding: 20px;
+    border-radius: 16px;
+    padding: 16px;
     display: flex;
     flex-direction: column;
     position: relative;
@@ -165,7 +170,7 @@
 .widget-header {
     display: flex;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
     position: relative;
     z-index: 1;
 }
@@ -179,7 +184,7 @@
 }
 
 .widget-header h3 {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: 600;
     color: var(--text-primary);
     margin: 0;
@@ -211,6 +216,11 @@
 .habits-add-btn svg {
     width: 18px;
     height: 18px;
+}
+
+/* Кнопка обновления для аналитики */
+#analyticsRefreshBtn {
+    transition: transform 0.5s ease;
 }
 
 /* Статистика помодоро */
@@ -439,9 +449,9 @@
 
 .timer-circle {
     position: relative;
-    width: 220px;
-    height: 220px;
-    margin-bottom: 30px;
+    width: 180px;
+    height: 180px;
+    margin-bottom: 20px;
     filter: drop-shadow(0 4px 20px rgba(116, 188, 164, 0.15));
 }
 
@@ -482,7 +492,7 @@
 }
 
 .timer-time {
-    font-size: 3rem;
+    font-size: 2.5rem;
     font-weight: 300;
     color: var(--text-primary);
     margin-bottom: 4px;
@@ -499,6 +509,52 @@
     letter-spacing: 0.08em;
 }
 
+/* Селектор задачи для Pomodoro */
+.pomodoro-task-selector {
+    width: 100%;
+    margin-bottom: 20px;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.pomodoro-task-selector label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.task-select {
+    width: 100%;
+    padding: 10px 12px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.task-select:focus {
+    outline: none;
+    border-color: var(--dashboard-accent);
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.task-select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.task-select option {
+    background: rgba(0, 0, 0, 0.9);
+    color: var(--text-primary);
+}
+
 .timer-controls {
     display: flex;
     gap: 16px;
@@ -506,8 +562,8 @@
 }
 
 .timer-btn {
-    width: 56px;
-    height: 56px;
+    width: 48px;
+    height: 48px;
     background: rgba(0, 0, 0, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 50%;
@@ -561,8 +617,8 @@
 /* Главная кнопка старт/пауза */
 .timer-start,
 .timer-pause {
-    width: 64px;
-    height: 64px;
+    width: 56px;
+    height: 56px;
     background: var(--dashboard-accent);
     border-color: var(--dashboard-accent);
 }
@@ -1602,8 +1658,15 @@
     opacity: 1;
 }
 
-.todo-text {
+/* Обновленные стили для контента задачи */
+.todo-content {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.todo-text {
     color: var(--text-primary);
     font-size: 0.9rem;
     transition: all 0.2s ease;
@@ -1612,6 +1675,32 @@
 .todo-item.completed .todo-text {
     text-decoration: line-through;
     color: var(--text-secondary);
+}
+
+.todo-meta {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    font-size: 0.75rem;
+}
+
+.todo-time {
+    color: var(--dashboard-accent);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.todo-deadline {
+    color: var(--text-secondary);
+}
+
+.todo-deadline.soon {
+    color: var(--dashboard-warning);
+}
+
+.todo-deadline.overdue {
+    color: var(--dashboard-danger);
 }
 
 .todo-delete {
@@ -1697,26 +1786,100 @@
     opacity: 0.8;
 }
 
-/* Адаптивность */
-@media (max-width: 1200px) {
+/* Стили для виджета аналитики */
+.analytics-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.analytics-section {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.analytics-subtitle {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.analytics-description {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+}
+
+.chart-container {
+    height: 180px;
+    position: relative;
+}
+
+.analytics-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.summary-item {
+    text-align: center;
+}
+
+.summary-label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+.summary-value {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--dashboard-accent);
+}
+
+/* Стили для больших экранов */
+@media (min-width: 1600px) {
     .dashboard-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
+        max-width: 1500px;
+        gap: 24px;
+    }
+    
+    .widget {
+        padding: 20px;
+    }
+    
+    .timer-circle {
+        width: 200px;
+        height: 200px;
+    }
+    
+    .timer-time {
+        font-size: 2.8rem;
+    }
+}
+
+/* Адаптивность */
+@media (max-width: 1024px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
     }
 
-    .pomodoro-widget {
+    .pomodoro-widget,
+    .habits-widget,
+    .todo-widget,
+    .analytics-widget {
         grid-column: 1;
-        grid-row: 1;
-    }
-
-    .habits-widget {
-        grid-column: 2;
-        grid-row: 1;
-    }
-
-    .todo-widget {
-        grid-column: 1 / 3;
-        grid-row: 2;
+        grid-row: auto;
     }
 }
 
@@ -1728,13 +1891,6 @@
     .dashboard-grid {
         grid-template-columns: 1fr;
         gap: 16px;
-    }
-
-    .pomodoro-widget,
-    .habits-widget,
-    .todo-widget {
-        grid-column: 1;
-        grid-row: auto;
     }
 
     .widget {
@@ -1767,5 +1923,13 @@
         transform: translate(-50%, -50%);
         width: 90%;
         max-width: 320px;
+    }
+    
+    .analytics-summary {
+        grid-template-columns: 1fr;
+    }
+    
+    .chart-container {
+        height: 150px;
     }
 }

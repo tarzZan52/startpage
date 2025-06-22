@@ -58,8 +58,11 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('🔍 Post-init check:');
         console.log('Dashboard active:', Dashboard?.isActive);
         console.log('Pomodoro initialized:', typeof PomodoroModule !== 'undefined');
+        console.log('Habits initialized:', typeof HabitsModule !== 'undefined');
+        console.log('Analytics initialized:', typeof AnalyticsModule !== 'undefined');
         console.log('Settings button exists:', !!document.getElementById('pomodoroSettingsBtn'));
         console.log('Settings dropdown exists:', !!document.getElementById('pomodoroSettingsDropdown'));
+        console.log('Chart.js loaded:', typeof Chart !== 'undefined');
     }, 1000);
     
     console.log('🎉 Application initialization complete');

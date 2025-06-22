@@ -154,7 +154,7 @@ const Editor = {
         
         // Проверяем размер файла (максимум 500KB)
         if (file.size > 500 * 1024) {
-                            alert('File too large. Maximum size: 500KB');
+                            alert('Файл слишком большой. Максимальный размер: 500KB');
             return;
         }
         
@@ -179,7 +179,7 @@ const Editor = {
             event.target.value = '';
         } catch (error) {
             console.error('Error uploading icon:', error);
-                                alert('Error loading icon. Try another file.');
+            alert('Ошибка загрузки иконки. Попробуйте другой файл.');
         }
     },
     
@@ -191,7 +191,7 @@ const Editor = {
         };
         
         if (!formData.name || !formData.url) {
-            alert('Please fill in all required fields');
+            alert('Пожалуйста, заполните все обязательные поля');
             return;
         }
         
@@ -202,7 +202,7 @@ const Editor = {
             // Проверяем, не достигнут ли лимит в 12 приложений
             const currentApps = Storage.getApps();
             if (currentApps.length >= 12) {
-                alert('Maximum number of applications reached (12). Delete one of the existing applications.');
+                alert('Достигнуто максимальное количество приложений (12). Удалите одно из существующих приложений.');
                 return;
             }
             
@@ -244,73 +244,31 @@ const Editor = {
             const urlObj = new URL(url);
             const domain = urlObj.hostname;
             
-            // Пробуем разные варианты получения фавиконки
-            const faviconSources = [
-                `https://www.google.com/s2/favicons?domain=${domain}&sz=64`,
-                `https://icons.duckduckgo.com/ip3/${domain}.ico`,
-                `${urlObj.origin}/favicon.ico`
-            ];
+            // Используем Google Favicon Service как основной источник
+            const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
             
-            this.loadFaviconFromSources(faviconSources, 0);
+            // Прямо устанавливаем URL без проверки загрузки
+            const preview = document.getElementById('iconPreview');
+            preview.innerHTML = `<img src="${faviconUrl}" alt="Favicon" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2Utd2lkdGg9IjIiPjxyZWN0IHg9IjMiIHk9IjMiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjIiIHJ5PSIyIj48L3JlY3Q+PC9zdmc+';">`;
+            this.currentIcon = faviconUrl;
+            
+            // Обновляем UI для обратной связи
+            if (force) {
+                const autoFaviconBtn = document.getElementById('autoFaviconBtn');
+                if (autoFaviconBtn) {
+                    autoFaviconBtn.textContent = 'Фавиконка загружена ✓';
+                    autoFaviconBtn.disabled = false;
+                    setTimeout(() => {
+                        autoFaviconBtn.textContent = 'Получить автоматически';
+                    }, 2000);
+                }
+            }
         } catch (error) {
             console.log('Invalid URL for favicon detection:', url);
             if (force) {
-                alert('Failed to load favicon. Check the URL.');
+                alert('Не удалось загрузить фавиконку. Проверьте URL.');
             }
         }
-    },
-    
-    loadFaviconFromSources(sources, index) {
-        if (index >= sources.length) {
-            // Все источники попробованы, сообщаем об этом пользователю
-            const autoFaviconBtn = document.getElementById('autoFaviconBtn');
-            if (autoFaviconBtn && autoFaviconBtn.textContent.includes('Загружаем')) {
-                autoFaviconBtn.textContent = 'Фавиконка не найдена';
-                autoFaviconBtn.disabled = false;
-                setTimeout(() => {
-                    autoFaviconBtn.textContent = 'Получить автоматически';
-                }, 3000);
-            }
-            return;
-        }
-        
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        
-        img.onload = () => {
-            // Успешно загрузили фавиконку
-            const preview = document.getElementById('iconPreview');
-            const faviconUrl = sources[index];
-            
-            preview.innerHTML = `<img src="${faviconUrl}" alt="Favicon">`;
-            this.currentIcon = faviconUrl;
-            
-            // Обновляем кнопки для обратной связи
-            const autoFaviconBtn = document.getElementById('autoFaviconBtn');
-            const uploadBtn = document.getElementById('uploadIconBtn');
-            
-            if (autoFaviconBtn) {
-                autoFaviconBtn.textContent = 'Фавиконка загружена ✓';
-                autoFaviconBtn.disabled = false;
-                setTimeout(() => {
-                    autoFaviconBtn.textContent = 'Получить автоматически';
-                }, 3000);
-            }
-            
-            if (uploadBtn) {
-                uploadBtn.textContent = 'Изменить иконку';
-                setTimeout(() => {
-                    uploadBtn.textContent = 'Выбрать файл';
-                }, 3000);
-            }
-        };
-        
-        img.onerror = () => {
-            // Этот источник не сработал, пробуем следующий
-            this.loadFaviconFromSources(sources, index + 1);
-        };
-        
-        img.src = sources[index];
     },
     
     loadAutoFavicon() {
@@ -318,7 +276,7 @@ const Editor = {
         const url = urlInput.value.trim();
         
         if (!url) {
-            alert('Please enter the application URL first');
+            alert('Сначала введите URL приложения');
             urlInput.focus();
             return;
         }
@@ -332,14 +290,16 @@ const Editor = {
         // Сбрасываем текущую иконку
         this.currentIcon = null;
         
-        // Используем существующую логику получения фавиконки с принудительной загрузкой
+        // Получаем фавиконку
         this.tryLoadFavicon(url, true);
         
-        // Восстанавливаем кнопку через 3 секунды
+        // Восстанавливаем кнопку через небольшую задержку
         setTimeout(() => {
-            autoFaviconBtn.textContent = originalText;
-            autoFaviconBtn.disabled = false;
-        }, 3000);
+            if (autoFaviconBtn.textContent === 'Загружаем...') {
+                autoFaviconBtn.textContent = originalText;
+                autoFaviconBtn.disabled = false;
+            }
+        }, 500);
     },
     
     getFaviconUrl(url) {

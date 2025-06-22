@@ -100,7 +100,11 @@ const TodoModule = {
             priority: this.elements.prioritySelect.value,
             deadline: this.elements.deadlineInput ? this.elements.deadlineInput.value : null,
             createdAt: new Date().toISOString(),
-            completedAt: null
+            completedAt: null,
+            // Новые поля для отслеживания времени
+            timeSpent: 0, // в минутах
+            pomodoroSessions: 0,
+            lastWorkedAt: null
         };
         
         this.tasks.unshift(task); // Добавляем в начало
@@ -126,6 +130,11 @@ const TodoModule = {
             task.completedAt = task.completed ? new Date().toISOString() : null;
             this.saveTasks();
             this.render();
+            
+            // Обновляем статистику для аналитики
+            if (window.AnalyticsModule) {
+                window.AnalyticsModule.refreshData();
+            }
         }
     },
     
@@ -154,6 +163,28 @@ const TodoModule = {
             this.saveTasks();
             this.render();
         }
+    },
+    
+    // Обновление времени работы над задачей
+    updateTaskTime(taskId, minutes) {
+        const task = this.tasks.find(t => t.id === taskId);
+        if (task) {
+            task.timeSpent += minutes;
+            task.pomodoroSessions += 1;
+            task.lastWorkedAt = new Date().toISOString();
+            this.saveTasks();
+            this.render();
+        }
+    },
+    
+    // Получение активных задач для выбора в Pomodoro
+    getActiveTasks() {
+        return this.tasks.filter(t => !t.completed);
+    },
+    
+    // Получение задачи по ID
+    getTaskById(id) {
+        return this.tasks.find(t => t.id === id);
     },
     
     // Установка фильтра
@@ -193,10 +224,19 @@ const TodoModule = {
                 break;
         }
         
-        // Сортировка: сначала по выполнению, потом по дедлайну, потом по приоритету, потом по дате
+        // Сортировка: сначала по выполнению, потом по последней работе, потом по приоритету
         return filtered.sort((a, b) => {
             if (a.completed !== b.completed) {
                 return a.completed ? 1 : -1;
+            }
+            
+            // Сортировка по последней работе (недавно использованные первые)
+            if (!a.completed && a.lastWorkedAt && b.lastWorkedAt) {
+                return new Date(b.lastWorkedAt) - new Date(a.lastWorkedAt);
+            } else if (!a.completed && a.lastWorkedAt && !b.lastWorkedAt) {
+                return -1;
+            } else if (!a.completed && !a.lastWorkedAt && b.lastWorkedAt) {
+                return 1;
             }
             
             // Сортировка по дедлайну (ближайшие первые)
@@ -215,6 +255,16 @@ const TodoModule = {
             
             return new Date(b.createdAt) - new Date(a.createdAt);
         });
+    },
+    
+    // Форматирование времени
+    formatTime(minutes) {
+        if (minutes < 60) {
+            return `${minutes}m`;
+        }
+        const hours = Math.floor(minutes / 60);
+        const mins = minutes % 60;
+        return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
     },
     
     // Создание HTML элемента задачи
@@ -262,14 +312,27 @@ const TodoModule = {
             deadlineHtml = `<span class="${deadlineClass}">📅 ${deadlineText}</span>`;
         }
         
+        // Время работы над задачей
+        let timeHtml = '';
+        if (task.timeSpent > 0) {
+            timeHtml = `<span class="todo-time" title="${task.pomodoroSessions} Pomodoro sessions">
+                🍅 ${this.formatTime(task.timeSpent)}
+            </span>`;
+        }
+        
         item.innerHTML = `
             <div class="todo-checkbox ${task.completed ? 'checked' : ''}" data-id="${task.id}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="20,6 9,17 4,12"></polyline>
                 </svg>
             </div>
-            <div class="todo-text" data-id="${task.id}">${this.escapeHtml(task.text)}</div>
-            ${deadlineHtml}
+            <div class="todo-content">
+                <div class="todo-text" data-id="${task.id}">${this.escapeHtml(task.text)}</div>
+                <div class="todo-meta">
+                    ${timeHtml}
+                    ${deadlineHtml}
+                </div>
+            </div>
             <div class="todo-priority" title="Priority: ${task.priority}">${priorityDots[task.priority]}</div>
             <button class="todo-delete" data-id="${task.id}" title="Delete task">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -397,8 +460,44 @@ const TodoModule = {
         // Show completion percentage
         if (total > 0) {
             const percent = Math.round((completed / total) * 100);
-            this.elements.stats.title = `Completed ${percent}% (${active} active)`;
+            const totalTime = this.tasks.reduce((sum, t) => sum + t.timeSpent, 0);
+            this.elements.stats.title = `Completed ${percent}% (${active} active, ${this.formatTime(totalTime)} total)`;
         }
+    },
+    
+    // Получение статистики для аналитики
+    getStatisticsData() {
+        const now = new Date();
+        const stats = {
+            daily: {},
+            weekly: {},
+            tasksByDay: {},
+            pomodoroTasks: 0,
+            regularTasks: 0
+        };
+        
+        // Анализируем выполненные задачи
+        this.tasks.filter(t => t.completed && t.completedAt).forEach(task => {
+            const completedDate = new Date(task.completedAt);
+            const dateKey = completedDate.toISOString().split('T')[0];
+            
+            // Подсчет по дням
+            if (!stats.daily[dateKey]) {
+                stats.daily[dateKey] = { total: 0, withPomodoro: 0, withoutPomodoro: 0 };
+            }
+            
+            stats.daily[dateKey].total++;
+            
+            if (task.pomodoroSessions > 0) {
+                stats.daily[dateKey].withPomodoro++;
+                stats.pomodoroTasks++;
+            } else {
+                stats.daily[dateKey].withoutPomodoro++;
+                stats.regularTasks++;
+            }
+        });
+        
+        return stats;
     },
     
     // Экранирование HTML
@@ -417,7 +516,18 @@ const TodoModule = {
     loadTasks() {
         try {
             const saved = localStorage.getItem('todo_tasks');
-            this.tasks = saved ? JSON.parse(saved) : [];
+            if (saved) {
+                this.tasks = JSON.parse(saved);
+                // Миграция старых задач без новых полей
+                this.tasks.forEach(task => {
+                    if (task.timeSpent === undefined) task.timeSpent = 0;
+                    if (task.pomodoroSessions === undefined) task.pomodoroSessions = 0;
+                    if (task.lastWorkedAt === undefined) task.lastWorkedAt = null;
+                });
+                this.saveTasks();
+            } else {
+                this.tasks = [];
+            }
         } catch (error) {
             console.error('Ошибка загрузки задач:', error);
             this.tasks = [];
@@ -432,4 +542,4 @@ const TodoModule = {
 };
 
 // Экспорт модуля
-window.TodoModule = TodoModule; 
+window.TodoModule = TodoModule;
