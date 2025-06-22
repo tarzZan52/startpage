@@ -5,8 +5,7 @@ const PomodoroModule = {
         workTime: 25,
         shortBreak: 5,
         longBreak: 15,
-        soundEnabled: true,
-        tickingSoundEnabled: false // Новая настройка для звука тиканья
+        soundEnabled: true
     },
     
     // Timer state
@@ -35,14 +34,12 @@ const PomodoroModule = {
         shortBreakInline: null,
         longBreakInline: null,
         soundEnabledInline: null,
-        tickingSoundEnabledInline: null, // Новый элемент
         todayMinutes: null,
         weekMinutes: null,
         taskSelector: null
     },
     
     timer: null,
-    tickingInterval: null, // Для звука тиканья
     
     init() {
         this.loadElements();
@@ -51,9 +48,15 @@ const PomodoroModule = {
         this.updateDisplay();
         this.updateStatsDisplay();
         this.createNotificationSound();
-        this.createTaskSelector();
         this.setupEventListeners();
         this.setupEventBusListeners();
+        
+        // Create task selector after all setup is done - but only if dashboard is active
+        if (Dashboard && Dashboard.isActive) {
+            setTimeout(() => {
+                this.createTaskSelector();
+            }, 100);
+        }
     },
     
     loadElements() {
@@ -69,8 +72,7 @@ const PomodoroModule = {
         this.elements.workTimeInline = document.getElementById('workTimeInline');
         this.elements.shortBreakInline = document.getElementById('shortBreakInline');
         this.elements.longBreakInline = document.getElementById('longBreakInline');
-        this.elements.soundEnabledInline = document.getElementById('soundEnabledInline');
-        this.elements.tickingSoundEnabledInline = document.getElementById('tickingSoundEnabledInline'); // Новый элемент
+
         this.elements.todayMinutes = document.getElementById('todayMinutes');
         this.elements.weekMinutes = document.getElementById('weekMinutes');
         
@@ -84,9 +86,21 @@ const PomodoroModule = {
     },
     
     createTaskSelector() {
-        // Create task selector after timer
+        // Check if selector already exists
+        if (document.getElementById('pomodoroTaskSelect')) {
+            this.elements.taskSelector = document.getElementById('pomodoroTaskSelect');
+            this.setupTaskSelectorEventListener();
+            this.updateTaskSelector();
+            console.log('Task selector already exists, reusing');
+            return;
+        }
+        
+        // Create task selector before timer controls
         const timerContainer = document.querySelector('.pomodoro-timer');
-        if (!timerContainer) return;
+        if (!timerContainer) {
+            console.warn('Pomodoro timer container not found');
+            return;
+        }
         
         const selectorContainer = document.createElement('div');
         selectorContainer.className = 'pomodoro-task-selector';
@@ -97,59 +111,101 @@ const PomodoroModule = {
             </select>
         `;
         
-        // Insert after circular timer
-        const timerCircle = timerContainer.querySelector('.timer-circle');
-        if (timerCircle && timerCircle.nextSibling) {
-            timerContainer.insertBefore(selectorContainer, timerCircle.nextSibling);
+        // Insert before timer controls
+        const timerControls = timerContainer.querySelector('.timer-controls');
+        if (timerControls) {
+            timerContainer.insertBefore(selectorContainer, timerControls);
         } else {
+            // Fallback: append to timer container
             timerContainer.appendChild(selectorContainer);
         }
         
         this.elements.taskSelector = document.getElementById('pomodoroTaskSelect');
+        this.setupTaskSelectorEventListener();
         this.updateTaskSelector();
+        
+        console.log('Task selector created:', this.elements.taskSelector);
+    },
+    
+    setupTaskSelectorEventListener() {
+        // Remove existing event listener if any
+        if (this.elements.taskSelector && this.taskSelectorHandler) {
+            this.elements.taskSelector.removeEventListener('change', this.taskSelectorHandler);
+        }
+        
+        // Create and add new event listener
+        this.taskSelectorHandler = (e) => {
+            this.state.currentTaskId = e.target.value ? parseInt(e.target.value) : null;
+            console.log('Selected task ID:', this.state.currentTaskId);
+        };
+        
+        if (this.elements.taskSelector) {
+            this.elements.taskSelector.addEventListener('change', this.taskSelectorHandler);
+        }
     },
     
     updateTaskSelector() {
-        if (!this.elements.taskSelector || !window.TodoModule) return;
+        if (!this.elements.taskSelector) {
+            console.warn('Task selector not found, trying to create...');
+            this.createTaskSelector();
+            return;
+        }
+        
+        if (!window.TodoModule) {
+            console.warn('TodoModule not available yet');
+            this.elements.taskSelector.innerHTML = '<option value="">Loading tasks...</option>';
+            this.elements.taskSelector.disabled = true;
+            return;
+        }
         
         const activeTasks = window.TodoModule.getActiveTasks();
         const currentValue = this.elements.taskSelector.value;
         
+        // Enable selector
+        this.elements.taskSelector.disabled = false;
+        
         // Clear and fill selector
         this.elements.taskSelector.innerHTML = '<option value="">No task selected</option>';
         
-        activeTasks.forEach(task => {
-            const option = document.createElement('option');
-            option.value = task.id;
-            
-            // Trim long text
-            let taskText = task.text;
-            if (taskText.length > 40) {
-                taskText = taskText.substring(0, 40) + '...';
-            }
-            
-            // Add time information if present
-            if (task.timeSpent > 0) {
-                taskText += ` (${window.TodoModule.formatTime(task.timeSpent)})`;
-            }
-            
-            option.textContent = taskText;
-            
-            // Highlight high priority tasks
-            if (task.priority === 'high') {
-                option.style.fontWeight = 'bold';
-            }
-            
-            this.elements.taskSelector.appendChild(option);
-        });
+        if (activeTasks && activeTasks.length > 0) {
+            activeTasks.forEach(task => {
+                const option = document.createElement('option');
+                option.value = task.id;
+                
+                // Trim long text
+                let taskText = task.text;
+                if (taskText.length > 40) {
+                    taskText = taskText.substring(0, 40) + '...';
+                }
+                
+                // Add time information if present
+                if (task.timeSpent > 0) {
+                    taskText += ` (${window.TodoModule.formatTime(task.timeSpent)})`;
+                }
+                
+                option.textContent = taskText;
+                
+                // Highlight high priority tasks
+                if (task.priority === 'high') {
+                    option.style.fontWeight = 'bold';
+                    option.style.color = '#ef4444';
+                } else if (task.priority === 'medium') {
+                    option.style.color = '#f59e0b';
+                }
+                
+                this.elements.taskSelector.appendChild(option);
+            });
+        }
         
         // Restore selected value if it's still relevant
-        if (currentValue && activeTasks.find(t => t.id == currentValue)) {
+        if (currentValue && activeTasks && activeTasks.find(t => t.id == currentValue)) {
             this.elements.taskSelector.value = currentValue;
             this.state.currentTaskId = parseInt(currentValue);
         } else {
             this.state.currentTaskId = null;
         }
+        
+        console.log('Task selector updated, found', activeTasks ? activeTasks.length : 0, 'active tasks');
     },
     
     setupEventListeners() {
@@ -167,12 +223,7 @@ const PomodoroModule = {
             this.elements.skipBtn.addEventListener('click', () => this.skip());
         }
         
-        // Task selector
-        if (this.elements.taskSelector) {
-            this.elements.taskSelector.addEventListener('change', (e) => {
-                this.state.currentTaskId = e.target.value ? parseInt(e.target.value) : null;
-            });
-        }
+        // Task selector event listener is handled in setupTaskSelectorEventListener()
         
         // Setup settings button
         this.setupSettingsMenu();
@@ -239,12 +290,7 @@ const PomodoroModule = {
                 }
             });
         }
-        if (this.elements.soundEnabledInline) {
-            this.elements.soundEnabledInline.addEventListener('change', () => this.saveInlineSettings());
-        }
-        if (this.elements.tickingSoundEnabledInline) {
-            this.elements.tickingSoundEnabledInline.addEventListener('change', () => this.saveInlineSettings());
-        }
+
         
         // Statistics buttons
         const statsBtn = document.getElementById('pomodoroStatsBtn');
@@ -286,6 +332,23 @@ const PomodoroModule = {
         // Subscribe to task updates
         EventBus.on('tasks:updated', () => {
             if (Dashboard.isActive) {
+                this.createTaskSelector(); // Ensure selector exists
+                this.updateTaskSelector();
+            }
+        });
+        
+        // Initial update when dashboard becomes active
+        EventBus.on('dashboard:activated', () => {
+            setTimeout(() => {
+                this.createTaskSelector(); // Create selector when dashboard is ready
+                this.updateTaskSelector();
+            }, 200);
+        });
+        
+        // Also try to create selector when TodoModule becomes available
+        EventBus.on('todo:initialized', () => {
+            if (Dashboard.isActive) {
+                this.createTaskSelector();
                 this.updateTaskSelector();
             }
         });
@@ -400,13 +463,6 @@ const PomodoroModule = {
         this.timer = setInterval(() => {
             this.tick();
         }, 1000);
-        
-        // Запускаем звук тиканья
-        if (this.settings.tickingSoundEnabled) {
-            this.tickingInterval = setInterval(() => {
-                this.playTickingSound();
-            }, 1000);
-        }
     },
     
     pause() {
@@ -424,12 +480,6 @@ const PomodoroModule = {
         if (this.timer) {
             clearInterval(this.timer);
             this.timer = null;
-        }
-        
-        // Останавливаем звук тиканья
-        if (this.tickingInterval) {
-            clearInterval(this.tickingInterval);
-            this.tickingInterval = null;
         }
     },
     
@@ -602,28 +652,6 @@ const PomodoroModule = {
                 // Тихо игнорируем ошибки звука
             }
         };
-        
-        // Создаем звук тиканья часов
-        this.playTickingSound = () => {
-            if (!this.settings.tickingSoundEnabled || !this.state.isRunning) return;
-            
-            try {
-                const oscillator = this.notificationSound.createOscillator();
-                const gainNode = this.notificationSound.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(this.notificationSound.destination);
-                
-                oscillator.frequency.setValueAtTime(400, this.notificationSound.currentTime);
-                gainNode.gain.setValueAtTime(0.02, this.notificationSound.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, this.notificationSound.currentTime + 0.05);
-                
-                oscillator.start(this.notificationSound.currentTime);
-                oscillator.stop(this.notificationSound.currentTime + 0.05);
-            } catch (error) {
-                // Тихо игнорируем ошибки звука
-            }
-        };
     },
     
     showNotification() {
@@ -656,12 +684,6 @@ const PomodoroModule = {
         if (this.elements.longBreakInline) {
             this.elements.longBreakInline.value = this.settings.longBreak;
         }
-        if (this.elements.soundEnabledInline) {
-            this.elements.soundEnabledInline.checked = this.settings.soundEnabled;
-        }
-        if (this.elements.tickingSoundEnabledInline) {
-            this.elements.tickingSoundEnabledInline.checked = this.settings.tickingSoundEnabled;
-        }
     },
     
     saveInlineSettings() {
@@ -673,12 +695,6 @@ const PomodoroModule = {
         }
         if (this.elements.longBreakInline) {
             this.settings.longBreak = parseInt(this.elements.longBreakInline.value);
-        }
-        if (this.elements.soundEnabledInline) {
-            this.settings.soundEnabled = this.elements.soundEnabledInline.checked;
-        }
-        if (this.elements.tickingSoundEnabledInline) {
-            this.settings.tickingSoundEnabled = this.elements.tickingSoundEnabledInline.checked;
         }
         
         localStorage.setItem('pomodoro_settings', JSON.stringify(this.settings));

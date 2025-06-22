@@ -16,214 +16,66 @@
 </p>
 
 <div align="center">
-  <h3>Minimalist and customizable browser start page.</h3>
-  <p>Add links to your favorite sites, switch between search engines, and display current time. All settings are stored locally in your browser.</p>
+  <h3>Minimalist browser start page with productivity dashboard</h3>
+  <p>Search engines, app shortcuts, Pomodoro timer, habit tracker, and todo list. All data stored locally.</p>
 </div>
 
 <br>
 
-<p align="center">
-  <img src="src/image-v4.png" alt="Main page view" width="90%">
-</p>
+![Main View](src/image-v4.png)
+![Dashboard View](src/dashboard-view-v2.png)
 
-<p align="center">
-  <img src="src/dashboard-view-v1.png" alt="Dashboard view" width="90%">
-</p>
+## 🚀 Installation
 
----
-
-## ⚡ Quick Installation
-
-**🐧 Linux:** Run `./server/install-service-linux.sh`
-
-After installation, open http://localhost:8000/ in your browser.
-
-<details>
-<summary>📋 Detailed Installation Instructions</summary>
-
-### Automatic Installation (Recommended)
-
-Download the project and run **one file** for automatic setup:
-
-#### 🐧 Linux:
+**Linux (automatic):**
 ```bash
 git clone https://github.com/TarzZan52/startpage.git
 cd startpage/server
 ./install-service-linux.sh
 ```
 
-After installation, startpage will:
-- ✅ Automatically start on system boot
-- ✅ Run in background
-- ✅ Be available at http://localhost:8000/
-
-### Manual Launch (without auto-start)
-
-If you don't want automatic startup, you can run manually:
-
-#### macOS / Linux (manual mode):
+**Manual (any OS):**
 ```bash
 cd startpage
 python3 -m http.server 8000
-# Open http://localhost:8000/
 ```
 
-</details>
+Open http://localhost:8000/ in your browser.
 
----
+**Set as homepage:** Use browser extensions like New Tab Override (Firefox) or New Tab Redirect (Chrome).
 
-## 🏠 Set as Home Page
+## ✨ Features
 
-<details>
-<summary>🔗 Browser Extensions (Recommended)</summary>
+**Start Page:**
+- Multi-engine search (DuckDuckGo, Google, Yandex)
+- Customizable app shortcuts (up to 12)
+- Real-time date & time
 
-Install an extension to replace the new tab:
+**Dashboard:**
+- 🍅 Pomodoro timer with task integration
+- 📅 Habit tracker with weekly goals
+- ✅ Todo list with priorities and time tracking
+- 📈 Progress analytics
 
-- **Firefox**: [New Tab Override](https://addons.mozilla.org/firefox/addon/new-tab-override/)
-- **Chrome**: [New Tab Redirect](https://chrome.google.com/webstore/detail/new-tab-redirect/icpgjfneehieebagbmdbhnlpiopdcmna)
+All data stored locally. Works on desktop and mobile.
 
-After installation:
-1. Open extension settings
-2. Enter URL: `http://localhost:8000/`
-3. Save changes
+## ⚙️ Management
 
-</details>
-
-<details>
-<summary>⚙️ Browser Settings</summary>
-
-**Firefox:**
-1. Settings → Home → Homepage
-2. Enter: `http://localhost:8000/`
-
-**Chrome/Edge:**
-1. Settings → On startup → Open page
-2. Add: `http://localhost:8000/`
-
-</details>
-
----
-
-## 🌟 Features
-
-### 🏠 Start Page
-- **Search engines**: DuckDuckGo, Google, Yandex with easy switching
-- **App tiles**: Add up to 12 custom application shortcuts
-- **Date & Time**: Real-time display with 24-hour format
-- **Responsive design**: Works on desktop and mobile devices
-
-### 📊 Dashboard Mode
-- **🍅 Pomodoro Timer**: Focus sessions with customizable work/break intervals
-- **📅 Habit Tracker**: Track daily habits with weekly goals (1-7 times per week)
-- **✅ Task Manager**: Add, organize, and complete tasks with priority levels
-- **📈 Statistics**: Visual progress tracking for all productivity tools
-
-### 🎨 Customization
-- **App Editor**: Add custom applications with automatic favicon detection
-- **Local Storage**: All data stored securely in your browser
-- **Clean Interface**: Minimalist design with smooth animations
-
----
-
-## 🛠️ Server Management
-
-<details>
-<summary>🐧 Linux Commands</summary>
-
-**Service Management:**
+**Linux service commands:**
 ```bash
-# Check status
-sudo systemctl status dashboard.service
-
-# Stop
-sudo systemctl stop dashboard.service
-
-# Start
-sudo systemctl start dashboard.service
-
-# Restart
-sudo systemctl restart dashboard.service
-
-# View logs
-sudo journalctl -u dashboard.service -f
+sudo systemctl status/start/stop/restart dashboard.service
+./uninstall-service-linux.sh  # Complete removal
 ```
 
-**Complete Removal:**
-```bash
-cd startpage/server
-./uninstall-service-linux.sh
-```
-
-</details>
-
----
-
-## 🛠️ Troubleshooting
-
-<details>
-<summary>❌ Python Not Found</summary>
-
-**Linux:**
-```bash
-# Ubuntu/Debian
-sudo apt update && sudo apt install python3
-
-# CentOS/RHEL
-sudo yum install python3
-
-# Arch Linux
-sudo pacman -S python
-```
-
-**macOS:**
-```bash
-# Via Homebrew
-brew install python3
-
-# Or download from python.org
-```
-
-</details>
-
-<details>
-<summary>🔒 Port 8000 Busy</summary>
-
-If port 8000 is already in use by another application:
-
-1. **Stop conflicting application:**
-   ```bash
-   # Linux/macOS
-   sudo lsof -i :8000
-   sudo kill -9 <PID>
-   ```
-
-2. **Or change port in scripts** (e.g., to 8080)
-
-</details>
-
-<details>
-<summary>🌐 Can't Open in Browser</summary>
-
-- Check firewall settings
-- Try alternative addresses:
-  - `http://127.0.0.1:8000/`
-  - `http://0.0.0.0:8000/`
-- Ensure server is running (see management commands above)
-
-</details>
-
----
+**Common issues:**
+- **Python not found:** Install python3 via your package manager
+- **Port 8000 busy:** Kill process with `sudo lsof -i :8000` or change port
+- **Can't connect:** Check firewall, try `127.0.0.1:8000`
 
 ## 📄 License
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE) file for details.
-
-## 🤝 Contributing
-
-Contributions are welcome! Feel free to create Issues or Pull Requests with suggestions and improvements.
-
----
+MIT License - see [LICENSE](LICENSE) file.
 
 <div align="center">
-  <p>Made with ❤️ by <a href="https://github.com/TarzZan52">TarzZan52</a></p>
+  Made with ❤️ by <a href="https://github.com/TarzZan52">TarzZan52</a>
 </div>

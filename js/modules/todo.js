@@ -25,6 +25,9 @@ const TodoModule = {
         this.setupEventListeners();
         this.setupEventBusListeners();
         this.render();
+        
+        // Notify other modules that TodoModule is ready
+        EventBus.emit('todo:initialized');
     },
     
     // Loading DOM elements
@@ -119,6 +122,9 @@ const TodoModule = {
         this.saveTasks();
         this.render();
         
+        // Notify other modules about task changes
+        EventBus.emit('tasks:updated');
+        
         // Clear form
         this.elements.input.value = '';
         this.elements.prioritySelect.value = 'medium';
@@ -138,6 +144,9 @@ const TodoModule = {
             task.completedAt = task.completed ? new Date().toISOString() : null;
             this.saveTasks();
             this.render();
+            
+            // Notify other modules about task changes
+            EventBus.emit('tasks:updated');
         }
     },
     
@@ -146,6 +155,9 @@ const TodoModule = {
         this.tasks = this.tasks.filter(t => t.id !== id);
         this.saveTasks();
         this.render();
+        
+        // Notify other modules about task changes
+        EventBus.emit('tasks:updated');
     },
     
     // Task editing
@@ -155,6 +167,9 @@ const TodoModule = {
             task.text = newText.trim();
             this.saveTasks();
             this.render();
+            
+            // Notify other modules about task changes
+            EventBus.emit('tasks:updated');
         }
     },
     
@@ -211,6 +226,9 @@ const TodoModule = {
             this.tasks = this.tasks.filter(t => !t.completed);
             this.saveTasks();
             this.render();
+            
+            // Notify other modules about task changes
+            EventBus.emit('tasks:updated');
         });
     },
     

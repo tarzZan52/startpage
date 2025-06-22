@@ -79,6 +79,9 @@ const Dashboard = {
         
         // Update widget data
         this.refreshWidgets();
+        
+        // Notify other modules that dashboard is active
+        EventBus.emit('dashboard:activated');
     },
     
     showMain() {
