@@ -379,7 +379,7 @@
     <div class="modal-overlay" id="editorModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">Редактировать приложение</h2>
+                <h2 class="modal-title">Edit Application</h2>
                 <button class="modal-close" id="modalClose">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -390,17 +390,17 @@
             
             <form class="editor-form" id="editorForm">
                 <div class="form-group">
-                    <label for="appName">Название приложения</label>
-                    <input type="text" id="appName" required placeholder="Например: YouTube">
+                    <label for="appName">Application name</label>
+                    <input type="text" id="appName" required placeholder="E.g.: YouTube">
                 </div>
                 
                 <div class="form-group">
-                    <label for="appUrl">URL приложения</label>
+                    <label for="appUrl">Application URL</label>
                     <input type="url" id="appUrl" required placeholder="https://example.com">
                 </div>
                 
                 <div class="form-group">
-                    <label for="appIcon">Иконка приложения</label>
+                    <label for="appIcon">Application icon</label>
                     <div class="icon-upload-container">
                         <div class="icon-preview" id="iconPreview">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -412,15 +412,15 @@
                         <div class="icon-upload-controls">
                             <input type="file" id="iconFile" accept="image/*" hidden>
                             <button type="button" class="btn-secondary" id="autoFaviconBtn">
-                                Получить автоматически
+                                Get automatically
                             </button>
                             <button type="button" class="btn-secondary" id="uploadIconBtn">
-                                Выбрать файл
+                                Choose file
                             </button>
                             <small class="help-text">
-                                Рекомендуется формат SVG.<br>
-                                Максимальный размер: 500KB<br>
-                                Найти иконки: <a href="https://icons8.com" target="_blank">icons8.com</a>
+                                SVG format recommended.<br>
+                                Maximum size: 500KB<br>
+                                Find icons: <a href="https://icons8.com" target="_blank">icons8.com</a>
                             </small>
                         </div>
                     </div>
@@ -428,10 +428,10 @@
                 
                 <div class="form-actions">
                     <button type="button" class="btn-danger" id="deleteAppBtn" style="display: none;">
-                        Удалить
+                        Delete
                     </button>
                     <button type="submit" class="btn-primary">
-                        Сохранить
+                        Save
                     </button>
                 </div>
             </form>

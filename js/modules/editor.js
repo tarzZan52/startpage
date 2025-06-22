@@ -144,7 +144,7 @@ const Editor = {
         // Сбрасываем текст кнопки
         const uploadBtn = document.getElementById('uploadIconBtn');
         if (uploadBtn) {
-            uploadBtn.textContent = 'Выбрать файл';
+            uploadBtn.textContent = 'Choose file';
         }
     },
     
@@ -154,7 +154,7 @@ const Editor = {
         
         // Проверяем размер файла (максимум 500KB)
         if (file.size > 500 * 1024) {
-                            alert('Файл слишком большой. Максимальный размер: 500KB');
+                            alert('File too large. Maximum size: 500KB');
             return;
         }
         
@@ -169,9 +169,9 @@ const Editor = {
             // Обновляем текст кнопки
             const uploadBtn = document.getElementById('uploadIconBtn');
             if (uploadBtn) {
-                uploadBtn.textContent = 'Иконка загружена ✓';
+                uploadBtn.textContent = 'Icon uploaded ✓';
                 setTimeout(() => {
-                    uploadBtn.textContent = 'Изменить иконку';
+                    uploadBtn.textContent = 'Change icon';
                 }, 2000);
             }
             
@@ -179,7 +179,7 @@ const Editor = {
             event.target.value = '';
         } catch (error) {
             console.error('Error uploading icon:', error);
-            alert('Ошибка загрузки иконки. Попробуйте другой файл.');
+            alert('Error loading icon. Try another file.');
         }
     },
     
@@ -191,7 +191,7 @@ const Editor = {
         };
         
         if (!formData.name || !formData.url) {
-            alert('Пожалуйста, заполните все обязательные поля');
+            alert('Please fill in all required fields');
             return;
         }
         
@@ -202,7 +202,7 @@ const Editor = {
             // Проверяем, не достигнут ли лимит в 12 приложений
             const currentApps = Storage.getApps();
             if (currentApps.length >= 12) {
-                alert('Достигнуто максимальное количество приложений (12). Удалите одно из существующих приложений.');
+                alert('Maximum number of applications reached (12). Delete one of the existing applications.');
                 return;
             }
             
@@ -256,17 +256,17 @@ const Editor = {
             if (force) {
                 const autoFaviconBtn = document.getElementById('autoFaviconBtn');
                 if (autoFaviconBtn) {
-                    autoFaviconBtn.textContent = 'Фавиконка загружена ✓';
-                    autoFaviconBtn.disabled = false;
-                    setTimeout(() => {
-                        autoFaviconBtn.textContent = 'Получить автоматически';
-                    }, 2000);
+                                         autoFaviconBtn.textContent = 'Favicon loaded ✓';
+                     autoFaviconBtn.disabled = false;
+                     setTimeout(() => {
+                         autoFaviconBtn.textContent = 'Get automatically';
+                     }, 2000);
                 }
             }
         } catch (error) {
             console.log('Invalid URL for favicon detection:', url);
             if (force) {
-                alert('Не удалось загрузить фавиконку. Проверьте URL.');
+                                 alert('Failed to load favicon. Check the URL.');
             }
         }
     },
@@ -276,7 +276,7 @@ const Editor = {
         const url = urlInput.value.trim();
         
         if (!url) {
-            alert('Сначала введите URL приложения');
+            alert('Please enter the application URL first');
             urlInput.focus();
             return;
         }
@@ -284,7 +284,7 @@ const Editor = {
         // Показываем индикатор загрузки
         const autoFaviconBtn = document.getElementById('autoFaviconBtn');
         const originalText = autoFaviconBtn.textContent;
-        autoFaviconBtn.textContent = 'Загружаем...';
+        autoFaviconBtn.textContent = 'Loading...';
         autoFaviconBtn.disabled = true;
         
         // Сбрасываем текущую иконку
@@ -295,7 +295,7 @@ const Editor = {
         
         // Восстанавливаем кнопку через небольшую задержку
         setTimeout(() => {
-            if (autoFaviconBtn.textContent === 'Загружаем...') {
+            if (autoFaviconBtn.textContent === 'Loading...') {
                 autoFaviconBtn.textContent = originalText;
                 autoFaviconBtn.disabled = false;
             }
