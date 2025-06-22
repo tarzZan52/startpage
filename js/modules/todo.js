@@ -227,35 +227,40 @@ const TodoModule = {
                 break;
         }
         
-        // Sorting: first by completion, then by last work, then by priority
+        // Улучшенная сортировка: сначала по статусу, потом по приоритету, потом по дате
         return filtered.sort((a, b) => {
+            // 1. Завершенные задачи в конец
             if (a.completed !== b.completed) {
                 return a.completed ? 1 : -1;
             }
             
-            // Sort by last work (recently used first)
-            if (!a.completed && a.lastWorkedAt && b.lastWorkedAt) {
-                return new Date(b.lastWorkedAt) - new Date(a.lastWorkedAt);
-            } else if (!a.completed && a.lastWorkedAt && !b.lastWorkedAt) {
-                return -1;
-            } else if (!a.completed && !a.lastWorkedAt && b.lastWorkedAt) {
-                return 1;
+            // 2. Для активных задач - сортировка по дедлайну (ближайшие первые)
+            if (!a.completed && !b.completed) {
+                // Задачи с дедлайном перед задачами без дедлайна
+                if (a.deadline && !b.deadline) return -1;
+                if (!a.deadline && b.deadline) return 1;
+                
+                // Если у обеих есть дедлайн, сортируем по дате
+                if (a.deadline && b.deadline) {
+                    const dateA = new Date(a.deadline);
+                    const dateB = new Date(b.deadline);
+                    const diff = dateA - dateB;
+                    if (diff !== 0) return diff;
+                }
+                
+                // 3. Потом по приоритету
+                const priorityOrder = { high: 0, medium: 1, low: 2 };
+                if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
+                    return priorityOrder[a.priority] - priorityOrder[b.priority];
+                }
+                
+                // 4. Задачи с временем работы выше
+                if (a.timeSpent !== b.timeSpent) {
+                    return b.timeSpent - a.timeSpent;
+                }
             }
             
-            // Sort by deadline (nearest first)
-            if (!a.completed && a.deadline && b.deadline) {
-                return new Date(a.deadline) - new Date(b.deadline);
-            } else if (!a.completed && a.deadline && !b.deadline) {
-                return -1;
-            } else if (!a.completed && !a.deadline && b.deadline) {
-                return 1;
-            }
-            
-            const priorityOrder = { high: 0, medium: 1, low: 2 };
-            if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
-                return priorityOrder[a.priority] - priorityOrder[b.priority];
-            }
-            
+            // 5. По дате создания (новые первые)
             return new Date(b.createdAt) - new Date(a.createdAt);
         });
     },
@@ -278,13 +283,16 @@ const TodoModule = {
             item.classList.add('completed');
         }
         
+        // Добавляем data-атрибут для анимаций
+        item.dataset.taskId = task.id;
+        
         const priorityDots = {
             low: '●',
             medium: '●●', 
             high: '●●●'
         };
         
-        // Determine deadline status
+        // Улучшенное определение статуса дедлайна
         let deadlineHtml = '';
         if (task.deadline && !task.completed) {
             const today = new Date();
@@ -295,24 +303,33 @@ const TodoModule = {
             
             let deadlineClass = 'todo-deadline';
             let deadlineText = '';
+            let deadlineIcon = '📅';
             
             if (daysLeft < 0) {
                 deadlineClass += ' overdue';
                 deadlineText = `Overdue by ${Math.abs(daysLeft)} days`;
+                deadlineIcon = '⚠️';
             } else if (daysLeft === 0) {
                 deadlineClass += ' soon';
                 deadlineText = 'Today';
+                deadlineIcon = '⏰';
             } else if (daysLeft === 1) {
                 deadlineClass += ' soon';
                 deadlineText = 'Tomorrow';
+                deadlineIcon = '⏳';
             } else if (daysLeft <= 3) {
                 deadlineClass += ' soon';
                 deadlineText = `In ${daysLeft} days`;
+                deadlineIcon = '⏳';
             } else {
-                deadlineText = deadline.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+                deadlineText = deadline.toLocaleDateString('en-US', { 
+                    day: 'numeric', 
+                    month: 'short',
+                    year: deadline.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
+                });
             }
             
-            deadlineHtml = `<span class="${deadlineClass}">📅 ${deadlineText}</span>`;
+            deadlineHtml = `<span class="${deadlineClass}">${deadlineIcon} ${deadlineText}</span>`;
         }
         
         // Task work time
@@ -321,6 +338,19 @@ const TodoModule = {
             timeHtml = `<span class="todo-time" title="${task.pomodoroSessions} Pomodoro sessions">
                 🍅 ${this.formatTime(task.timeSpent)}
             </span>`;
+        }
+        
+        // Добавляем время создания для недавних задач
+        let createdHtml = '';
+        const createdDate = new Date(task.createdAt);
+        const hoursAgo = Math.floor((new Date() - createdDate) / (1000 * 60 * 60));
+        if (hoursAgo < 24 && !task.completed) {
+            if (hoursAgo === 0) {
+                const minutesAgo = Math.floor((new Date() - createdDate) / (1000 * 60));
+                createdHtml = `<span class="todo-created">Added ${minutesAgo < 1 ? 'just now' : `${minutesAgo}m ago`}</span>`;
+            } else {
+                createdHtml = `<span class="todo-created">Added ${hoursAgo}h ago</span>`;
+            }
         }
         
         item.innerHTML = `
@@ -334,6 +364,7 @@ const TodoModule = {
                 <div class="todo-meta">
                     ${timeHtml}
                     ${deadlineHtml}
+                    ${createdHtml}
                 </div>
             </div>
             <div class="todo-priority" title="Priority: ${task.priority}">${priorityDots[task.priority]}</div>
@@ -350,10 +381,26 @@ const TodoModule = {
         const text = item.querySelector('.todo-text');
         const deleteBtn = item.querySelector('.todo-delete');
         
-        checkbox.addEventListener('click', () => this.toggleTask(task.id));
+        checkbox.addEventListener('click', () => {
+            // Добавляем анимацию при отметке
+            if (!task.completed) {
+                checkbox.classList.add('checking');
+                setTimeout(() => {
+                    this.toggleTask(task.id);
+                }, 300);
+            } else {
+                this.toggleTask(task.id);
+            }
+        });
+        
         deleteBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            this.deleteTask(task.id);
+            // Анимация удаления
+            item.style.transform = 'translateX(100%)';
+            item.style.opacity = '0';
+            setTimeout(() => {
+                this.deleteTask(task.id);
+            }, 300);
         });
         
         // Edit on double click
@@ -468,8 +515,6 @@ const TodoModule = {
         }
     },
     
-
-    
     // Экранирование HTML
     escapeHtml(text) {
         const div = document.createElement('div');
@@ -515,7 +560,6 @@ const TodoModule = {
         return this.tasks;
     },
     
-
 };
 
 // Export module

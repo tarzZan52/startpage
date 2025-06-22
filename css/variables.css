@@ -5,16 +5,26 @@
     --text-secondary: #888;
     --accent: #ffffff;
     
-    /* Dashboard neutral colors */
+    /* Dashboard colors - улучшенная палитра */
     --dashboard-accent: #6b7280;
     --dashboard-accent-hover: #9ca3af;
+    --dashboard-accent-bright: #74bca4;
     --dashboard-success: #22c55e;
     --dashboard-warning: #f59e0b;
     --dashboard-danger: #ef4444;
     --dashboard-info: #3b82f6;
     
+    /* Widget glow colors */
+    --widget-glow: rgba(116, 188, 164, 0.15);
+    
     /* Transition timings */
     --transition-fast: 0.2s ease;
-    --transition-normal: 0.3s ease;
-    --transition-slow: 0.5s ease;
+    --transition-normal: 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    --transition-slow: 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+    --shadow-xl: 0 12px 48px rgba(0, 0, 0, 0.5);
 }

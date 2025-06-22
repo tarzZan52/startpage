@@ -116,67 +116,67 @@
                             <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"></path>
                         </svg>
                     </button>
-                </div>
-                
-                <!-- Выпадающие настройки -->
-                <div class="pomodoro-settings-dropdown" id="pomodoroSettingsDropdown">
-                    <div class="settings-group">
-                        <div class="setting-item">
-                            <label for="workTimeInline">Work period</label>
-                            <div class="time-input-group">
-                                <button class="time-btn time-minus" data-target="workTimeInline">−</button>
-                                <input type="number" id="workTimeInline" min="5" max="60" value="25" step="5">
-                                <button class="time-btn time-plus" data-target="workTimeInline">+</button>
-                                <span class="time-unit">min</span>
+                    
+                    <!-- Выпадающие настройки - перемещаем внутрь header -->
+                    <div class="pomodoro-settings-dropdown" id="pomodoroSettingsDropdown">
+                        <div class="settings-group">
+                            <div class="setting-item">
+                                <label for="workTimeInline">Work period</label>
+                                <div class="time-input-group">
+                                    <button class="time-btn time-minus" data-target="workTimeInline">−</button>
+                                    <input type="number" id="workTimeInline" min="5" max="60" value="25" step="5">
+                                    <button class="time-btn time-plus" data-target="workTimeInline">+</button>
+                                    <span class="time-unit">min</span>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="setting-item">
-                            <label for="shortBreakInline">Short break</label>
-                            <div class="time-input-group">
-                                <button class="time-btn time-minus" data-target="shortBreakInline">−</button>
-                                <input type="number" id="shortBreakInline" min="1" max="30" value="5" step="1">
-                                <button class="time-btn time-plus" data-target="shortBreakInline">+</button>
-                                <span class="time-unit">min</span>
-                            </div>
-                        </div>
-                        
-                        <div class="setting-item">
-                            <label for="longBreakInline">Long break</label>
-                            <div class="time-input-group">
-                                <button class="time-btn time-minus" data-target="longBreakInline">−</button>
-                                <input type="number" id="longBreakInline" min="10" max="60" value="15" step="5">
-                                <button class="time-btn time-plus" data-target="longBreakInline">+</button>
-                                <span class="time-unit">min</span>
-                            </div>
-                        </div>
-                        
-                        <div class="setting-item setting-toggle">
-                            <label for="soundEnabledInline">Sound notifications</label>
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="soundEnabledInline" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-                        
-                        <div class="settings-separator"></div>
-                        
-                        <div class="settings-actions">
-                            <button class="settings-action-btn" id="pomodoroStatsBtn">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M3 3v18h18"></path>
-                                    <path d="m19 9-5 5-4-4-3 3"></path>
-                                </svg>
-                                View Statistics
-                            </button>
                             
-                            <button class="settings-action-btn danger" id="pomodoroResetStatsBtn">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="3,6 5,6 21,6"></polyline>
-                                    <path d="m19,6v14a2,2 0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2v2"></path>
-                                </svg>
-                                Reset Statistics
-                            </button>
+                            <div class="setting-item">
+                                <label for="shortBreakInline">Short break</label>
+                                <div class="time-input-group">
+                                    <button class="time-btn time-minus" data-target="shortBreakInline">−</button>
+                                    <input type="number" id="shortBreakInline" min="1" max="30" value="5" step="1">
+                                    <button class="time-btn time-plus" data-target="shortBreakInline">+</button>
+                                    <span class="time-unit">min</span>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <label for="longBreakInline">Long break</label>
+                                <div class="time-input-group">
+                                    <button class="time-btn time-minus" data-target="longBreakInline">−</button>
+                                    <input type="number" id="longBreakInline" min="10" max="60" value="15" step="5">
+                                    <button class="time-btn time-plus" data-target="longBreakInline">+</button>
+                                    <span class="time-unit">min</span>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-item setting-toggle">
+                                <label for="soundEnabledInline">Sound notifications</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="soundEnabledInline" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="settings-separator"></div>
+                            
+                            <div class="settings-actions">
+                                <button class="settings-action-btn" id="pomodoroStatsBtn">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M3 3v18h18"></path>
+                                        <path d="m19 9-5 5-4-4-3 3"></path>
+                                    </svg>
+                                    View Statistics
+                                </button>
+                                
+                                <button class="settings-action-btn danger" id="pomodoroResetStatsBtn">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="3,6 5,6 21,6"></polyline>
+                                        <path d="m19,6v14a2,2 0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2v2"></path>
+                                    </svg>
+                                    Reset Statistics
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -5,7 +5,8 @@ const PomodoroModule = {
         workTime: 25,
         shortBreak: 5,
         longBreak: 15,
-        soundEnabled: true
+        soundEnabled: true,
+        tickingSoundEnabled: false // Новая настройка для звука тиканья
     },
     
     // Timer state
@@ -34,12 +35,14 @@ const PomodoroModule = {
         shortBreakInline: null,
         longBreakInline: null,
         soundEnabledInline: null,
+        tickingSoundEnabledInline: null, // Новый элемент
         todayMinutes: null,
         weekMinutes: null,
         taskSelector: null
     },
     
     timer: null,
+    tickingInterval: null, // Для звука тиканья
     
     init() {
         this.loadElements();
@@ -67,6 +70,7 @@ const PomodoroModule = {
         this.elements.shortBreakInline = document.getElementById('shortBreakInline');
         this.elements.longBreakInline = document.getElementById('longBreakInline');
         this.elements.soundEnabledInline = document.getElementById('soundEnabledInline');
+        this.elements.tickingSoundEnabledInline = document.getElementById('tickingSoundEnabledInline'); // Новый элемент
         this.elements.todayMinutes = document.getElementById('todayMinutes');
         this.elements.weekMinutes = document.getElementById('weekMinutes');
         
@@ -238,6 +242,9 @@ const PomodoroModule = {
         if (this.elements.soundEnabledInline) {
             this.elements.soundEnabledInline.addEventListener('change', () => this.saveInlineSettings());
         }
+        if (this.elements.tickingSoundEnabledInline) {
+            this.elements.tickingSoundEnabledInline.addEventListener('change', () => this.saveInlineSettings());
+        }
         
         // Statistics buttons
         const statsBtn = document.getElementById('pomodoroStatsBtn');
@@ -393,6 +400,13 @@ const PomodoroModule = {
         this.timer = setInterval(() => {
             this.tick();
         }, 1000);
+        
+        // Запускаем звук тиканья
+        if (this.settings.tickingSoundEnabled) {
+            this.tickingInterval = setInterval(() => {
+                this.playTickingSound();
+            }, 1000);
+        }
     },
     
     pause() {
@@ -410,6 +424,12 @@ const PomodoroModule = {
         if (this.timer) {
             clearInterval(this.timer);
             this.timer = null;
+        }
+        
+        // Останавливаем звук тиканья
+        if (this.tickingInterval) {
+            clearInterval(this.tickingInterval);
+            this.tickingInterval = null;
         }
     },
     
@@ -582,6 +602,28 @@ const PomodoroModule = {
                 // Тихо игнорируем ошибки звука
             }
         };
+        
+        // Создаем звук тиканья часов
+        this.playTickingSound = () => {
+            if (!this.settings.tickingSoundEnabled || !this.state.isRunning) return;
+            
+            try {
+                const oscillator = this.notificationSound.createOscillator();
+                const gainNode = this.notificationSound.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(this.notificationSound.destination);
+                
+                oscillator.frequency.setValueAtTime(400, this.notificationSound.currentTime);
+                gainNode.gain.setValueAtTime(0.02, this.notificationSound.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, this.notificationSound.currentTime + 0.05);
+                
+                oscillator.start(this.notificationSound.currentTime);
+                oscillator.stop(this.notificationSound.currentTime + 0.05);
+            } catch (error) {
+                // Тихо игнорируем ошибки звука
+            }
+        };
     },
     
     showNotification() {
@@ -617,6 +659,9 @@ const PomodoroModule = {
         if (this.elements.soundEnabledInline) {
             this.elements.soundEnabledInline.checked = this.settings.soundEnabled;
         }
+        if (this.elements.tickingSoundEnabledInline) {
+            this.elements.tickingSoundEnabledInline.checked = this.settings.tickingSoundEnabled;
+        }
     },
     
     saveInlineSettings() {
@@ -632,11 +677,14 @@ const PomodoroModule = {
         if (this.elements.soundEnabledInline) {
             this.settings.soundEnabled = this.elements.soundEnabledInline.checked;
         }
+        if (this.elements.tickingSoundEnabledInline) {
+            this.settings.tickingSoundEnabled = this.elements.tickingSoundEnabledInline.checked;
+        }
         
         localStorage.setItem('pomodoro_settings', JSON.stringify(this.settings));
         
-                        // Update display if timer is not running
-                if (!this.state.isRunning && this.state.currentTime === 0) {
+        // Update display if timer is not running
+        if (!this.state.isRunning && this.state.currentTime === 0) {
             this.updateDisplay();
             this.updateProgress();
         }

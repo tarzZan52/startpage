@@ -9,21 +9,44 @@
 .mode-toggle-btn {
     width: 56px;
     height: 56px;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
+    border-radius: 16px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     position: relative;
+    overflow: hidden;
+}
+
+.mode-toggle-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, var(--dashboard-accent) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.mode-toggle-btn:hover::before {
+    opacity: 0.2;
 }
 
 .mode-toggle-btn:hover {
     background: rgba(255, 255, 255, 0.1);
     border-color: rgba(255, 255, 255, 0.3);
-    transform: scale(1.05);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.mode-toggle-btn:active {
+    transform: translateY(0);
 }
 
 .mode-toggle-btn svg {
@@ -31,22 +54,23 @@
     height: 24px;
     color: var(--text-primary);
     position: absolute;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    z-index: 1;
 }
 
 .mode-icon-dashboard {
     opacity: 0;
-    transform: rotate(180deg);
+    transform: rotate(180deg) scale(0.8);
 }
 
 .dashboard-mode .mode-icon-home {
     opacity: 0;
-    transform: rotate(-180deg);
+    transform: rotate(-180deg) scale(0.8);
 }
 
 .dashboard-mode .mode-icon-dashboard {
     opacity: 1;
-    transform: rotate(0deg);
+    transform: rotate(0deg) scale(1);
 }
 
 /* Основной контент */
@@ -79,6 +103,7 @@
     transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
     position: relative;
     z-index: 10;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.1) 100%);
 }
 
 .dashboard-content.active {
@@ -89,22 +114,32 @@
 .dashboard-content .site-title {
     text-align: center;
     margin-bottom: 40px;
-    font-size: 2.5rem;
-    font-weight: 700;
-    background: linear-gradient(135deg, var(--text-primary), rgba(116, 188, 164, 0.8));
+    font-size: 2.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--dashboard-accent-bright) 50%, var(--text-primary) 100%);
+    background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    animation: shineText 3s ease-in-out infinite;
+    letter-spacing: -0.02em;
 }
 
-/* Сетка дашборда */
+@keyframes shineText {
+    0% { background-position: 0% center; }
+    50% { background-position: 100% center; }
+    100% { background-position: 0% center; }
+}
+
+/* Сетка дашборда - улучшенная адаптивность */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-    max-width: 100%;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 0 20px;
+    grid-auto-rows: minmax(420px, auto);
 }
 
 /* 4 колонки для широких экранов */
@@ -115,6 +150,25 @@
     }
 }
 
+/* 3 колонки для средних экранов */
+@media (min-width: 1024px) and (max-width: 1399px) {
+    .dashboard-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    /* Analytics widget занимает всю ширину на средних экранах */
+    .analytics-widget {
+        grid-column: span 3;
+    }
+}
+
+/* 2 колонки для планшетов */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
 /* Специфичные стили для FullHD ноутбуков */
 @media (min-width: 1920px) and (max-height: 1080px) {
     .dashboard-content {
@@ -122,159 +176,146 @@
     }
     
     .dashboard-grid {
-        gap: 16px;
+        gap: 20px;
     }
     
     .widget {
-        max-height: 380px;
-        padding: 14px;
+        padding: 18px;
     }
     
     .timer-circle {
-        width: 130px;
-        height: 130px;
+        width: 140px;
+        height: 140px;
         margin-bottom: 12px;
     }
     
     .timer-time {
-        font-size: 1.9rem;
-    }
-    
-    .habits-list {
-        max-height: 220px;
-    }
-    
-    .todo-list {
-        max-height: 200px;
+        font-size: 2rem;
     }
 }
 
-/* Позиционирование виджетов */
-.pomodoro-widget {
-    grid-column: 1;
-    grid-row: 1;
-}
-
-.habits-widget {
-    grid-column: 2;
-    grid-row: 1;
-}
-
-.todo-widget {
-    grid-column: 1;
-    grid-row: 2;
-}
-
-.analytics-widget {
-    grid-column: 2;
-    grid-row: 2;
-}
-
-/* Позиционирование виджетов для 4 колонок */
-@media (min-width: 1400px) {
-    .pomodoro-widget {
-        grid-column: 1;
-        grid-row: 1;
-    }
-
-    .habits-widget {
-        grid-column: 2;
-        grid-row: 1;
-    }
-
-    .todo-widget {
-        grid-column: 3;
-        grid-row: 1;
-    }
-
-    .analytics-widget {
-        grid-column: 4;
-        grid-row: 1;
-    }
-}
-
-/* Базовые стили виджетов */
+/* Базовые стили виджетов - улучшенные */
 .widget {
-    background: rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    padding: 16px;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.3) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+    padding: 20px;
     display: flex;
     flex-direction: column;
     position: relative;
     overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    min-height: 0;
-    max-height: 400px;
-    backdrop-filter: blur(10px);
-}
-
-.widget:hover {
-    border-color: rgba(255, 255, 255, 0.2);
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    min-height: 420px;
+    backdrop-filter: blur(20px);
+    box-shadow: 
+        0 4px 24px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .widget::before {
     content: '';
     position: absolute;
-    top: -50%;
-    left: -50%;
+    top: -100%;
+    left: -100%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(116, 188, 164, 0.1) 0%, transparent 60%);
+    background: radial-gradient(circle, var(--widget-glow) 0%, transparent 60%);
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.4s ease;
     pointer-events: none;
+}
+
+.widget:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 
+        0 12px 40px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .widget:hover::before {
     opacity: 1;
 }
 
-/* Заголовки виджетов */
+/* Заголовки виджетов - улучшенные */
 .widget-header {
     display: flex;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
     position: relative;
-    z-index: 1;
+    z-index: 2;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .widget-icon {
-    width: 24px;
-    height: 24px;
-    color: var(--dashboard-accent);
+    width: 28px;
+    height: 28px;
+    color: var(--dashboard-accent-bright);
     margin-right: 12px;
     flex-shrink: 0;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
 .widget-header h3 {
-    font-size: 1.1rem;
-    font-weight: 600;
+    font-size: 1.2rem;
+    font-weight: 700;
     color: var(--text-primary);
     margin: 0;
     flex: 1;
+    letter-spacing: -0.01em;
 }
 
 .widget-settings-btn,
 .notes-add-btn,
 .habits-add-btn {
-    background: none;
-    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     color: var(--text-secondary);
     cursor: pointer;
     padding: 8px;
-    border-radius: 8px;
+    border-radius: 10px;
     transition: all 0.2s ease;
-    margin-left: auto;
+    margin-left: 8px;
+    position: relative;
+    overflow: hidden;
+}
+
+.widget-settings-btn::before,
+.notes-add-btn::before,
+.habits-add-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s ease, height 0.3s ease;
+}
+
+.widget-settings-btn:hover::before,
+.notes-add-btn:hover::before,
+.habits-add-btn:hover::before {
+    width: 100%;
+    height: 100%;
 }
 
 .widget-settings-btn:hover,
 .notes-add-btn:hover,
 .habits-add-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
     color: var(--text-primary);
+    transform: translateY(-1px);
+}
+
+.widget-settings-btn:active,
+.notes-add-btn:active,
+.habits-add-btn:active {
+    transform: translateY(0);
 }
 
 .widget-settings-btn svg,
@@ -282,6 +323,8 @@
 .habits-add-btn svg {
     width: 18px;
     height: 18px;
+    position: relative;
+    z-index: 1;
 }
 
 /* Кнопка обновления для аналитики */
@@ -289,44 +332,67 @@
     transition: transform 0.5s ease;
 }
 
+#analyticsRefreshBtn:hover {
+    animation: spin 1s ease-in-out;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 /* Статистика помодоро */
 .pomodoro-stats {
     font-size: 0.85rem;
     color: var(--text-secondary);
     margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
-/* Выпадающие настройки помодоро */
+.pomodoro-stats::before {
+    content: '🔥';
+    font-size: 1rem;
+}
+
+/* Выпадающие настройки помодоро - ИСПРАВЛЕНО */
 .pomodoro-settings-dropdown {
     position: absolute;
-    top: 100%;
+    top: calc(100% + 8px);
     right: 0;
-    width: 300px;
-    background: rgba(0, 0, 0, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    width: 320px;
+    background: rgba(10, 10, 10, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 16px;
-    padding: 20px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    padding: 24px;
+    box-shadow: 
+        0 12px 40px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
     backdrop-filter: blur(20px);
-    z-index: 9999;
+    z-index: 1000;
     opacity: 0;
     visibility: hidden;
     transform: translateY(-10px);
-    transition: all 0.3s ease;
-    margin-top: 8px;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Позиционирование исправлено - dropdown внутри header */
+.pomodoro-widget .widget-header {
+    position: relative;
+    overflow: visible;
 }
 
 .pomodoro-settings-dropdown.active {
-    opacity: 1 !important;
-    visibility: visible !important;
-    transform: translateY(0) !important;
-    display: block !important;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
 }
 
 .settings-group {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 20px;
 }
 
 .setting-item {
@@ -338,7 +404,7 @@
 
 .setting-item label {
     color: var(--text-primary);
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     font-weight: 500;
     flex: 1;
 }
@@ -354,10 +420,10 @@
 }
 
 .time-btn {
-    width: 32px;
-    height: 32px;
-    background: rgba(255, 255, 255, 0.1);
-    border: none;
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
     color: var(--text-primary);
     font-size: 1.2rem;
@@ -370,7 +436,8 @@
 }
 
 .time-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.2);
     transform: scale(1.05);
 }
 
@@ -383,7 +450,7 @@
     background: transparent;
     border: none;
     color: var(--text-primary);
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 600;
     text-align: center;
     outline: none;
@@ -391,19 +458,19 @@
 
 .time-unit {
     color: var(--text-secondary);
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     margin-right: 4px;
 }
 
-/* Переключатель (Toggle) */
+/* Переключатель (Toggle) - улучшенный */
 .setting-toggle {
     align-items: center;
 }
 
 .toggle-switch {
     position: relative;
-    width: 48px;
-    height: 24px;
+    width: 52px;
+    height: 28px;
 }
 
 .toggle-switch input[type="checkbox"] {
@@ -420,25 +487,27 @@
     right: 0;
     bottom: 0;
     background: rgba(255, 255, 255, 0.2);
-    border-radius: 24px;
-    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 28px;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .toggle-slider::before {
     content: '';
     position: absolute;
-    height: 18px;
-    width: 18px;
-    left: 3px;
+    height: 20px;
+    width: 20px;
+    left: 4px;
     bottom: 3px;
     background: white;
     border-radius: 50%;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .toggle-switch input:checked + .toggle-slider {
     background: var(--dashboard-accent);
+    border-color: var(--dashboard-accent);
 }
 
 .toggle-switch input:checked + .toggle-slider::before {
@@ -448,28 +517,28 @@
 /* Разделитель в настройках */
 .settings-separator {
     height: 1px;
-    background: rgba(255, 255, 255, 0.1);
-    margin: 8px 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    margin: 12px 0;
 }
 
 /* Кнопки действий в настройках */
 .settings-actions {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-top: 8px;
+    gap: 10px;
+    margin-top: 12px;
 }
 
 .settings-action-btn {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 12px;
+    gap: 10px;
+    padding: 12px 16px;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
+    border-radius: 10px;
     color: var(--text-primary);
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -480,7 +549,7 @@
 .settings-action-btn:hover {
     background: rgba(255, 255, 255, 0.1);
     border-color: rgba(255, 255, 255, 0.2);
-    transform: translateY(-1px);
+    transform: translateX(4px);
 }
 
 .settings-action-btn.danger {
@@ -489,26 +558,17 @@
 }
 
 .settings-action-btn.danger:hover {
-    background: rgba(239, 68, 68, 0.1);
+    background: rgba(239, 68, 68, 0.15);
     border-color: rgba(239, 68, 68, 0.5);
 }
 
 .settings-action-btn svg {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     flex-shrink: 0;
 }
 
-/* Позиционирование относительно виджета */
-.pomodoro-widget {
-    position: relative;
-}
-
-.pomodoro-widget .widget-header {
-    position: relative;
-}
-
-/* Таймер Помодоро */
+/* Таймер Помодоро - улучшенный */
 .pomodoro-timer {
     display: flex;
     flex-direction: column;
@@ -521,10 +581,10 @@
 
 .timer-circle {
     position: relative;
-    width: 140px;
-    height: 140px;
-    margin-bottom: 15px;
-    filter: drop-shadow(0 4px 20px rgba(116, 188, 164, 0.15));
+    width: 160px;
+    height: 160px;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 4px 20px rgba(116, 188, 164, 0.2));
 }
 
 .timer-progress {
@@ -539,15 +599,18 @@
 
 .timer-progress circle:last-child {
     stroke-linecap: round;
+    filter: drop-shadow(0 0 10px currentColor);
 }
 
 /* Анимация пульсации во время работы */
 @keyframes timer-pulse {
     0%, 100% {
-        filter: drop-shadow(0 4px 20px rgba(116, 188, 164, 0.15));
+        filter: drop-shadow(0 4px 20px rgba(116, 188, 164, 0.2));
+        transform: scale(1);
     }
     50% {
-        filter: drop-shadow(0 4px 30px rgba(116, 188, 164, 0.3));
+        filter: drop-shadow(0 4px 30px rgba(116, 188, 164, 0.4));
+        transform: scale(1.02);
     }
 }
 
@@ -564,7 +627,7 @@
 }
 
 .timer-time {
-    font-size: 2rem;
+    font-size: 2.2rem;
     font-weight: 300;
     color: var(--text-primary);
     margin-bottom: 4px;
@@ -574,11 +637,11 @@
 }
 
 .timer-label {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     color: var(--text-secondary);
-    font-weight: 500;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
 }
 
 /* Селектор задачи для Pomodoro */
@@ -586,9 +649,9 @@
     width: 100%;
     margin-bottom: 20px;
     padding: 16px;
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.3);
     border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .pomodoro-task-selector label {
@@ -596,17 +659,17 @@
     margin-bottom: 8px;
     font-size: 0.85rem;
     color: var(--text-secondary);
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .task-select {
     width: 100%;
-    padding: 10px 12px;
-    background: rgba(0, 0, 0, 0.4);
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
+    border-radius: 10px;
     color: var(--text-primary);
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -614,7 +677,8 @@
 .task-select:focus {
     outline: none;
     border-color: var(--dashboard-accent);
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.7);
+    box-shadow: 0 0 0 2px rgba(116, 188, 164, 0.1);
 }
 
 .task-select:disabled {
@@ -623,8 +687,9 @@
 }
 
 .task-select option {
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(10, 10, 10, 0.95);
     color: var(--text-primary);
+    padding: 8px;
 }
 
 .timer-controls {
@@ -634,11 +699,11 @@
 }
 
 .timer-btn {
-    width: 40px;
-    height: 40px;
-    background: rgba(0, 0, 0, 0.4);
+    width: 44px;
+    height: 44px;
+    background: rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
+    border-radius: 14px;
     color: var(--text-primary);
     cursor: pointer;
     display: flex;
@@ -663,25 +728,25 @@
 }
 
 .timer-btn:hover::before {
-    width: 100%;
-    height: 100%;
+    width: 120%;
+    height: 120%;
 }
 
 .timer-btn:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.08);
     border-color: rgba(255, 255, 255, 0.2);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
 .timer-btn:active {
     transform: translateY(0);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .timer-btn svg {
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
     position: relative;
     z-index: 1;
 }
@@ -689,61 +754,73 @@
 /* Главная кнопка старт/пауза */
 .timer-start,
 .timer-pause {
-    width: 48px;
-    height: 48px;
+    width: 52px;
+    height: 52px;
     background: var(--dashboard-accent);
     border-color: var(--dashboard-accent);
 }
 
 .timer-start:hover,
 .timer-pause:hover {
-    background: rgba(116, 188, 164, 0.8);
-    border-color: rgba(116, 188, 164, 0.8);
+    background: var(--dashboard-accent-hover);
+    border-color: var(--dashboard-accent-hover);
 }
 
 .timer-start svg,
 .timer-pause svg {
-    width: 26px;
-    height: 26px;
+    width: 28px;
+    height: 28px;
 }
 
 /* Статистика продуктивности */
 .pomodoro-productivity {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    gap: 16px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .productivity-item {
     text-align: center;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+.productivity-item:hover {
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .productivity-label {
     display: block;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     color: var(--text-secondary);
-    margin-bottom: 4px;
+    margin-bottom: 6px;
+    font-weight: 500;
 }
 
 .productivity-value {
     display: block;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--dashboard-accent);
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--dashboard-accent-bright);
 }
 
-/* Стили для трекера привычек */
+/* Стили для трекера привычек - улучшенные */
 .habits-stats {
     font-size: 0.85rem;
     color: var(--text-secondary);
     margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .habits-stats .stats-separator {
-    margin: 0 8px;
+    margin: 0 4px;
     opacity: 0.5;
 }
 
@@ -755,7 +832,30 @@
     flex-direction: column;
     gap: 12px;
     padding-right: 4px;
-    max-height: 250px;
+    /* Убираем ограничение высоты */
+}
+
+/* Кастомный скроллбар для списков */
+.habits-list::-webkit-scrollbar,
+.todo-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.habits-list::-webkit-scrollbar-track,
+.todo-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+.habits-list::-webkit-scrollbar-thumb,
+.todo-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.habits-list::-webkit-scrollbar-thumb:hover,
+.todo-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
 }
 
 .habits-empty {
@@ -768,6 +868,12 @@
     font-size: 3rem;
     margin-bottom: 16px;
     opacity: 0.6;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
 }
 
 .habits-empty-text {
@@ -776,35 +882,67 @@
 }
 
 .habit-item {
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    padding: 12px;
-    transition: all 0.2s ease;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.2) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 16px;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.habit-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--habit-color);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.habit-item:hover::before {
+    opacity: 0.05;
 }
 
 .habit-item:hover {
     background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
-    transform: translateX(2px);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateX(4px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 .habit-header {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: 12px;
+    margin-bottom: 12px;
 }
 
 .habit-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.habit-icon::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: currentColor;
+    opacity: 0.2;
 }
 
 .habit-info {
@@ -812,8 +950,8 @@
 }
 
 .habit-name {
-    font-size: 0.95rem;
-    font-weight: 500;
+    font-size: 1rem;
+    font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 4px;
 }
@@ -821,7 +959,7 @@
 .habit-stats {
     display: flex;
     gap: 12px;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     color: var(--text-secondary);
 }
 
@@ -832,8 +970,8 @@
 }
 
 .habit-check {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     border: 2px solid rgba(255, 255, 255, 0.2);
     background: rgba(0, 0, 0, 0.3);
@@ -846,27 +984,33 @@
 }
 
 .habit-check:hover {
-    border-color: rgba(255, 255, 255, 0.4);
+    border-color: var(--habit-color);
     transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(116, 188, 164, 0.3);
 }
 
 .habit-check.checked {
     background: var(--habit-color);
     border-color: var(--habit-color);
+    animation: checkBounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes checkBounce {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.3); }
+    100% { transform: scale(1); }
 }
 
 .habit-check svg {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     color: white;
     opacity: 0;
-    transform: scale(0.5);
-    transition: all 0.3s ease;
+    transition: opacity 0.2s ease;
 }
 
 .habit-check.checked svg {
     opacity: 1;
-    transform: scale(1);
 }
 
 .habit-progress {
@@ -876,7 +1020,7 @@
 .habit-week {
     display: flex;
     gap: 4px;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     overflow: hidden;
 }
 
@@ -888,58 +1032,99 @@
 }
 
 .habit-day-label {
-    font-size: 0.65rem;
+    font-size: 0.7rem;
     color: var(--text-secondary);
     margin-bottom: 4px;
-    opacity: 0.6;
+    opacity: 0.7;
+    font-weight: 500;
 }
 
 .habit-day-marker {
     width: 100%;
-    height: 4px;
+    height: 6px;
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 2px;
-    transition: all 0.2s ease;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.habit-day-marker::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2));
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
 }
 
 .habit-day.completed .habit-day-marker {
     background: var(--dashboard-success);
 }
 
+.habit-day.completed .habit-day-marker::before {
+    transform: translateX(100%);
+}
+
 .habit-day.today .habit-day-label {
     color: var(--text-primary);
-    font-weight: 600;
+    font-weight: 700;
     opacity: 1;
+}
+
+.habit-day.today .habit-day-marker {
+    box-shadow: 0 0 0 2px var(--dashboard-accent);
 }
 
 .habit-progress-bar {
     width: 100%;
-    height: 6px;
+    height: 8px;
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
+    border-radius: 4px;
     overflow: hidden;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+    position: relative;
 }
 
 .habit-progress-fill {
     height: 100%;
-    transition: width 0.3s ease;
-    border-radius: 3px;
+    transition: width 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--habit-color) 0%, var(--habit-color) 100%);
+    position: relative;
+}
+
+.habit-progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
 }
 
 .habit-progress-text {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     color: var(--text-secondary);
     text-align: center;
+    font-weight: 500;
 }
-
-
 
 .habit-actions {
     display: flex;
     gap: 8px;
     justify-content: flex-end;
-    margin-top: 8px;
+    margin-top: 12px;
     opacity: 0;
     transition: opacity 0.2s ease;
 }
@@ -949,18 +1134,19 @@
 }
 
 .habit-action-btn {
-    background: none;
-    border: none;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     padding: 6px;
     color: var(--text-secondary);
     cursor: pointer;
-    border-radius: 6px;
+    border-radius: 8px;
     transition: all 0.2s ease;
 }
 
 .habit-action-btn:hover {
     background: rgba(255, 255, 255, 0.1);
     color: var(--text-primary);
+    transform: translateY(-2px);
 }
 
 .habit-action-btn svg {
@@ -971,16 +1157,18 @@
 .habit-delete:hover {
     background: rgba(239, 68, 68, 0.2);
     color: var(--dashboard-danger);
+    border-color: rgba(239, 68, 68, 0.3);
 }
 
-/* Модальное окно для добавления привычки */
+/* Модальное окно для добавления привычки - улучшенное */
 .habit-modal {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -996,25 +1184,41 @@
 }
 
 .habit-modal-content {
-    background: rgba(20, 20, 20, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: linear-gradient(135deg, rgba(20, 20, 20, 0.98) 0%, rgba(10, 10, 10, 0.98) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 24px;
     width: 90%;
-    max-width: 480px;
-    animation: modalSlideIn 0.3s ease;
+    max-width: 500px;
+    animation: modalSlideIn 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(-20px) scale(0.95);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
 }
 
 .habit-modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 24px 28px;
+    padding: 28px 32px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: sticky;
+    top: 0;
+    background: inherit;
+    z-index: 1;
 }
 
 .habit-modal-title {
-    font-size: 1.4rem;
-    font-weight: 600;
+    font-size: 1.5rem;
+    font-weight: 700;
     color: var(--text-primary);
 }
 
@@ -1024,35 +1228,41 @@
     color: var(--text-secondary);
     cursor: pointer;
     padding: 8px;
+    font-size: 1.5rem;
     border-radius: 8px;
     transition: all 0.2s ease;
-    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .habit-modal-close:hover {
     background: rgba(255, 255, 255, 0.1);
     color: var(--text-primary);
+    transform: rotate(90deg);
 }
 
 .habit-form {
-    padding: 28px;
+    padding: 32px;
 }
 
 .habit-form-group {
-    margin-bottom: 20px;
+    margin-bottom: 24px;
 }
 
 .habit-form-group label {
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     color: var(--text-primary);
-    font-size: 0.9rem;
-    font-weight: 500;
+    font-size: 0.95rem;
+    font-weight: 600;
 }
 
 .habit-form-group input {
     width: 100%;
-    padding: 12px 16px;
+    padding: 14px 18px;
     background: rgba(0, 0, 0, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
@@ -1063,17 +1273,23 @@
 
 .habit-form-group input:focus {
     outline: none;
-    border-color: rgba(255, 255, 255, 0.3);
+    border-color: var(--dashboard-accent);
     background: rgba(0, 0, 0, 0.6);
+    box-shadow: 0 0 0 3px rgba(116, 188, 164, 0.1);
 }
 
 .habit-icon-grid {
     display: flex;
-    gap: 12px;
+    gap: 16px;
 }
 
 .habit-icon-input {
-    flex: 0 0 80px;
+    flex: 0 0 90px;
+}
+
+.habit-icon-input input {
+    text-align: center;
+    font-size: 2rem;
 }
 
 .habit-target-input {
@@ -1082,25 +1298,25 @@
 
 .habit-target-input label {
     display: block;
-    margin-bottom: 4px;
-    font-size: 0.8rem;
+    margin-bottom: 6px;
+    font-size: 0.85rem;
     color: var(--text-secondary);
 }
 
 .habit-target-controls {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
 
 .habit-target-controls .habit-target-btn {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     background: rgba(0, 0, 0, 0.4);
     color: var(--text-primary);
-    border-radius: 8px;
-    font-size: 16px;
+    border-radius: 10px;
+    font-size: 18px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -1126,14 +1342,14 @@
 
 .habit-color-picker {
     display: flex;
-    gap: 8px;
+    gap: 10px;
     flex-wrap: wrap;
 }
 
 .habit-color-option {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
     border: 2px solid transparent;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -1141,11 +1357,12 @@
 }
 
 .habit-color-option:hover {
-    transform: scale(1.1);
+    transform: scale(1.1) rotate(5deg);
 }
 
 .habit-color-option.selected {
     border-color: white;
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.2);
 }
 
 .habit-color-option.selected::after {
@@ -1155,37 +1372,37 @@
     left: 50%;
     transform: translate(-50%, -50%);
     color: white;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     font-weight: bold;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .habit-form-actions {
     display: flex;
     gap: 12px;
     justify-content: flex-end;
-    margin-top: 28px;
+    margin-top: 32px;
 }
 
 .habit-btn {
-    padding: 12px 24px;
+    padding: 14px 28px;
     border: none;
     border-radius: 12px;
     font-size: 1rem;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .habit-btn-primary {
-    background: rgba(116, 188, 164, 0.2);
-    border: 1px solid rgba(116, 188, 164, 0.4);
-    color: #fff;
+    background: var(--dashboard-accent);
+    color: white;
 }
 
 .habit-btn-primary:hover {
-    background: rgba(116, 188, 164, 0.3);
-    border-color: rgba(116, 188, 164, 0.6);
-    transform: translateY(-1px);
+    background: var(--dashboard-accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(116, 188, 164, 0.3);
 }
 
 .habit-btn-secondary {
@@ -1206,7 +1423,8 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1216,27 +1434,32 @@
 }
 
 .habit-details-content {
-    background: rgba(20, 20, 20, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: linear-gradient(135deg, rgba(20, 20, 20, 0.98) 0%, rgba(10, 10, 10, 0.98) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 24px;
     width: 90%;
     max-width: 600px;
     max-height: 80vh;
     overflow-y: auto;
-    animation: modalSlideIn 0.3s ease;
+    animation: modalSlideIn 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
 
 .habit-details-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 24px 28px;
+    padding: 28px 32px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: sticky;
+    top: 0;
+    background: inherit;
+    z-index: 1;
 }
 
 .habit-details-header h3 {
-    font-size: 1.3rem;
-    font-weight: 600;
+    font-size: 1.4rem;
+    font-weight: 700;
     color: var(--text-primary);
     display: flex;
     align-items: center;
@@ -1252,15 +1475,21 @@
     font-size: 1.5rem;
     border-radius: 8px;
     transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .habit-details-close:hover {
     background: rgba(255, 255, 255, 0.1);
     color: var(--text-primary);
+    transform: rotate(90deg);
 }
 
 .habit-calendar {
-    padding: 24px;
+    padding: 28px;
 }
 
 /* Навигация календаря */
@@ -1268,18 +1497,18 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
     padding: 0 8px;
 }
 
 .calendar-nav-btn {
     background: rgba(255, 255, 255, 0.1);
-    border: none;
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
     color: var(--text-primary);
-    font-size: 18px;
+    font-size: 20px;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -1290,30 +1519,31 @@
 
 .calendar-nav-btn:hover {
     background: var(--dashboard-accent);
+    border-color: var(--dashboard-accent);
     color: white;
     transform: scale(1.1);
 }
 
 .calendar-month-year {
-    font-size: 1.1rem;
-    font-weight: 600;
+    font-size: 1.2rem;
+    font-weight: 700;
     color: var(--text-primary);
     text-align: center;
-    min-width: 150px;
+    min-width: 180px;
 }
 
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
+    gap: 6px;
 }
 
 .calendar-header {
     text-align: center;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     color: var(--text-secondary);
-    padding: 8px 0;
-    font-weight: 500;
+    padding: 10px 0;
+    font-weight: 600;
 }
 
 .calendar-day {
@@ -1322,24 +1552,38 @@
     align-items: center;
     justify-content: center;
     background: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
-    font-size: 0.85rem;
+    border-radius: 10px;
+    font-size: 0.9rem;
     color: var(--text-secondary);
     transition: all 0.2s ease;
+    cursor: default;
+    position: relative;
 }
 
 .calendar-day.completed {
     background: var(--dashboard-success);
     color: white;
-    font-weight: 500;
+    font-weight: 600;
+}
+
+.calendar-day.completed::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.2));
+    border-radius: inherit;
 }
 
 .calendar-day.today {
     border: 2px solid var(--dashboard-accent);
+    font-weight: 700;
 }
 
 .calendar-day.future {
-    opacity: 0.3;
+    opacity: 0.4;
 }
 
 .calendar-day.empty {
@@ -1350,8 +1594,9 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
-    padding: 24px;
+    padding: 28px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.2);
 }
 
 .stat-item {
@@ -1362,182 +1607,27 @@
     font-size: 0.8rem;
     color: var(--text-secondary);
     margin-bottom: 8px;
+    font-weight: 500;
 }
 
 .stat-value {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: var(--text-primary);
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--dashboard-accent-bright);
 }
 
-/* Заметки */
-.notes-content {
-    display: flex;
-    gap: 16px;
-    flex: 1;
-    min-height: 350px;
-    height: auto;
-    overflow: hidden;
-}
-
-.notes-sidebar {
-    flex: 0 0 200px;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    min-height: 0;
-}
-
-.notes-list {
-    flex: 1;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-height: 0;
-}
-
-.note-item {
-    padding: 12px;
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.note-item:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
-}
-
-.note-item.active {
-    background: var(--dashboard-accent);
-    border-color: var(--dashboard-accent);
-    color: white;
-}
-
-.note-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 4px;
-    gap: 8px;
-}
-
-.note-title {
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: inherit;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    flex: 1;
-}
-
-.note-date {
-    font-size: 0.7rem;
-    opacity: 0.7;
-    flex-shrink: 0;
-}
-
-.note-preview {
-    font-size: 0.75rem;
-    opacity: 0.8;
-    line-height: 1.3;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.notes-editor {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    height: 100%;
-    min-height: 0;
-}
-
-.notes-editor textarea {
-    flex: 1;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    color: var(--text-primary);
-    padding: 16px;
-    font-size: 0.9rem;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    line-height: 1.5;
-    resize: none;
-    outline: none;
-    transition: all 0.2s ease;
-    min-height: 250px;
-    height: auto;
-}
-
-.notes-editor textarea:focus {
-    border-color: var(--dashboard-accent);
-    background: rgba(0, 0, 0, 0.4);
-}
-
-.notes-actions {
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-}
-
-.notes-btn {
-    padding: 6px 12px;
-    background: rgba(107, 114, 128, 0.2);
-    border: 1px solid rgba(107, 114, 128, 0.3);
-    border-radius: 6px;
-    color: var(--dashboard-accent);
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.notes-btn:hover {
-    background: rgba(156, 163, 175, 0.3);
-    border-color: rgba(156, 163, 175, 0.5);
-    color: var(--dashboard-accent-hover);
-}
-
-.notes-btn.saved {
-    background: var(--dashboard-success);
-    border-color: var(--dashboard-success);
-    color: white;
-}
-
-.notes-btn-danger {
-    background: rgba(239, 68, 68, 0.2);
-    border-color: rgba(239, 68, 68, 0.3);
-    color: var(--dashboard-danger);
-}
-
-.notes-btn-danger:hover {
-    background: rgba(239, 68, 68, 0.3);
-    border-color: var(--dashboard-danger);
-}
-
-.notes-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    pointer-events: none;
-}
-
-/* ToDo список */
+/* ToDo список - улучшенный */
 .todo-stats {
     font-size: 0.9rem;
     color: var(--text-secondary);
     margin-left: auto;
+    font-weight: 600;
 }
 
 .todo-input {
     display: flex;
-    gap: 6px;
-    margin-bottom: 12px;
+    gap: 8px;
+    margin-bottom: 16px;
     position: relative;
     z-index: 1;
 }
@@ -1545,33 +1635,34 @@
 .todo-input-row {
     flex: 1;
     display: flex;
-    gap: 6px;
+    gap: 8px;
 }
 
 .todo-input input {
     flex: 1;
-    padding: 10px 12px;
-    background: rgba(0, 0, 0, 0.4);
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
+    border-radius: 12px;
     color: var(--text-primary);
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     transition: all 0.2s ease;
 }
 
 .todo-input input:focus {
     outline: none;
     border-color: var(--dashboard-accent);
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.7);
+    box-shadow: 0 0 0 3px rgba(116, 188, 164, 0.1);
 }
 
 .todo-add-btn {
-    width: 38px;
-    height: 38px;
-    background: rgba(107, 114, 128, 0.2);
-    border: 1px solid rgba(107, 114, 128, 0.3);
-    border-radius: 10px;
-    color: var(--dashboard-accent);
+    width: 44px;
+    height: 44px;
+    background: var(--dashboard-accent);
+    border: 1px solid var(--dashboard-accent);
+    border-radius: 12px;
+    color: white;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -1580,24 +1671,29 @@
 }
 
 .todo-add-btn:hover {
-    background: rgba(156, 163, 175, 0.3);
-    border-color: rgba(156, 163, 175, 0.5);
-    color: var(--dashboard-accent-hover);
+    background: var(--dashboard-accent-hover);
+    border-color: var(--dashboard-accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(116, 188, 164, 0.3);
+}
+
+.todo-add-btn:active {
+    transform: translateY(0);
 }
 
 .todo-add-btn svg {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
 }
 
 .todo-priority-select {
-    width: 50px;
-    padding: 8px 4px;
-    background: rgba(0, 0, 0, 0.4);
+    width: 60px;
+    padding: 10px 8px;
+    background: rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
+    border-radius: 10px;
     color: var(--text-primary);
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     text-align: center;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -1606,30 +1702,31 @@
 .todo-priority-select:focus {
     outline: none;
     border-color: var(--dashboard-accent);
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.7);
 }
 
 .todo-priority-select option {
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(10, 10, 10, 0.95);
     color: var(--text-primary);
 }
 
 .todo-filters {
     display: flex;
-    gap: 4px;
-    margin-bottom: 12px;
+    gap: 6px;
+    margin-bottom: 16px;
     position: relative;
     z-index: 1;
 }
 
 .todo-filter {
     flex: 1;
-    padding: 6px 8px;
+    padding: 8px 12px;
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 6px;
+    border-radius: 8px;
     color: var(--text-secondary);
-    font-size: 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -1646,18 +1743,19 @@
 }
 
 .todo-clear-completed {
-    padding: 6px 12px;
-    background: rgba(239, 68, 68, 0.2);
+    padding: 8px 16px;
+    background: rgba(239, 68, 68, 0.15);
     border: 1px solid rgba(239, 68, 68, 0.3);
-    border-radius: 6px;
+    border-radius: 8px;
     color: var(--dashboard-danger);
-    font-size: 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .todo-clear-completed:hover {
-    background: rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.25);
     border-color: var(--dashboard-danger);
 }
 
@@ -1666,13 +1764,13 @@
     overflow-y: auto;
     position: relative;
     z-index: 1;
-    max-height: 220px;
+    /* Убираем ограничение высоты */
 }
 
 .todo-item {
     display: flex;
-    align-items: center;
-    padding: 8px 0;
+    align-items: flex-start;
+    padding: 12px 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     transition: all 0.2s ease;
     position: relative;
@@ -1680,17 +1778,17 @@
 
 .todo-item.priority-high {
     border-left: 3px solid var(--dashboard-danger);
-    padding-left: 8px;
+    padding-left: 12px;
 }
 
 .todo-item.priority-medium {
     border-left: 3px solid var(--dashboard-warning);
-    padding-left: 8px;
+    padding-left: 12px;
 }
 
 .todo-item.priority-low {
     border-left: 3px solid var(--dashboard-info);
-    padding-left: 8px;
+    padding-left: 12px;
 }
 
 .todo-item:last-child {
@@ -1698,15 +1796,21 @@
 }
 
 .todo-item.completed {
-    opacity: 0.6;
+    opacity: 0.5;
+}
+
+.todo-item:hover {
+    background: rgba(255, 255, 255, 0.02);
+    transform: translateX(4px);
 }
 
 .todo-checkbox {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     border: 2px solid rgba(255, 255, 255, 0.3);
     border-radius: 6px;
     margin-right: 12px;
+    margin-top: 2px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -1715,14 +1819,19 @@
     flex-shrink: 0;
 }
 
+.todo-checkbox:hover {
+    border-color: var(--dashboard-accent);
+    transform: scale(1.1);
+}
+
 .todo-checkbox.checked {
     background: var(--dashboard-success);
     border-color: var(--dashboard-success);
 }
 
 .todo-checkbox svg {
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     color: white;
     opacity: 0;
     transition: opacity 0.2s ease;
@@ -1737,13 +1846,15 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
 }
 
 .todo-text {
     color: var(--text-primary);
-    font-size: 0.9rem;
+    font-size: 0.95rem;
+    line-height: 1.4;
     transition: all 0.2s ease;
+    word-break: break-word;
 }
 
 .todo-item.completed .todo-text {
@@ -1755,7 +1866,8 @@
     display: flex;
     gap: 12px;
     align-items: center;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
+    flex-wrap: wrap;
 }
 
 .todo-time {
@@ -1763,6 +1875,7 @@
     display: flex;
     align-items: center;
     gap: 4px;
+    font-weight: 500;
 }
 
 .todo-deadline {
@@ -1771,10 +1884,12 @@
 
 .todo-deadline.soon {
     color: var(--dashboard-warning);
+    font-weight: 500;
 }
 
 .todo-deadline.overdue {
     color: var(--dashboard-danger);
+    font-weight: 600;
 }
 
 .todo-delete {
@@ -1782,8 +1897,8 @@
     border: none;
     color: var(--text-secondary);
     cursor: pointer;
-    padding: 4px;
-    border-radius: 4px;
+    padding: 6px;
+    border-radius: 6px;
     opacity: 0;
     transition: all 0.2s ease;
     margin-left: 8px;
@@ -1795,101 +1910,115 @@
 
 .todo-delete:hover {
     background: rgba(248, 113, 113, 0.2);
-    color: #f87171;
+    color: var(--dashboard-danger);
 }
 
 .todo-delete svg {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
 }
 
 .todo-edit-input {
     width: 100%;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.7);
     border: 1px solid var(--dashboard-accent);
-    border-radius: 6px;
+    border-radius: 8px;
     color: var(--text-primary);
-    padding: 4px 8px;
-    font-size: 0.9rem;
+    padding: 8px 12px;
+    font-size: 0.95rem;
     font-family: inherit;
 }
 
 .todo-edit-input:focus {
     outline: none;
     border-color: var(--dashboard-accent);
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.9);
+    box-shadow: 0 0 0 3px rgba(116, 188, 164, 0.1);
 }
 
 .todo-priority {
     color: var(--text-secondary);
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     margin-left: 8px;
     margin-right: 8px;
-    opacity: 0.6;
+    opacity: 0.7;
 }
 
 .todo-item.priority-high .todo-priority {
     color: var(--dashboard-danger);
-    opacity: 0.8;
+    opacity: 0.9;
 }
 
 .todo-item.priority-medium .todo-priority {
     color: var(--dashboard-warning);
-    opacity: 0.8;
+    opacity: 0.9;
 }
 
 .todo-item.priority-low .todo-priority {
     color: var(--dashboard-info);
-    opacity: 0.8;
+    opacity: 0.9;
 }
 
 .todo-empty {
     text-align: center;
-    padding: 40px 20px;
+    padding: 60px 20px;
     color: var(--text-secondary);
 }
 
 .todo-empty-icon {
-    font-size: 2rem;
-    margin-bottom: 12px;
+    font-size: 3rem;
+    margin-bottom: 16px;
     opacity: 0.6;
+    animation: float 3s ease-in-out infinite;
 }
 
 .todo-empty-text {
-    font-size: 0.9rem;
+    font-size: 1rem;
     opacity: 0.8;
 }
 
-/* Стили для виджета аналитики */
+/* Стили для виджета аналитики - ИСПРАВЛЕНО */
+.analytics-widget {
+    /* Убираем фиксированную высоту для адаптивности */
+    min-height: 420px;
+}
+
 .analytics-content {
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: 24px;
+    /* Убираем overflow hidden чтобы контент не обрезался */
 }
 
 .analytics-section {
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    padding: 16px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 20px;
+    transition: all 0.2s ease;
+}
+
+.analytics-section:hover {
+    background: rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.12);
 }
 
 .analytics-subtitle {
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: 1.1rem;
+    font-weight: 700;
     color: var(--text-primary);
-    margin-bottom: 4px;
+    margin-bottom: 6px;
 }
 
 .analytics-description {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     color: var(--text-secondary);
-    margin-bottom: 16px;
+    margin-bottom: 20px;
 }
 
 .chart-container {
-    height: 180px;
+    height: 200px;
     position: relative;
 }
 
@@ -1897,86 +2026,49 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 20px 0 0;
+    /* Убираем margin и добавляем padding для правильного отображения */
 }
 
 .summary-item {
     text-align: center;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.2s ease;
+}
+
+.summary-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
 }
 
 .summary-label {
     display: block;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     color: var(--text-secondary);
-    margin-bottom: 4px;
+    margin-bottom: 8px;
+    font-weight: 500;
 }
 
 .summary-value {
     display: block;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--dashboard-accent);
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--dashboard-accent-bright);
 }
 
-/* Стили для FullHD экранов */
-@media (min-width: 1920px) and (min-height: 1080px) {
-    .dashboard-grid {
-        max-width: 1500px;
-        gap: 24px;
-    }
-    
-    .widget {
-        padding: 20px;
-        max-height: 450px;
-    }
-    
-    .timer-circle {
-        width: 160px;
-        height: 160px;
-    }
-    
-    .timer-time {
-        font-size: 2.2rem;
-    }
-}
-
-/* Стили для больших экранов */
-@media (min-width: 1600px) {
-    .dashboard-grid {
-        max-width: 1400px;
-        gap: 20px;
-    }
-    
-    .widget {
-        padding: 18px;
-        max-height: 420px;
-    }
-    
-    .timer-circle {
-        width: 150px;
-        height: 150px;
-    }
-    
-    .timer-time {
-        font-size: 2.1rem;
-    }
-}
-
-/* Адаптивность */
+/* Адаптивность - улучшенная */
 @media (max-width: 1024px) {
     .dashboard-grid {
         grid-template-columns: 1fr;
-        gap: 16px;
+        gap: 20px;
     }
 
-    .pomodoro-widget,
-    .habits-widget,
-    .todo-widget,
-    .analytics-widget {
-        grid-column: 1;
-        grid-row: auto;
+    .widget {
+        min-height: auto;
     }
 }
 
@@ -1985,17 +2077,25 @@
         padding: 20px 10px;
     }
 
+    .dashboard-content .site-title {
+        font-size: 2.2rem;
+        margin-bottom: 30px;
+    }
+
     .dashboard-grid {
         grid-template-columns: 1fr;
         gap: 16px;
+        padding: 0 10px;
     }
 
     .widget {
-        padding: 20px;
+        padding: 16px;
         border-radius: 16px;
+        min-height: auto;
     }
 
     .mode-toggle {
+        top: auto;
         bottom: 20px;
         right: 20px;
     }
@@ -2003,6 +2103,16 @@
     .mode-toggle-btn {
         width: 50px;
         height: 50px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    .timer-circle {
+        width: 120px;
+        height: 120px;
+    }
+
+    .timer-time {
+        font-size: 1.8rem;
     }
 
     .habit-week {
@@ -2013,13 +2123,23 @@
         font-size: 0.6rem;
     }
 
-
-    
     .analytics-summary {
         grid-template-columns: 1fr;
     }
     
     .chart-container {
-        height: 150px;
+        height: 160px;
+    }
+
+    /* Dropdown для мобильных */
+    .pomodoro-settings-dropdown {
+        width: calc(100vw - 40px);
+        left: 20px;
+        right: 20px;
+        transform: translateX(-20px);
+    }
+    
+    .pomodoro-settings-dropdown.active {
+        transform: translateX(-20px) translateY(0);
     }
 }
