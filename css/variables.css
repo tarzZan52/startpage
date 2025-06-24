@@ -5,6 +5,15 @@
     --text-secondary: #888;
     --accent: #ffffff;
     
+    /* Background colors */
+    --background-primary: rgba(0, 0, 0, 0.6);
+    --background-secondary: rgba(20, 20, 20, 0.95);
+    --background-tertiary: rgba(30, 30, 30, 0.8);
+    
+    /* Accent colors */
+    --accent-color: #74bca4;
+    --accent-hover: #9ca3af;
+    
     /* Dashboard colors - улучшенная палитра */
     --dashboard-accent: #6b7280;
     --dashboard-accent-hover: #9ca3af;

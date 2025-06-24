@@ -18,7 +18,6 @@ const Apps = {
         
         // Load applications from Storage
         const apps = Storage.getApps();
-        // Apps loaded from storage
         
         // Limit quantity to maximum
         const appsToShow = apps.slice(0, CONFIG.maxApps);

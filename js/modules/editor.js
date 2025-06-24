@@ -15,27 +15,42 @@ const Editor = {
             addBtn.addEventListener('click', () => this.openEditor());
         }
         
-
-        
         // Icon upload button
         const uploadBtn = document.getElementById('uploadIconBtn');
         const fileInput = document.getElementById('iconFile');
-        const autoFaviconBtn = document.getElementById('autoFaviconBtn');
         
         if (uploadBtn && fileInput) {
             uploadBtn.addEventListener('click', () => fileInput.click());
             fileInput.addEventListener('change', (e) => this.handleIconUpload(e));
         }
         
-        // Auto favicon button
-        if (autoFaviconBtn) {
-            autoFaviconBtn.addEventListener('click', () => this.loadAutoFavicon());
-        }
-        
         // Delete button
         const deleteBtn = document.getElementById('deleteAppBtn');
         if (deleteBtn) {
-            deleteBtn.addEventListener('click', () => this.deleteApp());
+            const handleDelete = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                
+                // Временно отключаем кнопку чтобы предотвратить множественные клики
+                deleteBtn.disabled = true;
+                deleteBtn.style.opacity = '0.5';
+                
+                this.deleteApp();
+                
+                // Восстанавливаем кнопку через секунду (если модальное окно не закрылось)
+                setTimeout(() => {
+                    if (deleteBtn) {
+                        deleteBtn.disabled = false;
+                        deleteBtn.style.opacity = '1';
+                    }
+                }, 1000);
+            };
+            
+            deleteBtn.addEventListener('click', handleDelete);
+            deleteBtn.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+            });
         }
         
         // Auto favicon loading on URL change
@@ -105,14 +120,14 @@ const Editor = {
             this.currentIcon = app.icon;
         }
         
-        // Show delete button for custom applications
+        // Show delete button for all applications
         const deleteBtn = modal.querySelector('#deleteAppBtn');
         if (deleteBtn) {
-            deleteBtn.style.display = app.isCustom ? 'block' : 'none';
+            deleteBtn.style.display = 'block'; // Always show delete button
+            // Change button text based on app type
+            deleteBtn.textContent = app.isCustom ? 'Delete' : 'Hide';
         }
     },
-    
-
     
     async handleIconUpload(event, modal) {
         const file = event.target.files[0];
@@ -193,12 +208,21 @@ const Editor = {
     },
     
     deleteApp() {
-        if (!this.currentApp || !this.currentApp.isCustom) return;
+        if (!this.currentApp) return;
         
-        Modal.confirm(`Delete application "${this.currentApp.name}"?`, () => {
+        const action = this.currentApp.isCustom ? 'delete' : 'hide';
+        const message = this.currentApp.isCustom 
+            ? `Delete application "${this.currentApp.name}"? This action cannot be undone.`
+            : `Hide application "${this.currentApp.name}"? You can restore it later by re-adding it.`;
+        
+        // НЕ закрываем основное модальное окно сразу
+        Modal.confirm(message, () => {
             Storage.deleteApp(this.currentApp.id);
             Apps.loadApps();
+            // Закрываем основное модальное окно только после подтверждения
             this.closeEditor();
+        }, () => {
+            // При отмене ничего не закрываем, оставляем окно редактирования открытым
         });
     },
     
@@ -219,71 +243,37 @@ const Editor = {
                 preview.innerHTML = `<img src="${faviconUrl}" alt="Favicon" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2Utd2lkdGg9IjIiPjxyZWN0IHg9IjMiIHk9IjMiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjIiIHJ5PSIyIj48L3JlY3Q+PC9zdmc+';">`;
                 this.currentIcon = faviconUrl;
             }
-            
-            // Update UI for feedback
-            if (force) {
-                const autoFaviconBtn = modal ? modal.querySelector('#autoFaviconBtn') : document.getElementById('autoFaviconBtn');
-                if (autoFaviconBtn) {
-                    autoFaviconBtn.textContent = 'Favicon loaded ✓';
-                    autoFaviconBtn.disabled = false;
-                    setTimeout(() => {
-                        autoFaviconBtn.textContent = 'Get automatically';
-                    }, 2000);
-                }
-            }
         } catch (error) {
-            // Invalid URL for favicon detection
-            if (force) {
-                Modal.confirm('Failed to load favicon. Check the URL.');
-            }
-        }
-    },
-    
-    loadAutoFavicon(modal) {
-        const urlInput = modal.querySelector('#appUrl');
-        const url = urlInput.value.trim();
-        
-        if (!url) {
-            Modal.confirm('Please enter the application URL first', () => {
-                urlInput.focus();
-            });
-            return;
-        }
-        
-        // Show loading indicator
-        const autoFaviconBtn = modal.querySelector('#autoFaviconBtn');
-        const originalText = autoFaviconBtn.textContent;
-        autoFaviconBtn.textContent = 'Loading...';
-        autoFaviconBtn.disabled = true;
-        
-        // Reset current icon
-        this.currentIcon = null;
-        
-        // Get favicon
-        this.tryLoadFavicon(url, true, modal);
-        
-        // Restore button after small delay
-        setTimeout(() => {
-            if (autoFaviconBtn.textContent === 'Loading...') {
-                autoFaviconBtn.textContent = originalText;
-                autoFaviconBtn.disabled = false;
-            }
-        }, 500);
-    },
-    
-    getFaviconUrl(url) {
-        try {
-            const domain = new URL(url).hostname;
-            return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
-        } catch {
-            return 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2Utd2lkdGg9IjIiPjxyZWN0IHg9IjMiIHk9IjMiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjIiIHJ5PSIyIj48L3JlY3Q+PC9zdmc+';
+            // Invalid URL for favicon detection, ignore silently
+            console.log('Invalid URL for favicon detection:', url);
         }
     },
     
     createFormContent() {
         const content = document.createElement('div');
+        
+        // Check if there are hidden default apps to restore
+        const hiddenApps = Storage.getHiddenDefaultApps();
+        const restoreSection = hiddenApps.length > 0 ? `
+            <div class="form-group">
+                <label>Or restore a hidden app:</label>
+                <select id="restoreAppSelect" class="form-control">
+                    <option value="">Choose an app to restore...</option>
+                    ${hiddenApps.map(app => 
+                        `<option value="${app.id}">${app.name}</option>`
+                    ).join('')}
+                </select>
+                <button type="button" class="btn-secondary" id="restoreAppBtn" style="margin-top: 8px;">
+                    Restore Selected App
+                </button>
+            </div>
+            <div class="form-separator" style="margin: 20px 0; height: 1px; background: rgba(255,255,255,0.1);"></div>
+        ` : '';
+        
         content.innerHTML = `
             <form class="editor-form" id="editorForm">
+                ${restoreSection}
+                
                 <div class="form-group">
                     <label for="appName">Application name</label>
                     <input type="text" id="appName" required placeholder="E.g.: YouTube">
@@ -306,15 +296,12 @@ const Editor = {
                         </div>
                         <div class="icon-upload-controls">
                             <input type="file" id="iconFile" accept="image/*" hidden>
-                            <button type="button" class="btn-secondary" id="autoFaviconBtn">
-                                Get automatically
-                            </button>
                             <button type="button" class="btn-secondary" id="uploadIconBtn">
                                 Choose file
                             </button>
                             <small class="help-text">
-                                SVG format recommended.<br>
-                                Maximum size: 500KB<br>
+                                Icon loads automatically from website favicon.<br>
+                                Upload custom icon if needed (SVG recommended, max 500KB)<br>
                                 Find icons: <a href="https://icons8.com" target="_blank">icons8.com</a>
                             </small>
                         </div>
@@ -338,9 +325,10 @@ const Editor = {
         const form = modal.querySelector('#editorForm');
         const uploadBtn = modal.querySelector('#uploadIconBtn');
         const fileInput = modal.querySelector('#iconFile');
-        const autoFaviconBtn = modal.querySelector('#autoFaviconBtn');
         const deleteBtn = modal.querySelector('#deleteAppBtn');
         const urlInput = modal.querySelector('#appUrl');
+        const restoreBtn = modal.querySelector('#restoreAppBtn');
+        const restoreSelect = modal.querySelector('#restoreAppSelect');
         
         // Form submission
         form.addEventListener('submit', (e) => {
@@ -354,14 +342,46 @@ const Editor = {
             fileInput.addEventListener('change', (e) => this.handleIconUpload(e, modal));
         }
         
-        // Auto favicon loading
-        if (autoFaviconBtn) {
-            autoFaviconBtn.addEventListener('click', () => this.loadAutoFavicon(modal));
-        }
-        
         // Delete button
         if (deleteBtn) {
-            deleteBtn.addEventListener('click', () => this.deleteApp());
+            const handleDelete = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                
+                // Временно отключаем кнопку чтобы предотвратить множественные клики
+                deleteBtn.disabled = true;
+                deleteBtn.style.opacity = '0.5';
+                
+                this.deleteApp();
+                
+                // Восстанавливаем кнопку через секунду (если модальное окно не закрылось)
+                setTimeout(() => {
+                    if (deleteBtn) {
+                        deleteBtn.disabled = false;
+                        deleteBtn.style.opacity = '1';
+                    }
+                }, 1000);
+            };
+            
+            deleteBtn.addEventListener('click', handleDelete);
+            deleteBtn.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+            });
+        }
+        
+        // Restore app button
+        if (restoreBtn && restoreSelect) {
+            restoreBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const appId = restoreSelect.value;
+                if (appId) {
+                    Storage.restoreApp(appId);
+                    Apps.loadApps();
+                    this.closeEditor();
+                }
+            });
         }
         
         // Auto favicon loading on URL change

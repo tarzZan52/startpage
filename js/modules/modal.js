@@ -49,12 +49,21 @@ const Modal = {
             closeBtn.addEventListener('click', () => this.close());
         }
         
-        // Закрытие по клику на оверлей
+        // Закрытие по клику на оверлей (только при прямом клике на оверлей)
         modal.addEventListener('click', (e) => {
+            // Закрываем только если клик был именно по modal overlay, а не по его содержимому
             if (e.target === modal) {
                 this.close();
             }
         });
+        
+        // Предотвращаем всплытие для всего содержимого модального окна
+        const modalContent = modal.querySelector('.universal-modal-content');
+        if (modalContent) {
+            modalContent.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        }
         
         // Закрытие по ESC
         const escHandler = (e) => {
@@ -135,40 +144,89 @@ const Modal = {
      * @param {function} onCancel - callback при отмене
      */
     confirm(message, onConfirm, onCancel = null) {
-        const content = document.createElement('div');
-        content.className = 'modal-confirm-content';
-        content.innerHTML = `
-            <p class="modal-confirm-message">${message}</p>
-            <div class="modal-confirm-actions">
-                <button class="btn-secondary modal-cancel-btn" type="button">Cancel</button>
-                <button class="btn-primary modal-confirm-btn" type="button">OK</button>
+        // Создаем простое модальное окно подтверждения без использования системы открытия
+        const overlay = document.createElement('div');
+        overlay.className = 'universal-modal modal-confirm active';
+        overlay.style.zIndex = '20000'; // Выше чем обычные модальные окна
+        
+        overlay.innerHTML = `
+            <div class="universal-modal-content">
+                <div class="universal-modal-body">
+                    <div class="modal-confirm-content">
+                        <p class="modal-confirm-message">${message}</p>
+                        <div class="modal-confirm-actions">
+                            <button class="btn-secondary modal-cancel-btn" type="button">Cancel</button>
+                            <button class="btn-primary modal-confirm-btn" type="button">OK</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         `;
         
-        const modal = this.open('Confirm', content, {
-            className: 'modal-confirm'
-        });
+        document.body.appendChild(overlay);
         
         // Обработчики для кнопок
-        const confirmBtn = content.querySelector('.modal-confirm-btn');
-        const cancelBtn = content.querySelector('.modal-cancel-btn');
+        const confirmBtn = overlay.querySelector('.modal-confirm-btn');
+        const cancelBtn = overlay.querySelector('.modal-cancel-btn');
         
-        confirmBtn.addEventListener('click', () => {
-            this.close();
-            if (onConfirm) onConfirm();
+        const cleanup = () => {
+            if (overlay.parentNode) {
+                overlay.parentNode.removeChild(overlay);
+            }
+        };
+        
+        const handleConfirm = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            cleanup();
+            if (onConfirm) {
+                setTimeout(() => onConfirm(), 10);
+            }
+        };
+        
+        const handleCancel = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            cleanup();
+            if (onCancel) {
+                setTimeout(() => onCancel(), 10);
+            }
+        };
+        
+        confirmBtn.addEventListener('click', handleConfirm);
+        cancelBtn.addEventListener('click', handleCancel);
+        
+        // Предотвращаем всплытие событий
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                cleanup();
+                if (onCancel) onCancel();
+            }
         });
         
-        cancelBtn.addEventListener('click', () => {
-            this.close();
-            if (onCancel) onCancel();
+        const modalContent = overlay.querySelector('.universal-modal-content');
+        modalContent.addEventListener('click', (e) => {
+            e.stopPropagation();
         });
+        
+        // Закрытие по ESC
+        const escHandler = (e) => {
+            if (e.key === 'Escape') {
+                cleanup();
+                if (onCancel) onCancel();
+                document.removeEventListener('keydown', escHandler);
+            }
+        };
+        document.addEventListener('keydown', escHandler);
         
         // Фокус на кнопку подтверждения
         setTimeout(() => {
             confirmBtn.focus();
         }, 100);
         
-        return modal;
+        return overlay;
     }
 };
 
